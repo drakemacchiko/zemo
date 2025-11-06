@@ -57,9 +57,83 @@ export const drivingLicenseSchema = z.object({
   licenseClass: z.string().min(1, 'License class is required'),
 })
 
+// Vehicle schemas
+export const vehicleCreateSchema = z.object({
+  plateNumber: z.string().min(1, 'Plate number is required').max(20, 'Plate number too long'),
+  engineNumber: z.string().optional(),
+  chassisNumber: z.string().optional(),
+  make: z.string().min(1, 'Make is required').max(50, 'Make too long'),
+  model: z.string().min(1, 'Model is required').max(50, 'Model too long'),
+  year: z.number().int().min(1900).max(new Date().getFullYear() + 1, 'Invalid year'),
+  color: z.string().min(1, 'Color is required').max(30, 'Color too long'),
+  vehicleType: z.enum(['SEDAN', 'SUV', 'HATCHBACK', 'PICKUP', 'VAN', 'COUPE', 'CONVERTIBLE', 'WAGON']),
+  transmission: z.enum(['MANUAL', 'AUTOMATIC']),
+  fuelType: z.enum(['PETROL', 'DIESEL', 'HYBRID', 'ELECTRIC']),
+  seatingCapacity: z.number().int().min(1).max(50, 'Invalid seating capacity'),
+  dailyRate: z.number().positive('Daily rate must be positive'),
+  weeklyRate: z.number().positive('Weekly rate must be positive').optional(),
+  monthlyRate: z.number().positive('Monthly rate must be positive').optional(),
+  securityDeposit: z.number().positive('Security deposit must be positive'),
+  currentMileage: z.number().int().min(0, 'Mileage cannot be negative'),
+  fuelTankCapacity: z.number().positive('Fuel tank capacity must be positive').optional(),
+  locationLatitude: z.number().min(-90).max(90, 'Invalid latitude'),
+  locationLongitude: z.number().min(-180).max(180, 'Invalid longitude'),
+  locationAddress: z.string().min(1, 'Location address is required').max(200, 'Address too long'),
+  features: z.array(z.string()).optional(),
+})
+
+export const vehicleUpdateSchema = vehicleCreateSchema.partial().omit({ plateNumber: true })
+
+export const vehicleSearchSchema = z.object({
+  make: z.string().optional(),
+  model: z.string().optional(),
+  vehicleType: z.enum(['SEDAN', 'SUV', 'HATCHBACK', 'PICKUP', 'VAN', 'COUPE', 'CONVERTIBLE', 'WAGON']).optional(),
+  transmission: z.enum(['MANUAL', 'AUTOMATIC']).optional(),
+  fuelType: z.enum(['PETROL', 'DIESEL', 'HYBRID', 'ELECTRIC']).optional(),
+  minDailyRate: z.number().positive().optional(),
+  maxDailyRate: z.number().positive().optional(),
+  minSeatingCapacity: z.number().int().min(1).optional(),
+  locationLatitude: z.number().min(-90).max(90).optional(),
+  locationLongitude: z.number().min(-180).max(180).optional(),
+  radius: z.number().positive().default(50), // Default 50km radius
+  page: z.number().int().min(1).default(1),
+  limit: z.number().int().min(1).max(50).default(20),
+})
+
+export const vehicleDocumentSchema = z.object({
+  documentType: z.enum(['LOGBOOK', 'INSURANCE', 'ROAD_TAX', 'INSPECTION']),
+  documentNumber: z.string().optional(),
+  issueDate: z.string().datetime().optional(),
+  expiryDate: z.string().datetime().optional(),
+  documentUrl: z.string().url('Invalid document URL'),
+})
+
+export const vehiclePhotoSchema = z.object({
+  photoUrl: z.string().url('Invalid photo URL'),
+  photoType: z.enum(['EXTERIOR_FRONT', 'EXTERIOR_REAR', 'EXTERIOR_LEFT', 'EXTERIOR_RIGHT', 'INTERIOR_FRONT', 'INTERIOR_REAR', 'DASHBOARD', 'ENGINE', 'OTHER']),
+  isPrimary: z.boolean().default(false),
+})
+
+export const vehiclePhotoUploadSchema = z.object({
+  photos: z.array(vehiclePhotoSchema).min(1, 'At least one photo is required').max(20, 'Maximum 20 photos allowed'),
+})
+
+export const adminVehicleActionSchema = z.object({
+  action: z.enum(['APPROVE', 'REJECT']),
+  reason: z.string().optional(),
+})
+
+// Type exports
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
 export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>
 export type DocumentUploadInput = z.infer<typeof documentUploadSchema>
 export type DrivingLicenseInput = z.infer<typeof drivingLicenseSchema>
+export type VehicleCreateInput = z.infer<typeof vehicleCreateSchema>
+export type VehicleUpdateInput = z.infer<typeof vehicleUpdateSchema>
+export type VehicleSearchInput = z.infer<typeof vehicleSearchSchema>
+export type VehicleDocumentInput = z.infer<typeof vehicleDocumentSchema>
+export type VehiclePhotoInput = z.infer<typeof vehiclePhotoSchema>
+export type VehiclePhotoUploadInput = z.infer<typeof vehiclePhotoUploadSchema>
+export type AdminVehicleActionInput = z.infer<typeof adminVehicleActionSchema>

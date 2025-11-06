@@ -26,6 +26,7 @@ model User {
   // Relations
   profile      UserProfile?
   drivingLicense DrivingLicense?
+  vehicles     Vehicle[]  // User can own multiple vehicles
 
   @@map("users")
 }
@@ -81,4 +82,142 @@ enum VerificationStatus {
   PENDING
   VERIFIED
   REJECTED
+}
+
+model Vehicle {
+  id              String   @id @default(cuid())
+  hostId          String
+  
+  // Vehicle identification
+  plateNumber     String   @unique
+  engineNumber    String?
+  chassisNumber   String?
+  
+  // Vehicle details
+  make            String
+  model           String
+  year            Int
+  color           String
+  vehicleType     VehicleType
+  transmission    Transmission
+  fuelType        FuelType
+  seatingCapacity Int
+  
+  // Pricing
+  dailyRate       Float
+  weeklyRate      Float?
+  monthlyRate     Float?
+  securityDeposit Float
+  
+  // Operational data
+  currentMileage  Int
+  fuelTankCapacity Float?
+  locationLatitude  Float
+  locationLongitude Float
+  locationAddress   String
+  
+  // Status
+  availabilityStatus AvailabilityStatus @default(AVAILABLE)
+  verificationStatus VerificationStatus @default(PENDING)
+  isActive        Boolean  @default(true)
+  
+  // Features and amenities
+  features        Json?    // Store array of features as JSON
+  
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  host            User     @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  documents       VehicleDocument[]
+  photos          VehiclePhoto[]
+
+  @@map("vehicles")
+  @@index([hostId])
+  @@index([availabilityStatus, isActive])
+  @@index([locationLatitude, locationLongitude])
+}
+
+model VehicleDocument {
+  id              String   @id @default(cuid())
+  vehicleId       String
+  documentType    DocumentType
+  documentNumber  String?
+  issueDate       DateTime?
+  expiryDate      DateTime?
+  documentUrl     String
+  verificationStatus VerificationStatus @default(PENDING)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  vehicle         Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("vehicle_documents")
+  @@index([vehicleId])
+}
+
+model VehiclePhoto {
+  id              String   @id @default(cuid())
+  vehicleId       String
+  photoUrl        String
+  photoType       PhotoType
+  isPrimary       Boolean  @default(false)
+  uploadDate      DateTime @default(now())
+
+  // Relations
+  vehicle         Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("vehicle_photos")
+  @@index([vehicleId])
+}
+
+enum VehicleType {
+  SEDAN
+  SUV
+  HATCHBACK
+  PICKUP
+  VAN
+  COUPE
+  CONVERTIBLE
+  WAGON
+}
+
+enum Transmission {
+  MANUAL
+  AUTOMATIC
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+  HYBRID
+  ELECTRIC
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  RENTED
+  MAINTENANCE
+  UNAVAILABLE
+}
+
+enum DocumentType {
+  LOGBOOK
+  INSURANCE
+  ROAD_TAX
+  INSPECTION
+}
+
+enum PhotoType {
+  EXTERIOR_FRONT
+  EXTERIOR_REAR
+  EXTERIOR_LEFT
+  EXTERIOR_RIGHT
+  INTERIOR_FRONT
+  INTERIOR_REAR
+  DASHBOARD
+  ENGINE
+  OTHER
 }

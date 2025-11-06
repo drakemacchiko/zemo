@@ -37,23 +37,35 @@ function extractTokenFromRequest(request: NextRequest): string | null {
   return null
 }
 
-export function withAuth(handler: (req: AuthenticatedRequest) => Promise<Response>) {
+export function withAuth(
+  handler: (req: AuthenticatedRequest) => Promise<Response>,
+  options: { requireAuth?: boolean } = { requireAuth: true }
+) {
   return async (req: NextRequest): Promise<Response> => {
     const token = extractTokenFromRequest(req)
+    const authenticatedReq = req as AuthenticatedRequest
     
     if (!token) {
-      return NextResponse.json(
-        { error: 'Access token required' },
-        { status: 401 }
-      )
+      if (options.requireAuth) {
+        return NextResponse.json(
+          { error: 'Access token required' },
+          { status: 401 }
+        )
+      }
+      // Optional auth - continue without user
+      return handler(authenticatedReq)
     }
     
     const payload = verifyAccessToken(token)
     if (!payload) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      )
+      if (options.requireAuth) {
+        return NextResponse.json(
+          { error: 'Invalid or expired token' },
+          { status: 401 }
+        )
+      }
+      // Optional auth - invalid token, continue without user
+      return handler(authenticatedReq)
     }
     
     // Verify user exists in database
@@ -63,14 +75,17 @@ export function withAuth(handler: (req: AuthenticatedRequest) => Promise<Respons
     })
     
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 401 }
-      )
+      if (options.requireAuth) {
+        return NextResponse.json(
+          { error: 'User not found' },
+          { status: 401 }
+        )
+      }
+      // Optional auth - user not found, continue without user
+      return handler(authenticatedReq)
     }
     
     // Add user to request object
-    const authenticatedReq = req as AuthenticatedRequest
     authenticatedReq.user = user
     
     return handler(authenticatedReq)
