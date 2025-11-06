@@ -1,0 +1,259 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ZEMO Design System CSS Variables */
+:root {
+  /* Brand Colors */
+  --zemo-yellow: #FFD400;
+  --zemo-black: #0A0A0A;
+  --zemo-yellow-light: #FFF266;
+  --zemo-yellow-dark: #E6BF00;
+  --zemo-black-light: #1A1A1A;
+  
+  /* Typography */
+  --zemo-heading-weight: 900;
+  --zemo-body-weight: 500;
+  --zemo-light-weight: 400;
+  
+  /* Spacing Scale */
+  --zemo-space-xs: 0.25rem;  /* 4px */
+  --zemo-space-sm: 0.5rem;   /* 8px */
+  --zemo-space-md: 1rem;     /* 16px */
+  --zemo-space-lg: 1.5rem;   /* 24px */
+  --zemo-space-xl: 2rem;     /* 32px */
+  
+  /* Border Radius */
+  --zemo-radius: 8px;
+  --zemo-radius-sm: 4px;
+  --zemo-radius-lg: 12px;
+  
+  /* Shadows */
+  --zemo-shadow-sm: 0 1px 2px 0 rgba(10, 10, 10, 0.05);
+  --zemo-shadow: 0 4px 6px -1px rgba(10, 10, 10, 0.1), 0 2px 4px -1px rgba(10, 10, 10, 0.06);
+  --zemo-shadow-lg: 0 20px 25px -5px rgba(10, 10, 10, 0.1), 0 10px 10px -5px rgba(10, 10, 10, 0.04);
+}
+
+/* Base Styles */
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    @apply bg-white text-zemo-black font-body;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+  
+  /* Typography Hierarchy */
+  h1 {
+    @apply text-3xl md:text-4xl font-heading text-zemo-black;
+    font-weight: var(--zemo-heading-weight);
+  }
+  
+  h2 {
+    @apply text-2xl md:text-3xl font-heading text-zemo-black;
+    font-weight: var(--zemo-heading-weight);
+  }
+  
+  h3 {
+    @apply text-xl md:text-2xl font-sub-heading text-zemo-black;
+  }
+  
+  h4 {
+    @apply text-lg md:text-xl font-sub-heading text-zemo-black;
+  }
+  
+  p {
+    @apply text-base font-body text-zemo-black leading-relaxed;
+    font-weight: var(--zemo-body-weight);
+  }
+  
+  /* Focus styles for accessibility */
+  *:focus {
+    @apply outline-none ring-2 ring-zemo-yellow ring-offset-2;
+  }
+  
+  /* Selection styles */
+  ::selection {
+    @apply bg-zemo-yellow text-zemo-black;
+  }
+}
+
+/* Component Layer */
+@layer components {
+  /* Button Styles */
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-base font-sub-heading;
+    @apply bg-zemo-yellow text-zemo-black border-2 border-zemo-yellow;
+    @apply rounded-zemo transition-all duration-200 touch-target;
+    @apply hover:bg-zemo-yellow-dark hover:border-zemo-yellow-dark;
+    @apply focus:ring-2 focus:ring-zemo-yellow focus:ring-offset-2;
+    @apply active:transform active:scale-95;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 text-base font-sub-heading;
+    @apply bg-transparent text-zemo-black border-2 border-zemo-black;
+    @apply rounded-zemo transition-all duration-200 touch-target;
+    @apply hover:bg-zemo-black hover:text-white;
+    @apply focus:ring-2 focus:ring-zemo-black focus:ring-offset-2;
+    @apply active:transform active:scale-95;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-4 py-2 text-base font-body;
+    @apply bg-transparent text-zemo-black border-none;
+    @apply rounded-zemo transition-all duration-200 touch-target;
+    @apply hover:bg-zemo-gray-100;
+    @apply focus:ring-2 focus:ring-zemo-yellow focus:ring-offset-2;
+    @apply active:transform active:scale-95;
+  }
+  
+  /* Card Styles */
+  .card {
+    @apply bg-white rounded-zemo-lg border border-zemo-gray-200;
+    @apply shadow-zemo transition-shadow duration-200;
+    @apply hover:shadow-zemo-md;
+  }
+  
+  .card-header {
+    @apply p-6 border-b border-zemo-gray-200;
+  }
+  
+  .card-body {
+    @apply p-6;
+  }
+  
+  .card-footer {
+    @apply p-6 pt-0;
+  }
+  
+  /* Input Styles */
+  .input {
+    @apply w-full px-4 py-3 text-base font-body;
+    @apply bg-white border-2 border-zemo-gray-300;
+    @apply rounded-zemo transition-colors duration-200;
+    @apply placeholder:text-zemo-gray-400;
+    @apply focus:border-zemo-yellow focus:ring-2 focus:ring-zemo-yellow focus:ring-offset-2;
+    @apply disabled:bg-zemo-gray-50 disabled:cursor-not-allowed;
+  }
+  
+  .input-error {
+    @apply border-error text-error;
+    @apply focus:border-error focus:ring-error;
+  }
+  
+  /* Navigation Styles */
+  .nav-link {
+    @apply inline-flex items-center px-4 py-2 text-base font-body;
+    @apply text-zemo-black transition-colors duration-200;
+    @apply hover:text-zemo-yellow-dark;
+    @apply focus:outline-none focus:ring-2 focus:ring-zemo-yellow;
+  }
+  
+  .nav-link-active {
+    @apply text-zemo-yellow-dark font-sub-heading;
+  }
+}
+
+/* Utility Classes */
+@layer utilities {
+  /* Mobile-first responsive utilities */
+  .container-mobile {
+    @apply max-w-sm mx-auto px-4;
+  }
+  
+  .container-tablet {
+    @apply max-w-2xl mx-auto px-6;
+  }
+  
+  .container-desktop {
+    @apply max-w-7xl mx-auto px-8;
+  }
+  
+  /* Text utilities */
+  .text-heading {
+    font-weight: var(--zemo-heading-weight);
+  }
+  
+  .text-body {
+    font-weight: var(--zemo-body-weight);
+  }
+  
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+  
+  /* Touch-friendly utilities */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Loading states */
+  .loading-skeleton {
+    @apply bg-zemo-gray-200 animate-pulse rounded;
+  }
+  
+  /* Accessibility utilities */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 640px) {
+  .btn-primary,
+  .btn-secondary {
+    @apply px-8 py-4 text-lg;
+  }
+  
+  .input {
+    @apply px-4 py-4 text-lg;
+  }
+}
+
+/* Dark mode support (for future implementation) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Will be implemented in future phases */
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .btn-primary {
+    @apply border-4;
+  }
+  
+  .btn-secondary {
+    @apply border-4;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
