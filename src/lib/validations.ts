@@ -123,6 +123,91 @@ export const adminVehicleActionSchema = z.object({
   reason: z.string().optional(),
 })
 
+// Booking schemas
+export const bookingCreateSchema = z.object({
+  vehicleId: z.string().cuid('Invalid vehicle ID'),
+  startDate: z.string().datetime('Invalid start date'),
+  endDate: z.string().datetime('Invalid end date'),
+  pickupLocation: z.string().max(200, 'Pickup location too long').optional(),
+  dropoffLocation: z.string().max(200, 'Dropoff location too long').optional(),
+  specialRequests: z.string().max(500, 'Special requests too long').optional(),
+}).refine(data => {
+  const start = new Date(data.startDate)
+  const end = new Date(data.endDate)
+  const now = new Date()
+  
+  // Start date must be in the future (at least 1 hour from now)
+  if (start <= new Date(now.getTime() + 60 * 60 * 1000)) {
+    return false
+  }
+  
+  // End date must be after start date
+  if (end <= start) {
+    return false
+  }
+  
+  // Maximum booking duration (90 days)
+  const maxDuration = 90 * 24 * 60 * 60 * 1000 // 90 days in milliseconds
+  if (end.getTime() - start.getTime() > maxDuration) {
+    return false
+  }
+  
+  return true
+}, {
+  message: 'Invalid booking dates. Start date must be at least 1 hour in the future, end date must be after start date, and maximum duration is 90 days.'
+})
+
+export const bookingUpdateSchema = z.object({
+  startDate: z.string().datetime('Invalid start date').optional(),
+  endDate: z.string().datetime('Invalid end date').optional(),
+  pickupLocation: z.string().max(200, 'Pickup location too long').optional(),
+  dropoffLocation: z.string().max(200, 'Dropoff location too long').optional(),
+  specialRequests: z.string().max(500, 'Special requests too long').optional(),
+  status: z.enum(['PENDING', 'CONFIRMED', 'ACTIVE', 'COMPLETED', 'CANCELLED', 'REJECTED', 'NO_SHOW']).optional(),
+}).refine(data => {
+  if (data.startDate && data.endDate) {
+    const start = new Date(data.startDate)
+    const end = new Date(data.endDate)
+    
+    if (end <= start) {
+      return false
+    }
+    
+    // Maximum booking duration (90 days)
+    const maxDuration = 90 * 24 * 60 * 60 * 1000
+    if (end.getTime() - start.getTime() > maxDuration) {
+      return false
+    }
+  }
+  
+  return true
+}, {
+  message: 'Invalid booking dates. End date must be after start date and maximum duration is 90 days.'
+})
+
+export const bookingSearchSchema = z.object({
+  status: z.enum(['PENDING', 'CONFIRMED', 'ACTIVE', 'COMPLETED', 'CANCELLED', 'REJECTED', 'NO_SHOW']).optional(),
+  vehicleId: z.string().cuid().optional(),
+  hostId: z.string().cuid().optional(),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+  page: z.number().int().min(1).default(1),
+  limit: z.number().int().min(1).max(50).default(20),
+})
+
+export const availabilityCheckSchema = z.object({
+  vehicleId: z.string().cuid('Invalid vehicle ID'),
+  startDate: z.string().datetime('Invalid start date'),
+  endDate: z.string().datetime('Invalid end date'),
+}).refine(data => {
+  const start = new Date(data.startDate)
+  const end = new Date(data.endDate)
+  
+  return end > start
+}, {
+  message: 'End date must be after start date'
+})
+
 // Type exports
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
@@ -137,3 +222,7 @@ export type VehicleDocumentInput = z.infer<typeof vehicleDocumentSchema>
 export type VehiclePhotoInput = z.infer<typeof vehiclePhotoSchema>
 export type VehiclePhotoUploadInput = z.infer<typeof vehiclePhotoUploadSchema>
 export type AdminVehicleActionInput = z.infer<typeof adminVehicleActionSchema>
+export type BookingCreateInput = z.infer<typeof bookingCreateSchema>
+export type BookingUpdateInput = z.infer<typeof bookingUpdateSchema>
+export type BookingSearchInput = z.infer<typeof bookingSearchSchema>
+export type AvailabilityCheckInput = z.infer<typeof availabilityCheckSchema>

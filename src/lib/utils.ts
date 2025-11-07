@@ -183,3 +183,148 @@ export function isEmpty(str: string | null | undefined): boolean {
 export function capitalizeWords(str: string): string {
   return str.replace(/\b\w/g, letter => letter.toUpperCase());
 }
+
+/**
+ * Pricing engine utilities for bookings
+ */
+
+/**
+ * Calculate number of days between two dates
+ * @param startDate - Start date
+ * @param endDate - End date
+ * @returns Number of days
+ */
+export function calculateDays(startDate: Date | string, endDate: Date | string): number {
+  const start = typeof startDate === 'string' ? new Date(startDate) : startDate;
+  const end = typeof endDate === 'string' ? new Date(endDate) : endDate;
+  
+  const diffTime = Math.abs(end.getTime() - start.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  return diffDays;
+}
+
+/**
+ * Check if a date is a weekend (Saturday or Sunday)
+ * @param date - Date to check
+ * @returns True if weekend
+ */
+export function isWeekend(date: Date | string): boolean {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  const dayOfWeek = dateObj.getDay();
+  return dayOfWeek === 0 || dayOfWeek === 6; // Sunday = 0, Saturday = 6
+}
+
+/**
+ * Count weekend days in a date range
+ * @param startDate - Start date
+ * @param endDate - End date
+ * @returns Number of weekend days
+ */
+export function countWeekendDays(startDate: Date | string, endDate: Date | string): number {
+  const start = typeof startDate === 'string' ? new Date(startDate) : startDate;
+  const end = typeof endDate === 'string' ? new Date(endDate) : endDate;
+  
+  let weekendDays = 0;
+  const currentDate = new Date(start);
+  
+  while (currentDate < end) {
+    if (isWeekend(currentDate)) {
+      weekendDays++;
+    }
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  return weekendDays;
+}
+
+/**
+ * Calculate booking pricing with weekend multipliers
+ * @param baseRate - Base daily rate
+ * @param startDate - Booking start date
+ * @param endDate - Booking end date
+ * @param options - Pricing options
+ * @returns Pricing breakdown
+ */
+export function calculateBookingPrice(
+  baseRate: number,
+  startDate: Date | string,
+  endDate: Date | string,
+  options: {
+    weekendMultiplier?: number; // Default 1.2 (20% increase)
+    serviceFeeRate?: number; // Default 0.1 (10%)
+    taxRate?: number; // Default 0.16 (16% VAT)
+  } = {}
+) {
+  const {
+    weekendMultiplier = 1.2,
+    serviceFeeRate = 0.1,
+    taxRate = 0.16,
+  } = options;
+
+  const totalDays = calculateDays(startDate, endDate);
+  const weekendDays = countWeekendDays(startDate, endDate);
+  const weekdays = totalDays - weekendDays;
+
+  // Calculate daily rates
+  const weekdayRate = baseRate;
+  const weekendRate = baseRate * weekendMultiplier;
+
+  // Calculate subtotal
+  const weekdayAmount = weekdays * weekdayRate;
+  const weekendAmount = weekendDays * weekendRate;
+  const subtotal = weekdayAmount + weekendAmount;
+
+  // Calculate fees
+  const serviceFee = subtotal * serviceFeeRate;
+  const taxAmount = (subtotal + serviceFee) * taxRate;
+  const totalAmount = subtotal + serviceFee + taxAmount;
+
+  return {
+    totalDays,
+    weekdays,
+    weekendDays,
+    weekdayRate,
+    weekendRate,
+    weekdayAmount,
+    weekendAmount,
+    subtotal,
+    serviceFee,
+    taxAmount,
+    totalAmount,
+  };
+}
+
+/**
+ * Generate a unique confirmation number for bookings
+ * @returns Confirmation number (format: ZEM-YYYYMMDD-XXXX)
+ */
+export function generateConfirmationNumber(): string {
+  const now = new Date();
+  const datePart = now.toISOString().slice(0, 10).replace(/-/g, '');
+  const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+  
+  return `ZEM-${datePart}-${randomPart}`;
+}
+
+/**
+ * Check if two date ranges overlap
+ * @param start1 - Start date of first range
+ * @param end1 - End date of first range
+ * @param start2 - Start date of second range
+ * @param end2 - End date of second range
+ * @returns True if ranges overlap
+ */
+export function dateRangesOverlap(
+  start1: Date | string,
+  end1: Date | string,
+  start2: Date | string,
+  end2: Date | string
+): boolean {
+  const s1 = typeof start1 === 'string' ? new Date(start1) : start1;
+  const e1 = typeof end1 === 'string' ? new Date(end1) : end1;
+  const s2 = typeof start2 === 'string' ? new Date(start2) : start2;
+  const e2 = typeof end2 === 'string' ? new Date(end2) : end2;
+  
+  return s1 < e2 && s2 < e1;
+}

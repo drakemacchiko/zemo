@@ -27,6 +27,7 @@ model User {
   profile      UserProfile?
   drivingLicense DrivingLicense?
   vehicles     Vehicle[]  // User can own multiple vehicles
+  bookings     Booking[]  // User can have multiple bookings
 
   @@map("users")
 }
@@ -132,6 +133,7 @@ model Vehicle {
   host            User     @relation(fields: [hostId], references: [id], onDelete: Cascade)
   documents       VehicleDocument[]
   photos          VehiclePhoto[]
+  bookings        Booking[]
 
   @@map("vehicles")
   @@index([hostId])
@@ -171,6 +173,54 @@ model VehiclePhoto {
 
   @@map("vehicle_photos")
   @@index([vehicleId])
+}
+
+model Booking {
+  id              String   @id @default(cuid())
+  userId          String   // Renter
+  vehicleId       String
+  hostId          String   // Vehicle owner (for quick queries)
+  
+  // Booking period
+  startDate       DateTime
+  endDate         DateTime
+  
+  // Pricing details
+  dailyRate       Float    // Rate at time of booking
+  totalDays       Int
+  subtotal        Float    // dailyRate * totalDays
+  serviceFee      Float    @default(0)
+  taxAmount       Float    @default(0)
+  totalAmount     Float    // subtotal + serviceFee + taxAmount
+  securityDeposit Float
+  
+  // Booking status and lifecycle
+  status          BookingStatus @default(PENDING)
+  confirmationNumber String @unique
+  
+  // Contact and pickup details
+  pickupLocation  String?
+  dropoffLocation String?
+  specialRequests String?
+  
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  confirmedAt     DateTime?
+  cancelledAt     DateTime?
+  completedAt     DateTime?
+
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicle         Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("bookings")
+  @@index([userId])
+  @@index([vehicleId])
+  @@index([hostId])
+  @@index([status])
+  @@index([startDate, endDate])
+  @@unique([vehicleId, startDate, endDate], name: "no_overlap_booking")
 }
 
 enum VehicleType {
@@ -220,4 +270,14 @@ enum PhotoType {
   DASHBOARD
   ENGINE
   OTHER
+}
+
+enum BookingStatus {
+  PENDING      // Awaiting host confirmation
+  CONFIRMED    // Host approved booking
+  ACTIVE       // Booking is currently active (vehicle picked up)
+  COMPLETED    // Booking finished successfully
+  CANCELLED    // Cancelled by user or host
+  REJECTED     // Host rejected the booking
+  NO_SHOW      // User didn't show up
 }
