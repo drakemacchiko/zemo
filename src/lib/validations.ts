@@ -131,6 +131,8 @@ export const bookingCreateSchema = z.object({
   pickupLocation: z.string().max(200, 'Pickup location too long').optional(),
   dropoffLocation: z.string().max(200, 'Dropoff location too long').optional(),
   specialRequests: z.string().max(500, 'Special requests too long').optional(),
+  insuranceId: z.string().cuid('Invalid insurance ID').optional(),
+  insuranceCoverageAmount: z.number().positive('Insurance coverage amount must be positive').optional(),
 }).refine(data => {
   const start = new Date(data.startDate)
   const end = new Date(data.endDate)
@@ -152,9 +154,14 @@ export const bookingCreateSchema = z.object({
     return false
   }
   
+  // If insuranceId is provided, coverageAmount should also be provided
+  if (data.insuranceId && !data.insuranceCoverageAmount) {
+    return false
+  }
+  
   return true
 }, {
-  message: 'Invalid booking dates. Start date must be at least 1 hour in the future, end date must be after start date, and maximum duration is 90 days.'
+  message: 'Invalid booking data. Check dates, duration (max 90 days), and insurance requirements.'
 })
 
 export const bookingUpdateSchema = z.object({
@@ -208,6 +215,99 @@ export const availabilityCheckSchema = z.object({
   message: 'End date must be after start date'
 })
 
+// Insurance schemas
+export const insuranceProductSchema = z.object({
+  name: z.string().min(1, 'Insurance name is required').max(100, 'Insurance name too long'),
+  description: z.string().min(1, 'Description is required').max(500, 'Description too long'),
+  coverageType: z.enum(['BASIC', 'COMPREHENSIVE', 'PREMIUM']),
+  maxCoverageAmount: z.number().positive('Maximum coverage amount must be positive'),
+  deductibleAmount: z.number().min(0, 'Deductible amount cannot be negative'),
+  accidentCoverage: z.boolean().default(true),
+  theftCoverage: z.boolean().default(false),
+  vandalismCoverage: z.boolean().default(false),
+  naturalDisasterCoverage: z.boolean().default(false),
+  thirdPartyCoverage: z.boolean().default(true),
+  dailyRate: z.number().positive('Daily rate must be positive'),
+  weeklyRate: z.number().positive('Weekly rate must be positive').optional(),
+  monthlyRate: z.number().positive('Monthly rate must be positive').optional(),
+  insuranceProvider: z.string().min(1, 'Insurance provider is required').default('ZEMO_PARTNER'),
+  policyTermsUrl: z.string().url('Invalid policy terms URL').optional(),
+})
+
+export const insuranceSelectionSchema = z.object({
+  insuranceId: z.string().cuid('Invalid insurance ID'),
+  coverageAmount: z.number().positive('Coverage amount must be positive').optional(),
+})
+
+export const policyCreateSchema = z.object({
+  bookingId: z.string().cuid('Invalid booking ID'),
+  insuranceId: z.string().cuid('Invalid insurance ID'),
+  coverageAmount: z.number().positive('Coverage amount must be positive'),
+})
+
+// Claims schemas
+export const claimCreateSchema = z.object({
+  policyId: z.string().cuid('Invalid policy ID'),
+  incidentDate: z.string().datetime('Invalid incident date'),
+  incidentLocation: z.string().min(1, 'Incident location is required').max(200, 'Incident location too long'),
+  incidentDescription: z.string().min(10, 'Incident description must be at least 10 characters').max(1000, 'Incident description too long'),
+  claimType: z.enum(['ACCIDENT', 'THEFT', 'VANDALISM', 'NATURAL_DISASTER', 'MECHANICAL', 'THIRD_PARTY']),
+  estimatedDamageAmount: z.number().positive('Estimated damage amount must be positive').optional(),
+  policeReportNumber: z.string().max(50, 'Police report number too long').optional(),
+}).refine(data => {
+  const incidentDate = new Date(data.incidentDate)
+  const now = new Date()
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+  
+  // Incident date cannot be in the future
+  if (incidentDate > now) {
+    return false
+  }
+  
+  // Incident date cannot be more than 30 days ago
+  if (incidentDate < thirtyDaysAgo) {
+    return false
+  }
+  
+  return true
+}, {
+  message: 'Incident date must be within the last 30 days and cannot be in the future'
+})
+
+export const claimUpdateSchema = z.object({
+  incidentDescription: z.string().min(10, 'Incident description must be at least 10 characters').max(1000, 'Incident description too long').optional(),
+  estimatedDamageAmount: z.number().positive('Estimated damage amount must be positive').optional(),
+  actualDamageAmount: z.number().positive('Actual damage amount must be positive').optional(),
+  policeReportNumber: z.string().max(50, 'Police report number too long').optional(),
+  status: z.enum(['SUBMITTED', 'UNDER_REVIEW', 'INVESTIGATING', 'APPROVED', 'REJECTED', 'SETTLED', 'CLOSED']).optional(),
+  priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT']).optional(),
+})
+
+export const adminClaimActionSchema = z.object({
+  status: z.enum(['UNDER_REVIEW', 'INVESTIGATING', 'APPROVED', 'REJECTED', 'SETTLED', 'CLOSED']),
+  reviewNotes: z.string().max(1000, 'Review notes too long').optional(),
+  actualDamageAmount: z.number().positive('Actual damage amount must be positive').optional(),
+  settlementAmount: z.number().positive('Settlement amount must be positive').optional(),
+  priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT']).optional(),
+})
+
+export const claimDocumentUploadSchema = z.object({
+  documentType: z.enum(['PHOTOS', 'POLICE_REPORT', 'MEDICAL_REPORT', 'REPAIR_INVOICE', 'RECEIPT', 'WITNESS_STATEMENT', 'OTHER']),
+  description: z.string().max(200, 'Description too long').optional(),
+})
+
+export const claimSearchSchema = z.object({
+  status: z.enum(['SUBMITTED', 'UNDER_REVIEW', 'INVESTIGATING', 'APPROVED', 'REJECTED', 'SETTLED', 'CLOSED']).optional(),
+  claimType: z.enum(['ACCIDENT', 'THEFT', 'VANDALISM', 'NATURAL_DISASTER', 'MECHANICAL', 'THIRD_PARTY']).optional(),
+  priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT']).optional(),
+  userId: z.string().cuid().optional(),
+  policyId: z.string().cuid().optional(),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+  page: z.number().int().min(1).default(1),
+  limit: z.number().int().min(1).max(50).default(20),
+})
+
 // Type exports
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
@@ -226,3 +326,11 @@ export type BookingCreateInput = z.infer<typeof bookingCreateSchema>
 export type BookingUpdateInput = z.infer<typeof bookingUpdateSchema>
 export type BookingSearchInput = z.infer<typeof bookingSearchSchema>
 export type AvailabilityCheckInput = z.infer<typeof availabilityCheckSchema>
+export type InsuranceProductInput = z.infer<typeof insuranceProductSchema>
+export type InsuranceSelectionInput = z.infer<typeof insuranceSelectionSchema>
+export type PolicyCreateInput = z.infer<typeof policyCreateSchema>
+export type ClaimCreateInput = z.infer<typeof claimCreateSchema>
+export type ClaimUpdateInput = z.infer<typeof claimUpdateSchema>
+export type AdminClaimActionInput = z.infer<typeof adminClaimActionSchema>
+export type ClaimDocumentUploadInput = z.infer<typeof claimDocumentUploadSchema>
+export type ClaimSearchInput = z.infer<typeof claimSearchSchema>

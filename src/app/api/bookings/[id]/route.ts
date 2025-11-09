@@ -160,7 +160,7 @@ export async function PUT(
     const updateData: BookingUpdateInput = validationResult.data;
 
     // Use transaction for booking updates
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // Get existing booking
       const existingBooking = await (tx as any).booking.findUnique({
         where: { id },

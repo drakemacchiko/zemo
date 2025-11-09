@@ -28,6 +28,10 @@ model User {
   drivingLicense DrivingLicense?
   vehicles     Vehicle[]  // User can own multiple vehicles
   bookings     Booking[]  // User can have multiple bookings
+  payments     Payment[]
+  paymentMethods PaymentMethod[]
+  insurancePolicies InsurancePolicy[] // User can have multiple insurance policies
+  claims       Claim[]     // User can file multiple claims
 
   @@map("users")
 }
@@ -213,6 +217,9 @@ model Booking {
   // Relations
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   vehicle         Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  payments        Payment[]
+  insurancePolicy InsurancePolicy? // Booking can have one insurance policy
+  claims          Claim[]  // Booking can have multiple claims
 
   @@map("bookings")
   @@index([userId])
@@ -221,6 +228,116 @@ model Booking {
   @@index([status])
   @@index([startDate, endDate])
   @@unique([vehicleId, startDate, endDate], name: "no_overlap_booking")
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  bookingId       String
+  userId          String
+  
+  // Payment details
+  amount          Float
+  currency        String   @default("ZMW") // Zambian Kwacha
+  paymentType     PaymentType
+  provider        PaymentProvider
+  
+  // Payment flow
+  status          PaymentStatus @default(PENDING)
+  intent          PaymentIntent @default(PAYMENT) // PAYMENT, HOLD, REFUND
+  
+  // External provider references
+  providerTransactionId String?
+  providerReference     String?
+  
+  // Payment metadata
+  paymentMethodId       String?
+  failureReason         String?
+  processedAt           DateTime?
+  
+  // Audit trail
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  booking         Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+  transactions    Transaction[]
+
+  @@map("payments")
+  @@index([bookingId])
+  @@index([userId])
+  @@index([status])
+  @@index([provider])
+  @@index([providerTransactionId])
+}
+
+model PaymentMethod {
+  id              String   @id @default(cuid())
+  userId          String
+  
+  // Payment method details
+  type            PaymentMethodType
+  provider        PaymentProvider
+  
+  // Tokenized details (no raw card data)
+  token           String   // Provider token reference
+  last4           String?  // Last 4 digits for display
+  brand           String?  // Card brand or mobile network
+  expiryMonth     Int?     // For cards only
+  expiryYear      Int?     // For cards only
+  
+  // Mobile money details
+  phoneNumber     String?  // For mobile money
+  accountName     String?  // Display name
+  
+  // Status
+  isDefault       Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments        Payment[]
+
+  @@map("payment_methods")
+  @@index([userId])
+  @@index([type])
+  @@index([provider])
+}
+
+model Transaction {
+  id              String   @id @default(cuid())
+  paymentId       String
+  
+  // Transaction details
+  amount          Float
+  type            TransactionType
+  status          TransactionStatus @default(PENDING)
+  
+  // External references
+  providerTransactionId String?
+  providerReference     String?
+  
+  // Reconciliation
+  reconciledAt    DateTime?
+  notes           String?
+  
+  // Metadata
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  payment         Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+  @@index([paymentId])
+  @@index([type])
+  @@index([status])
+  @@index([providerTransactionId])
 }
 
 enum VehicleType {
@@ -280,4 +397,283 @@ enum BookingStatus {
   CANCELLED    // Cancelled by user or host
   REJECTED     // Host rejected the booking
   NO_SHOW      // User didn't show up
+}
+
+enum PaymentType {
+  BOOKING_PAYMENT    // Main rental payment
+  SECURITY_DEPOSIT   // Security deposit hold
+  REFUND            // Refund payment
+  PARTIAL_REFUND    // Partial refund
+  DAMAGE_CHARGE     // Additional damage charges
+}
+
+enum PaymentProvider {
+  AIRTEL_MONEY
+  MTN_MOMO
+  ZAMTEL_KWACHA
+  STRIPE
+  DPO
+}
+
+enum PaymentStatus {
+  PENDING       // Payment initiated
+  PROCESSING    // Payment being processed
+  COMPLETED     // Payment successful
+  FAILED        // Payment failed
+  CANCELLED     // Payment cancelled
+  REFUNDED      // Payment refunded
+  HELD          // Payment on hold (for deposits)
+  RELEASED      // Hold released
+}
+
+enum PaymentIntent {
+  PAYMENT       // Regular payment
+  HOLD          // Hold funds (security deposit)
+  REFUND        // Refund transaction
+}
+
+enum PaymentMethodType {
+  MOBILE_MONEY
+  CREDIT_CARD
+  DEBIT_CARD
+}
+
+enum TransactionType {
+  CHARGE        // Charge transaction
+  HOLD          // Hold funds
+  CAPTURE       // Capture held funds
+  REFUND        // Refund transaction
+  RELEASE       // Release held funds
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// Insurance Models
+model Insurance {
+  id               String   @id @default(cuid())
+  
+  // Insurance product details
+  name             String   // e.g., "Basic Coverage", "Comprehensive"
+  description      String
+  coverageType     CoverageType
+  
+  // Coverage limits and details
+  maxCoverageAmount Float   // Maximum coverage amount
+  deductibleAmount Float    // Amount user pays before insurance kicks in
+  
+  // Coverage features
+  accidentCoverage      Boolean @default(true)
+  theftCoverage         Boolean @default(false)
+  vandalismCoverage     Boolean @default(false)
+  naturalDisasterCoverage Boolean @default(false)
+  thirdPartyCoverage    Boolean @default(true)
+  
+  // Pricing
+  dailyRate        Float   // Daily insurance premium
+  weeklyRate       Float?  // Weekly rate (if different)
+  monthlyRate      Float?  // Monthly rate (if different)
+  
+  // Status
+  isActive         Boolean @default(true)
+  
+  // Provider details
+  insuranceProvider String @default("ZEMO_PARTNER")
+  policyTermsUrl   String?
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  policies         InsurancePolicy[]
+
+  @@map("insurance_products")
+}
+
+model InsurancePolicy {
+  id               String   @id @default(cuid())
+  bookingId        String   @unique // One policy per booking
+  userId           String   // Policy holder
+  insuranceId      String   // Insurance product
+  
+  // Policy details
+  policyNumber     String   @unique
+  coverageAmount   Float    // Actual coverage amount for this policy
+  premiumAmount    Float    // Total premium paid
+  deductibleAmount Float    // Deductible for this policy
+  
+  // Policy period (matches booking period)
+  startDate        DateTime
+  endDate          DateTime
+  
+  // Policy status
+  status           PolicyStatus @default(PENDING)
+  
+  // External provider references
+  providerPolicyId String?  // External insurer policy ID
+  providerReference String? // External reference
+  
+  // Policy documents
+  policyDocumentUrl String? // URL to policy document
+  
+  // Claims relationship
+  activatedAt      DateTime?
+  cancelledAt      DateTime?
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  booking          Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  insurance        Insurance @relation(fields: [insuranceId], references: [id])
+  claims           Claim[]
+
+  @@map("insurance_policies")
+  @@index([userId])
+  @@index([status])
+  @@index([policyNumber])
+}
+
+model Claim {
+  id               String   @id @default(cuid())
+  policyId         String   // Associated insurance policy
+  bookingId        String   // Associated booking
+  userId           String   // Claimant (usually the renter)
+  
+  // Claim details
+  claimNumber      String   @unique
+  incidentDate     DateTime
+  incidentLocation String
+  incidentDescription String
+  
+  // Claim type and damage assessment
+  claimType        ClaimType
+  estimatedDamageAmount Float?
+  actualDamageAmount    Float?
+  
+  // Claim status and workflow
+  status           ClaimStatus @default(SUBMITTED)
+  priority         ClaimPriority @default(NORMAL)
+  
+  // External references
+  policeReportNumber String?
+  insurerClaimId     String? // External insurer claim ID
+  
+  // Review and processing
+  reviewedBy       String?  // Admin user ID who reviewed
+  reviewedAt       DateTime?
+  reviewNotes      String?
+  
+  // Settlement
+  settlementAmount Float?
+  settlementDate   DateTime?
+  settlementNotes  String?
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  policy           InsurancePolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  booking          Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents        ClaimDocument[]
+
+  @@map("claims")
+  @@index([userId])
+  @@index([policyId])
+  @@index([bookingId])
+  @@index([status])
+  @@index([claimNumber])
+}
+
+model ClaimDocument {
+  id               String   @id @default(cuid())
+  claimId          String   // Associated claim
+  
+  // Document details
+  documentType     ClaimDocumentType
+  fileName         String
+  originalFileName String
+  fileSize         Int
+  mimeType         String
+  documentUrl      String   // URL to stored document
+  
+  // Document metadata
+  uploadedBy       String   // User ID who uploaded
+  description      String?
+  
+  // Verification
+  isVerified       Boolean  @default(false)
+  verifiedBy       String?  // Admin user ID who verified
+  verifiedAt       DateTime?
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  claim            Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
+
+  @@map("claim_documents")
+  @@index([claimId])
+  @@index([documentType])
+}
+
+// Insurance and Claims Enums
+enum CoverageType {
+  BASIC           // Basic third-party coverage
+  COMPREHENSIVE   // Full coverage including theft, vandalism
+  PREMIUM         // Premium coverage with additional benefits
+}
+
+enum PolicyStatus {
+  PENDING         // Policy created but not activated
+  ACTIVE          // Policy is active and covers the period
+  EXPIRED         // Policy period has ended
+  CANCELLED       // Policy was cancelled
+  SUSPENDED       // Policy temporarily suspended
+}
+
+enum ClaimType {
+  ACCIDENT        // Traffic accident
+  THEFT           // Vehicle theft
+  VANDALISM       // Vandalism damage
+  NATURAL_DISASTER // Weather/natural disaster damage
+  MECHANICAL      // Mechanical breakdown (if covered)
+  THIRD_PARTY     // Third-party liability claim
+}
+
+enum ClaimStatus {
+  SUBMITTED       // Claim submitted by user
+  UNDER_REVIEW    // Claim being reviewed by admin
+  INVESTIGATING   // Claim under investigation
+  APPROVED        // Claim approved for settlement
+  REJECTED        // Claim rejected
+  SETTLED         // Claim settled and paid
+  CLOSED          // Claim closed (no further action)
+}
+
+enum ClaimPriority {
+  LOW             // Minor damage, no urgency
+  NORMAL          // Standard priority
+  HIGH            // Significant damage or urgent
+  URGENT          // Emergency or major incident
+}
+
+enum ClaimDocumentType {
+  PHOTOS          // Photos of damage/incident
+  POLICE_REPORT   // Official police report
+  MEDICAL_REPORT  // Medical reports (if applicable)
+  REPAIR_INVOICE  // Repair shop invoices
+  RECEIPT         // Payment receipts
+  WITNESS_STATEMENT // Witness statements
+  OTHER           // Other supporting documents
 }

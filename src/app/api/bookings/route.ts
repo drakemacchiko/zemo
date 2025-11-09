@@ -11,6 +11,7 @@ import {
   calculateBookingPrice, 
   generateConfirmationNumber 
 } from '@/lib/utils';
+import { InsurancePricingService } from '@/lib/insurance';
 
 /**
  * Verify authentication token and return user info
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
     const userId = authResult.userId;
 
     // Use database transaction to prevent race conditions
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       // Check if vehicle exists and is available
       const vehicle = await tx.vehicle.findUnique({
         where: { 
@@ -139,6 +140,25 @@ export async function POST(request: NextRequest) {
         bookingData.endDate
       );
 
+      // Handle insurance if selected
+      let insurancePremium = 0;
+      
+      if (bookingData.insuranceId && bookingData.insuranceCoverageAmount) {
+        // Calculate insurance premium
+        const insurancePricing = await InsurancePricingService.calculatePremium(
+          bookingData.insuranceId,
+          bookingData.insuranceCoverageAmount || vehicle.dailyRate * 30, // Estimate vehicle value
+          new Date(bookingData.startDate),
+          new Date(bookingData.endDate),
+          bookingData.insuranceCoverageAmount
+        );
+        
+        insurancePremium = insurancePricing.totalPremium;
+      }
+
+      // Calculate final total including insurance
+      const finalTotalAmount = pricing.totalAmount + insurancePremium;
+
       // Generate confirmation number
       const confirmationNumber = generateConfirmationNumber();
 
@@ -155,7 +175,7 @@ export async function POST(request: NextRequest) {
           subtotal: pricing.subtotal,
           serviceFee: pricing.serviceFee,
           taxAmount: pricing.taxAmount,
-          totalAmount: pricing.totalAmount,
+          totalAmount: finalTotalAmount, // Include insurance premium
           securityDeposit: vehicle.securityDeposit,
           confirmationNumber,
           pickupLocation: bookingData.pickupLocation || null,
@@ -189,6 +209,26 @@ export async function POST(request: NextRequest) {
           }
         }
       });
+
+      // Create insurance policy if selected
+      if (bookingData.insuranceId && bookingData.insuranceCoverageAmount && insurancePremium > 0) {
+        const insurancePolicy = await InsurancePricingService.createPolicy(
+          booking.id,
+          userId,
+          bookingData.insuranceId,
+          bookingData.insuranceCoverageAmount,
+          insurancePremium,
+          new Date(bookingData.startDate),
+          new Date(bookingData.endDate)
+        );
+        
+        // Return booking with insurance policy information
+        return {
+          ...booking,
+          insurancePolicy,
+          insurancePremium,
+        };
+      }
 
       return booking;
     });

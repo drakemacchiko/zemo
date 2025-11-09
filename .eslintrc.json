@@ -19,6 +19,7 @@
     ".next/",
     "out/",
     "dist/",
-    "*.config.js"
+    "*.config.js",
+    "scripts/"
   ]
 }
