@@ -150,11 +150,12 @@ export async function PUT(
     );
 
     // Log admin action for audit trail
-    console.log(`Admin ${authResult.user.email} updated claim ${claimId}:`, {
-      from: existingClaim.status,
-      to: actionData.status,
-      reviewNotes: actionData.reviewNotes,
-    });
+    // TODO: Implement proper audit logging service
+    // console.log(`Admin ${authResult.user.email} updated claim ${claimId}:`, {
+    //   from: existingClaim.status,
+    //   to: actionData.status,
+    //   reviewNotes: actionData.reviewNotes,
+    // });
 
     return NextResponse.json({
       success: true,

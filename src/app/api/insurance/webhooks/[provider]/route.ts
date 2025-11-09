@@ -10,7 +10,8 @@ export async function POST(
     const provider = params.provider.toLowerCase();
     const body = await request.json();
 
-    console.log(`Received webhook from insurance provider: ${provider}`, body);
+        // Log the webhook for debugging
+    // console.log(`Received webhook from insurance provider: ${provider}`, body);
 
     // Validate provider
     const validProviders = ['zemo_partner', 'madison_insurance', 'professional_insurance'];
@@ -44,7 +45,7 @@ export async function POST(
         break;
         
       default:
-        console.log(`Unknown webhook event type: ${body.event_type || body.type}`);
+        // console.log(`Unknown webhook event type: ${body.event_type || body.type}`);
         break;
     }
 
@@ -92,7 +93,7 @@ async function handlePolicyActivation(data: any) {
       },
     });
 
-    console.log(`Policy ${policy.policyNumber} activated successfully`);
+    // console.log(`Policy ${policy.policyNumber} activated successfully`);
   } catch (error) {
     console.error('Error activating policy:', error);
   }
@@ -100,7 +101,7 @@ async function handlePolicyActivation(data: any) {
 
 // Handle policy cancellation webhook
 async function handlePolicyCancellation(data: any) {
-  const { policy_number, external_policy_id, cancellation_date, reason } = data;
+  const { policy_number, external_policy_id, cancellation_date } = data;
   
   try {
     // Find policy by number or external ID
@@ -127,7 +128,7 @@ async function handlePolicyCancellation(data: any) {
       },
     });
 
-    console.log(`Policy ${policy.policyNumber} cancelled:`, reason);
+    // console.log(`Policy ${policy.policyNumber} cancelled:`, reason);
   } catch (error) {
     console.error('Error cancelling policy:', error);
   }
@@ -177,7 +178,7 @@ async function handleClaimStatusUpdate(data: any) {
       },
     });
 
-    console.log(`Claim ${claim.claimNumber} status updated to: ${mappedStatus}`);
+    // console.log(`Claim ${claim.claimNumber} status updated to: ${mappedStatus}`);
   } catch (error) {
     console.error('Error updating claim status:', error);
   }
@@ -221,7 +222,7 @@ async function handleClaimSettlement(data: any) {
       },
     });
 
-    console.log(`Claim ${claim.claimNumber} settled for: ${settlement_amount}`);
+    // console.log(`Claim ${claim.claimNumber} settled for: ${settlement_amount}`);
   } catch (error) {
     console.error('Error settling claim:', error);
   }
