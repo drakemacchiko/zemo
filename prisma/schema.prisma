@@ -32,6 +32,16 @@ model User {
   paymentMethods PaymentMethod[]
   insurancePolicies InsurancePolicy[] // User can have multiple insurance policies
   claims       Claim[]     // User can file multiple claims
+  
+  // Phase 9: Messaging & Support Relations
+  hostConversations     Conversation[] @relation("HostConversations")
+  renterConversations   Conversation[] @relation("RenterConversations")
+  sentMessages         Message[]
+  notifications        Notification[]
+  notificationPreference NotificationPreference?
+  supportTickets       SupportTicket[]
+  ticketMessages       TicketMessage[]
+  ticketAttachments    TicketAttachment[]
 
   @@map("users")
 }
@@ -139,6 +149,11 @@ model Vehicle {
   photos          VehiclePhoto[]
   bookings        Booking[]
   inspections     VehicleInspection[]
+  
+  // Phase 9: Messaging & Support Relations
+  conversations   Conversation[]
+  notifications   Notification[]
+  supportTickets  SupportTicket[]
 
   @@map("vehicles")
   @@index([hostId])
@@ -230,6 +245,11 @@ model Booking {
   claims          Claim[]  // Booking can have multiple claims
   inspections     VehicleInspection[]
   depositAdjustments DepositAdjustment[]
+  
+  // Phase 9: Messaging & Support Relations
+  conversations   Conversation[]
+  notifications   Notification[]
+  supportTickets  SupportTicket[]
 
   @@map("bookings")
   @@index([userId])
@@ -921,4 +941,361 @@ enum DepositStatus {
   PROCESSED        // Payment/refund processed
   DISPUTED         // Under dispute
   RESOLVED         // Dispute resolved
+}
+
+// Phase 9: Messaging, Notifications & Support Models
+model Conversation {
+  id               String   @id @default(cuid())
+  
+  // Participants
+  hostId           String   // Vehicle host
+  renterId         String   // Vehicle renter
+  bookingId        String?  // Optional associated booking
+  vehicleId        String?  // Optional associated vehicle
+  
+  // Conversation metadata
+  title            String?  // Optional conversation title
+  lastMessageAt    DateTime?
+  isArchived       Boolean  @default(false)
+  
+  // Privacy settings
+  hostDeleted      Boolean  @default(false)
+  renterDeleted    Boolean  @default(false)
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  host             User     @relation("HostConversations", fields: [hostId], references: [id])
+  renter           User     @relation("RenterConversations", fields: [renterId], references: [id])
+  booking          Booking? @relation(fields: [bookingId], references: [id])
+  vehicle          Vehicle? @relation(fields: [vehicleId], references: [id])
+  messages         Message[]
+
+  @@map("conversations")
+  @@index([hostId])
+  @@index([renterId])
+  @@index([bookingId])
+  @@index([vehicleId])
+  @@index([lastMessageAt])
+  @@unique([hostId, renterId, bookingId]) // Prevent duplicate conversations
+}
+
+model Message {
+  id               String   @id @default(cuid())
+  conversationId   String
+  senderId         String
+  
+  // Message content
+  content          String
+  messageType      MessageType @default(TEXT)
+  
+  // Message metadata
+  isRead           Boolean  @default(false)
+  readAt           DateTime?
+  isEdited         Boolean  @default(false)
+  editedAt         DateTime?
+  
+  // Content moderation
+  isDeleted        Boolean  @default(false)
+  deletedAt        DateTime?
+  deletedBy        String?
+  
+  // Attachments
+  attachmentUrl    String?  // Optional file attachment
+  attachmentType   AttachmentType?
+  attachmentSize   Int?     // File size in bytes
+  
+  // System messages
+  systemMetadata   Json?    // For system messages (booking updates, etc.)
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  conversation     Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender           User     @relation(fields: [senderId], references: [id])
+
+  @@map("messages")
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@index([isRead])
+}
+
+model Notification {
+  id               String   @id @default(cuid())
+  userId           String
+  
+  // Notification content
+  type             NotificationType
+  title            String
+  message          String
+  actionUrl        String?  // URL for notification action
+  
+  // Notification metadata
+  isRead           Boolean  @default(false)
+  readAt           DateTime?
+  
+  // Delivery channels
+  deliveryChannels String   @default("IN_APP") // JSON string of channels
+  emailSent        Boolean  @default(false)
+  emailSentAt      DateTime?
+  smsSent          Boolean  @default(false)
+  smsSentAt        DateTime?
+  pushSent         Boolean  @default(false)
+  pushSentAt       DateTime?
+  
+  // Related entities
+  bookingId        String?
+  vehicleId        String?
+  conversationId   String?
+  ticketId         String?
+  
+  // Priority and scheduling
+  priority         NotificationPriority @default(NORMAL)
+  scheduledFor     DateTime? // For scheduled notifications
+  expiresAt        DateTime? // Notification expiry
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  booking          Booking? @relation(fields: [bookingId], references: [id])
+  vehicle          Vehicle? @relation(fields: [vehicleId], references: [id])
+
+  @@map("notifications")
+  @@index([userId])
+  @@index([type])
+  @@index([isRead])
+  @@index([priority])
+  @@index([scheduledFor])
+  @@index([createdAt])
+}
+
+model NotificationPreference {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  
+  // Channel preferences
+  emailEnabled     Boolean  @default(true)
+  smsEnabled       Boolean  @default(true)
+  pushEnabled      Boolean  @default(true)
+  
+  // Notification type preferences
+  bookingUpdates   Boolean  @default(true)
+  paymentUpdates   Boolean  @default(true)
+  messageAlerts    Boolean  @default(true)
+  marketingEmails  Boolean  @default(false)
+  systemAlerts     Boolean  @default(true)
+  
+  // Timing preferences
+  quietHoursStart  Int?     // Hour (0-23) when quiet hours start
+  quietHoursEnd    Int?     // Hour (0-23) when quiet hours end
+  timezone         String   @default("Africa/Lusaka")
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
+model SupportTicket {
+  id               String   @id @default(cuid())
+  userId           String
+  
+  // Ticket identification
+  ticketNumber     String   @unique
+  
+  // Ticket content
+  subject          String
+  description      String
+  category         TicketCategory
+  priority         TicketPriority @default(NORMAL)
+  
+  // Status and assignment
+  status           TicketStatus @default(OPEN)
+  assignedToId     String?  // Admin user assigned to ticket
+  
+  // Related entities
+  bookingId        String?
+  vehicleId        String?
+  paymentId        String?
+  
+  // Resolution
+  resolutionNotes  String?
+  resolvedAt       DateTime?
+  resolvedBy       String?  // Admin user who resolved
+  
+  // Customer satisfaction
+  customerRating   Int?     // 1-5 rating
+  customerFeedback String?
+  
+  // Internal notes
+  internalNotes    String?
+  tags             Json?    // Array of tags for categorization
+  
+  // Escalation
+  escalatedAt      DateTime?
+  escalatedBy      String?
+  escalationReason String?
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  user             User     @relation(fields: [userId], references: [id])
+  booking          Booking? @relation(fields: [bookingId], references: [id])
+  vehicle          Vehicle? @relation(fields: [vehicleId], references: [id])
+  messages         TicketMessage[]
+  attachments      TicketAttachment[]
+
+  @@map("support_tickets")
+  @@index([userId])
+  @@index([ticketNumber])
+  @@index([status])
+  @@index([category])
+  @@index([priority])
+  @@index([assignedToId])
+  @@index([createdAt])
+}
+
+model TicketMessage {
+  id               String   @id @default(cuid())
+  ticketId         String
+  senderId         String
+  
+  // Message content
+  content          String
+  isInternal       Boolean  @default(false) // Internal admin notes
+  
+  // Message metadata
+  isEdited         Boolean  @default(false)
+  editedAt         DateTime?
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  ticket           SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender           User     @relation(fields: [senderId], references: [id])
+
+  @@map("ticket_messages")
+  @@index([ticketId])
+  @@index([senderId])
+  @@index([isInternal])
+  @@index([createdAt])
+}
+
+model TicketAttachment {
+  id               String   @id @default(cuid())
+  ticketId         String
+  uploadedBy       String
+  
+  // File details
+  fileName         String
+  originalFileName String
+  fileSize         Int
+  mimeType         String
+  fileUrl          String
+  
+  // File metadata
+  description      String?
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  
+  // Relations
+  ticket           SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  uploader         User     @relation(fields: [uploadedBy], references: [id])
+
+  @@map("ticket_attachments")
+  @@index([ticketId])
+  @@index([uploadedBy])
+}
+
+// Phase 9 Enums
+enum MessageType {
+  TEXT             // Regular text message
+  SYSTEM           // System-generated message
+  BOOKING_UPDATE   // Booking status update
+  PAYMENT_UPDATE   // Payment status update
+  IMAGE            // Image attachment
+  DOCUMENT         // Document attachment
+}
+
+enum AttachmentType {
+  IMAGE            // Image file
+  DOCUMENT         // PDF, DOC, etc.
+  VIDEO            // Video file
+  OTHER            // Other file types
+}
+
+enum NotificationType {
+  BOOKING_CONFIRMED    // Booking confirmed by host
+  BOOKING_CANCELLED    // Booking cancelled
+  PAYMENT_SUCCESS      // Payment successful
+  PAYMENT_FAILED       // Payment failed
+  MESSAGE_RECEIVED     // New message received
+  VEHICLE_APPROVED     // Vehicle listing approved
+  DOCUMENT_REQUIRED    // Document upload required
+  INSPECTION_DUE       // Vehicle inspection due
+  SUPPORT_RESPONSE     // Support ticket response
+  SYSTEM_ANNOUNCEMENT  // System-wide announcement
+  MARKETING           // Marketing communication
+}
+
+enum NotificationChannel {
+  IN_APP              // In-app notification
+  EMAIL               // Email notification
+  SMS                 // SMS notification
+  PUSH                // Push notification
+}
+
+enum NotificationPriority {
+  LOW                 // Low priority
+  NORMAL              // Normal priority
+  HIGH                // High priority
+  URGENT              // Urgent priority
+}
+
+enum TicketCategory {
+  BOOKING_ISSUE       // Booking-related issues
+  PAYMENT_ISSUE       // Payment problems
+  VEHICLE_ISSUE       // Vehicle-related problems
+  TECHNICAL_SUPPORT   // Technical app issues
+  ACCOUNT_ISSUE       // Account-related problems
+  DAMAGE_DISPUTE      // Damage assessment disputes
+  REFUND_REQUEST      // Refund requests
+  FEATURE_REQUEST     // Feature requests
+  COMPLAINT           // General complaints
+  OTHER               // Other issues
+}
+
+enum TicketPriority {
+  LOW                 // Low priority
+  NORMAL              // Normal priority
+  HIGH                // High priority
+  URGENT              // Urgent priority
+  CRITICAL            // Critical priority
+}
+
+enum TicketStatus {
+  OPEN                // Ticket is open
+  IN_PROGRESS         // Being worked on
+  WAITING_CUSTOMER    // Waiting for customer response
+  WAITING_INTERNAL    // Waiting for internal response
+  RESOLVED            // Resolved
+  CLOSED              // Closed
+  ESCALATED           // Escalated to higher level
 }
