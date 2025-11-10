@@ -1,0 +1,83 @@
+config:
+  target: 'http://localhost:3000'
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: Warm up
+    - duration: 120
+      arrivalRate: 20
+      name: Ramp up load
+    - duration: 300
+      arrivalRate: 30
+      name: Sustained load
+  variables:
+    # Lusaka area coordinates for testing
+    lusaka_coords:
+      - [-15.3875, 28.3228]   # City center
+      - [-15.4067, 28.2871]   # Kabulonga
+      - [-15.3794, 28.3753]   # Woodlands
+      - [-15.4198, 28.3228]   # Chelstone
+      - [-15.3308, 28.4524]   # Airport area
+  
+scenarios:
+  - name: Basic vehicle search
+    weight: 40
+    flow:
+      - get:
+          url: "/api/vehicles/search?limit=20&sortBy=distance"
+          
+  - name: Location-based search
+    weight: 30
+    flow:
+      - function: "setRandomLocation"
+      - get:
+          url: "/api/vehicles/search?latitude={{ latitude }}&longitude={{ longitude }}&radius=25&limit=15"
+          
+  - name: Advanced filtered search
+    weight: 20
+    flow:
+      - function: "setSearchFilters"
+      - get:
+          url: "/api/vehicles/search?vehicleType={{ vehicleType }}&minPrice={{ minPrice }}&maxPrice={{ maxPrice }}&transmission={{ transmission }}&limit=20"
+          
+  - name: Availability search with dates
+    weight: 10
+    flow:
+      - function: "setDateRange"
+      - get:
+          url: "/api/vehicles/search?startDate={{ startDate }}&endDate={{ endDate }}&limit=20"
+
+functions:
+  setRandomLocation: |
+    const coords = context.vars.lusaka_coords;
+    const randomCoord = coords[Math.floor(Math.random() * coords.length)];
+    context.vars.latitude = randomCoord[0];
+    context.vars.longitude = randomCoord[1];
+    
+  setSearchFilters: |
+    const vehicleTypes = ['SEDAN', 'SUV', 'HATCHBACK', 'PICKUP'];
+    const transmissions = ['MANUAL', 'AUTOMATIC'];
+    
+    context.vars.vehicleType = vehicleTypes[Math.floor(Math.random() * vehicleTypes.length)];
+    context.vars.minPrice = Math.floor(Math.random() * 200) + 100; // 100-300
+    context.vars.maxPrice = Math.floor(Math.random() * 300) + 400; // 400-700
+    context.vars.transmission = transmissions[Math.floor(Math.random() * transmissions.length)];
+    
+  setDateRange: |
+    const now = new Date();
+    const startDate = new Date(now.getTime() + Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000); // 0-30 days from now
+    const endDate = new Date(startDate.getTime() + (Math.floor(Math.random() * 14) + 1) * 24 * 60 * 60 * 1000); // 1-14 days duration
+    
+    context.vars.startDate = startDate.toISOString().split('T')[0];
+    context.vars.endDate = endDate.toISOString().split('T')[0];
+
+expect:
+  - statusCode: 200
+  - contentType: "application/json"
+  - hasHeader: "content-type"
+
+ensure:
+  # Response time should be under 2 seconds for p95
+  maxErrorRate: 1
+  p95: 2000
+  p99: 3000

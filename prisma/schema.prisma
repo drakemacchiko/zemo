@@ -138,11 +138,19 @@ model Vehicle {
   documents       VehicleDocument[]
   photos          VehiclePhoto[]
   bookings        Booking[]
+  inspections     VehicleInspection[]
 
   @@map("vehicles")
   @@index([hostId])
   @@index([availabilityStatus, isActive])
   @@index([locationLatitude, locationLongitude])
+  @@index([vehicleType, availabilityStatus, isActive])
+  @@index([make, model])
+  @@index([dailyRate])
+  @@index([seatingCapacity])
+  @@index([year, make])
+  @@index([verificationStatus, availabilityStatus])
+  @@index([createdAt])
 }
 
 model VehicleDocument {
@@ -220,6 +228,8 @@ model Booking {
   payments        Payment[]
   insurancePolicy InsurancePolicy? // Booking can have one insurance policy
   claims          Claim[]  // Booking can have multiple claims
+  inspections     VehicleInspection[]
+  depositAdjustments DepositAdjustment[]
 
   @@map("bookings")
   @@index([userId])
@@ -676,4 +686,239 @@ enum ClaimDocumentType {
   RECEIPT         // Payment receipts
   WITNESS_STATEMENT // Witness statements
   OTHER           // Other supporting documents
+}
+
+// Phase 7: Vehicle Handover & Return Models
+model VehicleInspection {
+  id               String   @id @default(cuid())
+  bookingId        String
+  vehicleId        String
+  inspectorId      String   // User performing inspection (renter or host)
+  
+  // Inspection type and timing
+  inspectionType   InspectionType
+  inspectionDate   DateTime @default(now())
+  
+  // Vehicle condition at inspection
+  mileage          Int
+  fuelLevel        Float    // Percentage (0-100)
+  
+  // Damage assessment
+  overallCondition VehicleCondition
+  damageScore      Float    @default(0) // 0-100, higher = more damage
+  estimatedRepairCost Float @default(0)
+  
+  // Inspection notes
+  notes            String?
+  concerns         String?  // Specific concerns or issues noted
+  
+  // GPS location of inspection
+  locationLatitude  Float?
+  locationLongitude Float?
+  locationAddress   String?
+  
+  // Inspection status
+  status           InspectionStatus @default(PENDING)
+  acknowledgedBy   String?  // Other party (host/renter) acknowledgment
+  acknowledgedAt   DateTime?
+  disputeRaised    Boolean  @default(false)
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  booking          Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  vehicle          Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  photos           InspectionPhoto[]
+  damageItems      DamageItem[]
+
+  @@map("vehicle_inspections")
+  @@index([bookingId])
+  @@index([vehicleId])
+  @@index([inspectionType])
+  @@index([status])
+}
+
+model InspectionPhoto {
+  id               String   @id @default(cuid())
+  inspectionId     String
+  
+  // Photo details
+  photoUrl         String
+  photoType        InspectionPhotoType
+  viewAngle        String?  // e.g., "front-left", "dashboard", "odometer"
+  
+  // Photo metadata
+  fileName         String
+  fileSize         Int
+  mimeType         String
+  
+  // Damage association
+  isDamagePhoto    Boolean  @default(false)
+  damageDescription String? // Description of damage shown in photo
+  
+  // GPS and timestamp
+  latitude         Float?
+  longitude        Float?
+  takenAt          DateTime @default(now())
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  
+  // Relations
+  inspection       VehicleInspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+
+  @@map("inspection_photos")
+  @@index([inspectionId])
+  @@index([photoType])
+}
+
+model DamageItem {
+  id               String   @id @default(cuid())
+  inspectionId     String
+  
+  // Damage details
+  damageType       DamageType
+  severity         DamageSeverity
+  location         String   // e.g., "front bumper", "rear door", "windshield"
+  description      String
+  
+  // Damage assessment
+  repairRequired   Boolean  @default(true)
+  estimatedCost    Float    @default(0)
+  actualCost       Float?   // Set after repair
+  
+  // Evidence
+  photoUrls        Json?    // Array of photo URLs showing this damage
+  
+  // Processing
+  isDisputed       Boolean  @default(false)
+  resolvedBy       String?  // Admin who resolved dispute
+  resolvedAt       DateTime?
+  resolutionNotes  String?
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  inspection       VehicleInspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+
+  @@map("damage_items")
+  @@index([inspectionId])
+  @@index([damageType])
+  @@index([severity])
+}
+
+model DepositAdjustment {
+  id               String   @id @default(cuid())
+  bookingId        String
+  pickupInspectionId String?
+  returnInspectionId String?
+  
+  // Adjustment details
+  originalDeposit  Float
+  damageCharges    Float    @default(0)
+  cleaningCharges  Float    @default(0)
+  fuelCharges      Float    @default(0)
+  otherCharges     Float    @default(0)
+  adjustmentAmount Float    // Total adjustment (positive = charge, negative = refund)
+  finalDepositReturn Float  // Amount to return to renter
+  
+  // Processing
+  status           DepositStatus @default(PENDING)
+  processedBy      String?  // Admin who processed
+  processedAt      DateTime?
+  
+  // Justification
+  justification    String?  // Explanation for charges
+  evidenceUrls     Json?    // Supporting evidence URLs
+  
+  // Dispute handling
+  isDisputed       Boolean  @default(false)
+  disputeReason    String?
+  disputeResolvedBy String?
+  disputeResolvedAt DateTime?
+  
+  // Payment processing
+  paymentId        String?  // Associated payment for additional charges
+  refundId         String?  // Associated refund payment
+  
+  // Metadata
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  // Relations
+  booking          Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("deposit_adjustments")
+  @@index([bookingId])
+  @@index([status])
+}
+
+// Phase 7 Enums
+enum InspectionType {
+  PICKUP          // Pre-rental inspection
+  RETURN          // Post-rental inspection
+  INTERMEDIATE    // Mid-rental check (for long rentals)
+  DAMAGE_ASSESSMENT // Special damage inspection
+}
+
+enum VehicleCondition {
+  EXCELLENT       // No visible damage
+  GOOD            // Minor cosmetic issues
+  FAIR            // Some wear and tear
+  POOR            // Significant damage/issues
+  DAMAGED         // Major damage requiring repair
+}
+
+enum InspectionStatus {
+  PENDING         // Inspection created but not completed
+  COMPLETED       // Inspection finished by inspector
+  ACKNOWLEDGED    // Other party has acknowledged inspection
+  DISPUTED        // Dispute raised about inspection
+  RESOLVED        // Dispute resolved
+}
+
+enum InspectionPhotoType {
+  EXTERIOR_OVERVIEW // Full vehicle exterior
+  INTERIOR_OVERVIEW // Interior overview
+  DASHBOARD        // Dashboard/odometer reading
+  DAMAGE_CLOSEUP   // Close-up of specific damage
+  FUEL_GAUGE       // Fuel level indicator
+  MILEAGE          // Odometer reading
+  TIRE_CONDITION   // Tire condition
+  SCRATCH_DENT     // Scratches or dents
+  OTHER            // Other inspection photos
+}
+
+enum DamageType {
+  SCRATCH          // Surface scratches
+  DENT             // Body dents
+  CRACK            // Cracks (windshield, etc.)
+  BROKEN_PART      // Broken components
+  MISSING_PART     // Missing parts/accessories
+  INTERIOR_DAMAGE  // Interior damage
+  MECHANICAL_ISSUE // Mechanical problems
+  ELECTRICAL_ISSUE // Electrical problems
+  TIRE_DAMAGE      // Tire damage
+  FLUID_LEAK       // Fluid leaks
+  OTHER            // Other damage types
+}
+
+enum DamageSeverity {
+  MINOR            // Cosmetic, no functional impact
+  MODERATE         // Some functional impact, repairable
+  MAJOR            // Significant damage, costly repair
+  SEVERE           // Extensive damage, may be total loss
+}
+
+enum DepositStatus {
+  PENDING          // Awaiting processing
+  CALCULATED       // Adjustment calculated
+  APPROVED         // Approved for processing
+  PROCESSED        // Payment/refund processed
+  DISPUTED         // Under dispute
+  RESOLVED         // Dispute resolved
 }
