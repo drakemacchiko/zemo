@@ -19,10 +19,12 @@ import {
 interface AdminUser {
   id: string
   email: string
-  firstName: string
-  lastName: string
   role: string
   permissions: string[]
+  profile?: {
+    firstName: string
+    lastName: string
+  }
 }
 
 export default function AdminLayout({
@@ -175,7 +177,7 @@ export default function AdminLayout({
               </button>
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-700">
-                  {user.firstName} {user.lastName}
+                  {user.profile ? `${user.profile.firstName} ${user.profile.lastName}` : user.email}
                 </span>
                 <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">
                   {user.role}

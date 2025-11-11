@@ -122,11 +122,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </a>
 
         {/* Page Layout */}
-        <div className="flex flex-col min-h-screen">
-          <ConditionalLayout>
-            {children}
-          </ConditionalLayout>
-        </div>
+        <ConditionalLayout>
+          {children}
+        </ConditionalLayout>
 
         {/* Offline notification (will be enhanced in Phase 11) */}
         <div
