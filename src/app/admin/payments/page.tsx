@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { DollarSign, TrendingUp, TrendingDown, Clock } from 'lucide-react'
 
 interface Payment {
@@ -42,15 +42,7 @@ export default function AdminPaymentsPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
 
-  useEffect(() => {
-    if (activeTab === 'payments') {
-      fetchPayments()
-    } else {
-      fetchPayouts()
-    }
-  }, [activeTab, filter])
-
-  const fetchPayments = async () => {
+  const fetchPayments = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -66,9 +58,9 @@ export default function AdminPaymentsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filter])
 
-  const fetchPayouts = async () => {
+  const fetchPayouts = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -84,7 +76,15 @@ export default function AdminPaymentsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filter])
+
+  useEffect(() => {
+    if (activeTab === 'payments') {
+      fetchPayments()
+    } else {
+      fetchPayouts()
+    }
+  }, [activeTab, fetchPayments, fetchPayouts])
 
   const handleProcessPayout = async (payoutId: string) => {
     try {

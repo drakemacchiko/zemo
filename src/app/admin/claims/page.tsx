@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react'
 
 interface Claim {
@@ -31,11 +31,7 @@ export default function AdminClaimsPage() {
   const [filter, setFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
 
-  useEffect(() => {
-    fetchClaims()
-  }, [filter])
-
-  const fetchClaims = async () => {
+  const fetchClaims = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -52,7 +48,11 @@ export default function AdminClaimsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filter, searchTerm])
+
+  useEffect(() => {
+    fetchClaims()
+  }, [fetchClaims])
 
   const handleSearch = () => {
     fetchClaims()

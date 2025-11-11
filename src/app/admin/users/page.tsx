@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { UserCheck, UserX, Shield, Mail, Phone } from 'lucide-react'
 
 interface User {
@@ -24,11 +24,7 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
 
-  useEffect(() => {
-    fetchUsers()
-  }, [filter, roleFilter])
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -47,7 +43,11 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filter, roleFilter, searchTerm])
+
+  useEffect(() => {
+    fetchUsers()
+  }, [fetchUsers])
 
   const handleSearch = () => {
     fetchUsers()
