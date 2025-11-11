@@ -1,8 +1,7 @@
 import '@/styles/globals.css';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
-import Header from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
+import ConditionalLayout from '@/components/layout/ConditionalLayout';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -124,13 +123,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {/* Page Layout */}
         <div className="flex flex-col min-h-screen">
-          <Header />
-
-          <main id="main-content" className="flex-1">
+          <ConditionalLayout>
             {children}
-          </main>
-
-          <Footer />
+          </ConditionalLayout>
         </div>
 
         {/* Offline notification (will be enhanced in Phase 11) */}
