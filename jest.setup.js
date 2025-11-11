@@ -1,5 +1,41 @@
 require('@testing-library/jest-dom');
 
+// Polyfills for Next.js Edge Runtime APIs
+const { TextEncoder, TextDecoder } = require('util')
+const { ReadableStream, WritableStream, TransformStream } = require('stream/web')
+
+global.TextEncoder = TextEncoder
+global.TextDecoder = TextDecoder
+global.ReadableStream = ReadableStream  
+global.WritableStream = WritableStream
+global.TransformStream = TransformStream
+
+// Mock Request and Response for Next.js server APIs
+global.Request = class MockRequest {
+  constructor(url, options = {}) {
+    this.url = url
+    this.method = options.method || 'GET'
+    this.headers = new Map(Object.entries(options.headers || {}))
+    this.body = options.body
+  }
+  
+  json() {
+    return Promise.resolve(JSON.parse(this.body || '{}'))
+  }
+}
+
+global.Response = class MockResponse {
+  constructor(body, options = {}) {
+    this.body = body
+    this.status = options.status || 200
+    this.headers = new Map(Object.entries(options.headers || {}))
+  }
+  
+  json() {
+    return Promise.resolve(JSON.parse(this.body || '{}'))
+  }
+}
+
 // Mock Next.js router
 jest.mock('next/router', () => ({
   useRouter() {

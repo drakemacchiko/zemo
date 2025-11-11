@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { withAuth, AuthenticatedRequest } from '@/lib/middleware'
 import { prisma } from '@/lib/db'
+import { parsePermissions } from '@/lib/auth'
 
 async function handler(request: AuthenticatedRequest) {
   try {
@@ -13,7 +14,9 @@ async function handler(request: AuthenticatedRequest) {
       omit: {
         password: true,
         refreshToken: true,
-        otpCode: true
+        otpCode: true,
+        mfaSecret: true,
+        mfaBackupCodes: true
       }
     })
     
@@ -23,9 +26,13 @@ async function handler(request: AuthenticatedRequest) {
         { status: 404 }
       )
     }
+
+    // Parse permissions from JSON string
+    const permissions = parsePermissions(user.permissions)
     
     return NextResponse.json({
-      user
+      ...user,
+      permissions
     })
     
   } catch (error) {
