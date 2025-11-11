@@ -134,20 +134,23 @@ export default function AdminLayout({
       )}
 
       {/* Desktop sidebar */}
-      <div className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
-        <div className="flex flex-col flex-grow pt-5 bg-white shadow-lg">
-          <div className="flex items-center px-4 pb-4">
+      <div className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col z-30">
+        <div className="flex flex-col flex-grow pt-5 bg-white border-r border-gray-200 overflow-y-auto">
+          <div className="flex items-center px-4 pb-4 border-b border-gray-200">
+            <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center mr-3">
+              <span className="text-lg font-bold text-black">Z</span>
+            </div>
             <h1 className="text-xl font-bold text-gray-900">ZEMO Admin</h1>
           </div>
-          <nav className="flex-1 px-4 pb-4 space-y-2">
+          <nav className="flex-1 px-2 py-4 space-y-1">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-yellow-50 hover:text-gray-900 transition-colors"
               >
-                <item.icon className="mr-3 h-5 w-5" />
-                {item.name}
+                <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                <span>{item.name}</span>
               </Link>
             ))}
           </nav>
@@ -155,10 +158,10 @@ export default function AdminLayout({
       </div>
 
       {/* Main content */}
-      <div className="md:pl-64">
+      <div className="md:pl-64 flex flex-col min-h-screen">
         {/* Top navigation */}
-        <div className="sticky top-0 z-10 bg-white shadow-sm border-b border-gray-200">
-          <div className="flex justify-between items-center px-4 py-3">
+        <div className="sticky top-0 z-20 bg-white shadow-sm border-b border-gray-200">
+          <div className="flex justify-between items-center px-4 sm:px-6 lg:px-8 py-3">
             <div className="flex items-center">
               <button
                 className="md:hidden mr-3"
@@ -192,7 +195,7 @@ export default function AdminLayout({
         </div>
 
         {/* Page content */}
-        <main className="p-6">
+        <main className="flex-1 bg-gray-50 p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>
