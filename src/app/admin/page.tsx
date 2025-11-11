@@ -11,6 +11,32 @@ import {
   Activity,
   DollarSign
 } from 'lucide-react'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js'
+import { Line, Bar } from 'react-chartjs-2'
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+)
 
 interface DashboardStats {
   totalUsers: number
@@ -181,24 +207,144 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Analytics Chart */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-semibold text-gray-900">Analytics</h2>
-          <select 
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-1 text-sm"
-          >
-            <option value="7d">Last 7 days</option>
-            <option value="30d">Last 30 days</option>
-            <option value="90d">Last 90 days</option>
-          </select>
+      {/* Analytics Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Daily Active Users Chart */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Daily Active Users</h2>
+            <select 
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-1 text-sm"
+            >
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+            </select>
+          </div>
+          {chartData.length > 0 ? (
+            <div className="h-64">
+              <Line
+                data={{
+                  labels: chartData.map(d => new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+                  datasets: [{
+                    label: 'Active Users',
+                    data: chartData.map(d => d.users),
+                    borderColor: '#FFD400',
+                    backgroundColor: 'rgba(255, 212, 0, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                  }]
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      mode: 'index',
+                      intersect: false,
+                    }
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      ticks: { precision: 0 }
+                    }
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <div className="h-64 flex items-center justify-center text-gray-500">
+              No data available
+            </div>
+          )}
         </div>
-        
+
+        {/* Bookings per Day Chart */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Bookings per Day</h2>
+          {chartData.length > 0 ? (
+            <div className="h-64">
+              <Bar
+                data={{
+                  labels: chartData.map(d => new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+                  datasets: [{
+                    label: 'Bookings',
+                    data: chartData.map(d => d.bookings),
+                    backgroundColor: '#0A0A0A',
+                    borderRadius: 4,
+                  }]
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      mode: 'index',
+                      intersect: false,
+                    }
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      ticks: { precision: 0 }
+                    }
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <div className="h-64 flex items-center justify-center text-gray-500">
+              No data available
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Revenue Chart */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Revenue per Day</h2>
         {chartData.length > 0 ? (
           <div className="h-80">
-            <SimpleChart data={chartData} />
+            <Line
+              data={{
+                labels: chartData.map(d => new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+                datasets: [{
+                  label: 'Revenue ($)',
+                  data: chartData.map(d => d.revenue),
+                  borderColor: '#10B981',
+                  backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                  fill: true,
+                  tension: 0.4,
+                }]
+              }}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                      label: (context) => `Revenue: $${(context.parsed.y || 0).toFixed(2)}`
+                    }
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      callback: (value) => `$${value}`
+                    }
+                  }
+                }
+              }}
+            />
           </div>
         ) : (
           <div className="h-80 flex items-center justify-center text-gray-500">
@@ -225,37 +371,6 @@ export default function AdminDashboard() {
           </button>
         </div>
       </div>
-    </div>
-  )
-}
-
-// Simple chart component for analytics
-function SimpleChart({ data }: { data: ChartData[] }) {
-  const maxRevenue = Math.max(...data.map(d => d.revenue))
-  const maxBookings = Math.max(...data.map(d => d.bookings))
-  
-  return (
-    <div className="h-full flex items-end space-x-2 pb-4">
-      {data.map((item, index) => (
-        <div key={index} className="flex-1 flex flex-col items-center">
-          <div className="w-full bg-gray-200 rounded-t relative" style={{ height: '200px' }}>
-            <div 
-              className="bg-yellow-500 rounded-t absolute bottom-0 w-full"
-              style={{ height: `${(item.revenue / maxRevenue) * 100}%` }}
-            />
-            <div 
-              className="bg-blue-500 rounded-t absolute bottom-0 w-1/2"
-              style={{ height: `${(item.bookings / maxBookings) * 100}%` }}
-            />
-          </div>
-          <div className="text-xs text-gray-600 mt-2 text-center">
-            {new Date(item.date).toLocaleDateString('en-GB', { 
-              day: '2-digit', 
-              month: 'short' 
-            })}
-          </div>
-        </div>
-      ))}
     </div>
   )
 }
