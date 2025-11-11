@@ -136,20 +136,20 @@ export default function AdminLayout({
       )}
 
       {/* Desktop sidebar */}
-      <div className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
-        <div className="flex flex-col flex-grow pt-5 bg-white shadow-lg">
-          <div className="flex items-center px-4 pb-4">
+      <div className="hidden md:fixed md:inset-y-0 md:left-0 md:z-40 md:w-64 md:flex md:flex-col">
+        <div className="flex flex-col w-full h-full bg-white shadow-lg border-r border-gray-200">
+          <div className="flex items-center px-6 py-5 border-b border-gray-200">
             <h1 className="text-xl font-bold text-gray-900">ZEMO Admin</h1>
           </div>
-          <nav className="flex-1 px-4 pb-4 space-y-2">
+          <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                className="flex items-center px-4 py-3 text-sm font-medium rounded-lg text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors"
               >
-                <item.icon className="mr-3 h-5 w-5" />
-                {item.name}
+                <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                <span className="truncate">{item.name}</span>
               </Link>
             ))}
           </nav>
