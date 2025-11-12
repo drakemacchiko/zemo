@@ -15,7 +15,9 @@
     "test:concurrency": "node scripts/test-concurrency.js",
     "type-check": "tsc --noEmit",
     "lighthouse": "lhci autorun --config=./lighthouseci.config.js",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "deploy:check": "node scripts/pre-deploy-check.js",
+    "deploy:prepare": "npm run deploy:check && git push origin main"
   },
   "dependencies": {
     "@prisma/client": "^6.18.0",
