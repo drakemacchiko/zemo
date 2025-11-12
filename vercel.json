@@ -4,12 +4,6 @@
   "installCommand": "npm ci",
   "devCommand": "npm run dev",
   "framework": "nextjs",
-  "functions": {
-    "app/api/**/*.ts": {
-      "runtime": "nodejs18.x",
-      "maxDuration": 30
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
@@ -63,12 +57,6 @@
       "source": "/admin",
       "destination": "/admin/dashboard",
       "permanent": false
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/health",
-      "destination": "/api/health/check"
     }
   ]
 }
