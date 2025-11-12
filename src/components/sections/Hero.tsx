@@ -19,7 +19,7 @@ export function Hero() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Link href="/vehicles" className="btn-secondary w-full sm:w-auto text-lg px-8 py-4">
+            <Link href="/search" className="btn-secondary w-full sm:w-auto text-lg px-8 py-4">
               Browse Cars
             </Link>
             <Link href="/host" className="btn-primary w-full sm:w-auto text-lg px-8 py-4">
