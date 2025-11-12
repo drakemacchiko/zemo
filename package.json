@@ -16,8 +16,15 @@
     "type-check": "tsc --noEmit",
     "lighthouse": "lhci autorun --config=./lighthouseci.config.js",
     "prepare": "husky install",
+    "security:audit": "node scripts/security-audit.js",
+    "security:scan": "npm audit --production --audit-level=moderate",
+    "load:test": "artillery run load/peak.yml",
+    "load:search": "artillery run load/search.yml",
+    "db:backup": "bash scripts/backup-database.sh production",
+    "db:restore": "bash scripts/restore-database.sh",
     "deploy:check": "node scripts/pre-deploy-check.js",
-    "deploy:prepare": "npm run deploy:check && git push origin main"
+    "deploy:prepare": "npm run deploy:check && git push origin main",
+    "deploy:production": "npm run security:audit && npm run test && npm run build && vercel --prod"
   },
   "dependencies": {
     "@prisma/client": "^6.18.0",

@@ -1,0 +1,219 @@
+# Artillery Load Test Configuration - Peak Traffic Scenario
+# Simulates peak usage: 1000 concurrent users over 5 minutes
+# Run with: npx artillery run load/peak.yml
+
+config:
+  target: "http://localhost:3000"
+  phases:
+    # Warm-up phase: Ramp up to 100 users over 1 minute
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 20
+      name: "Warm-up"
+    
+    # Peak load: 500 users/minute for 3 minutes
+    - duration: 180
+      arrivalRate: 100
+      name: "Peak load"
+    
+    # Sustained load: 200 users/minute for 2 minutes
+    - duration: 120
+      arrivalRate: 50
+      name: "Sustained load"
+    
+    # Cool down: Decrease to 50 users/minute
+    - duration: 60
+      arrivalRate: 10
+      name: "Cool down"
+
+  # Performance thresholds
+  ensure:
+    maxErrorRate: 1 # Max 1% error rate
+    p95: 500 # 95th percentile response time < 500ms
+    p99: 1000 # 99th percentile response time < 1s
+
+  # HTTP configuration
+  http:
+    timeout: 10
+  
+  # Load test variables
+  variables:
+    testEmail: "loadtest-{{ $randomNumber() }}@example.com"
+    testPassword: "TestPassword123!"
+
+  # Plugins for detailed metrics
+  plugins:
+    expect: {}
+    metrics-by-endpoint:
+      stripQueryString: true
+
+scenarios:
+  # ============================================
+  # Scenario 1: Anonymous User Browsing (60%)
+  # ============================================
+  - name: "Anonymous browsing"
+    weight: 60
+    flow:
+      - get:
+          url: "/"
+          expect:
+            - statusCode: 200
+            - contentType: text/html
+
+      - get:
+          url: "/search?location=Lusaka&startDate={{ $randomDate() }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: results
+
+      - get:
+          url: "/vehicles/{{ $randomString() }}"
+          expect:
+            - statusCode: [200, 404]
+
+      - think: 3 # User reads vehicle details for 3 seconds
+
+  # ============================================
+  # Scenario 2: User Registration (10%)
+  # ============================================
+  - name: "User registration"
+    weight: 10
+    flow:
+      - post:
+          url: "/api/auth/register"
+          json:
+            email: "{{ testEmail }}"
+            password: "{{ testPassword }}"
+            firstName: "Load"
+            lastName: "Test"
+            phoneNumber: "+260977{{ $randomNumber() }}"
+          expect:
+            - statusCode: [200, 201, 400, 409]
+          capture:
+            - json: "$.token"
+              as: "authToken"
+
+  # ============================================
+  # Scenario 3: Authenticated User Booking (20%)
+  # ============================================
+  - name: "Authenticated booking flow"
+    weight: 20
+    flow:
+      # Login
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "testuser@example.com"
+            password: "TestPassword123!"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+          expect:
+            - statusCode: [200, 401]
+
+      # Search vehicles
+      - get:
+          url: "/api/vehicles/search?location=Lusaka"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+
+      # Check availability
+      - get:
+          url: "/api/bookings/availability?vehicleId=test-vehicle-id&startDate=2025-12-01&endDate=2025-12-05"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: [200, 404]
+
+      - think: 5 # User decides to book
+
+      # Create booking (will fail without real vehicle, but tests endpoint)
+      - post:
+          url: "/api/bookings"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            vehicleId: "test-vehicle-id"
+            startDate: "2025-12-01T10:00:00Z"
+            endDate: "2025-12-05T10:00:00Z"
+            insuranceProductId: "basic-insurance"
+          expect:
+            - statusCode: [200, 201, 400, 404]
+
+  # ============================================
+  # Scenario 4: Host Managing Vehicles (5%)
+  # ============================================
+  - name: "Host vehicle management"
+    weight: 5
+    flow:
+      # Login as host
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "host@example.com"
+            password: "HostPassword123!"
+          capture:
+            - json: "$.token"
+              as: "hostToken"
+          expect:
+            - statusCode: [200, 401]
+
+      # View own vehicles
+      - get:
+          url: "/api/vehicles/my-vehicles"
+          headers:
+            Authorization: "Bearer {{ hostToken }}"
+          expect:
+            - statusCode: 200
+
+      # View bookings
+      - get:
+          url: "/api/bookings?role=host"
+          headers:
+            Authorization: "Bearer {{ hostToken }}"
+          expect:
+            - statusCode: 200
+
+  # ============================================
+  # Scenario 5: Admin Dashboard Access (5%)
+  # ============================================
+  - name: "Admin dashboard"
+    weight: 5
+    flow:
+      # Login as admin
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "admin@zemo.zm"
+            password: "AdminPassword123!"
+          capture:
+            - json: "$.token"
+              as: "adminToken"
+          expect:
+            - statusCode: [200, 401]
+
+      # Dashboard stats
+      - get:
+          url: "/api/admin/dashboard/stats"
+          headers:
+            Authorization: "Bearer {{ adminToken }}"
+          expect:
+            - statusCode: [200, 403]
+
+      # View all users
+      - get:
+          url: "/api/admin/users"
+          headers:
+            Authorization: "Bearer {{ adminToken }}"
+          expect:
+            - statusCode: [200, 403]
+
+      # View all vehicles
+      - get:
+          url: "/api/admin/vehicles"
+          headers:
+            Authorization: "Bearer {{ adminToken }}"
+          expect:
+            - statusCode: [200, 403]
