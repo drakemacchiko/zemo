@@ -2,6 +2,7 @@ import '@/styles/globals.css';
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import ConditionalLayout from '@/components/layout/ConditionalLayout';
+import { PWAProvider } from '@/components/PWAProvider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -109,39 +110,41 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="dns-prefetch" href="//maps.googleapis.com" />
         <link rel="dns-prefetch" href="//api.whatsapp.com" />
 
-        {/* Service Worker registration will be handled by next-pwa */}
+        {/* Service Worker registration will be handled by PWAProvider */}
       </head>
       <body className="min-h-screen bg-white text-zemo-black antialiased">
-        {/* Skip to main content for accessibility */}
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 
-                     bg-zemo-yellow text-zemo-black px-4 py-2 rounded-zemo z-50"
-        >
-          Skip to main content
-        </a>
+        <PWAProvider>
+          {/* Skip to main content for accessibility */}
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 
+                       bg-zemo-yellow text-zemo-black px-4 py-2 rounded-zemo z-50"
+          >
+            Skip to main content
+          </a>
 
-        {/* Page Layout */}
-        <ConditionalLayout>
-          {children}
-        </ConditionalLayout>
+          {/* Page Layout */}
+          <ConditionalLayout>
+            {children}
+          </ConditionalLayout>
 
-        {/* Offline notification (will be enhanced in Phase 11) */}
-        <div
-          id="offline-notification"
-          className="fixed bottom-4 left-4 right-4 p-4 bg-zemo-gray-800 text-white 
-                     rounded-zemo shadow-zemo-lg transform translate-y-full transition-transform 
-                     duration-300 ease-in-out z-50"
-          role="alert"
-          aria-live="polite"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-body">You're offline. Some features may be limited.</span>
-            <span className="text-zemo-yellow text-sm font-sub-heading cursor-pointer">
-              Dismiss
-            </span>
+          {/* Offline notification */}
+          <div
+            id="offline-notification"
+            className="fixed bottom-4 left-4 right-4 p-4 bg-zemo-gray-800 text-white 
+                       rounded-zemo shadow-zemo-lg transform translate-y-full transition-transform 
+                       duration-300 ease-in-out z-50"
+            role="alert"
+            aria-live="polite"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-body">You're offline. Some features may be limited.</span>
+              <span className="text-zemo-yellow text-sm font-sub-heading cursor-pointer">
+                Dismiss
+              </span>
+            </div>
           </div>
-        </div>
+        </PWAProvider>
       </body>
     </html>
   );
