@@ -67,8 +67,15 @@ export default function LoginPage() {
         localStorage.setItem('accessToken', data.tokens.accessToken)
         localStorage.setItem('refreshToken', data.tokens.refreshToken)
         
-        // Redirect to profile or dashboard
-        router.push('/profile')
+        // Redirect based on user role
+        const userRole = data.user?.role
+        if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
+          router.push('/admin')
+        } else if (userRole === 'HOST') {
+          router.push('/host')
+        } else {
+          router.push('/profile')
+        }
       } else {
         setErrors({ general: data.error || 'Login failed' })
       }

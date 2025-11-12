@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
         phoneNumber: user.phoneNumber,
         phoneVerified: user.phoneVerified,
         emailVerified: user.emailVerified,
+        role: user.role,
         profile: user.profile,
         drivingLicense: user.drivingLicense
       },
