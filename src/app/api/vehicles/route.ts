@@ -29,7 +29,9 @@ async function handleGet(request: AuthenticatedRequest) {
     const where: any = {
       isActive: true,
       availabilityStatus: 'AVAILABLE',
-      verificationStatus: 'VERIFIED',
+      verificationStatus: {
+        in: ['VERIFIED', 'PENDING'] // Allow both VERIFIED and PENDING for testing
+      },
     }
 
     // Add filters

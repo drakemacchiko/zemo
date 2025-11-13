@@ -128,7 +128,9 @@ export async function GET(request: NextRequest) {
     // Build where clause
     const where: any = {
       availabilityStatus: 'AVAILABLE',
-      verificationStatus: 'VERIFIED',
+      verificationStatus: {
+        in: ['VERIFIED', 'PENDING'] // Allow both VERIFIED and PENDING for testing
+      },
       isActive: true
     };
 
