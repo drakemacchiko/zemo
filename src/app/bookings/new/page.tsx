@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 
@@ -12,7 +12,7 @@ interface InsuranceOption {
   premium: number
 }
 
-export default function NewBookingPage() {
+function NewBookingForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const vehicleId = searchParams.get('vehicleId')
@@ -310,5 +310,20 @@ export default function NewBookingPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function NewBookingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zemo-yellow mx-auto" />
+          <p className="mt-4 text-gray-600">Loading booking form...</p>
+        </div>
+      </div>
+    }>
+      <NewBookingForm />
+    </Suspense>
   )
 }

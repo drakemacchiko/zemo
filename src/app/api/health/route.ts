@@ -1,6 +1,10 @@
 import { prisma } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
+// Force dynamic rendering - don't pre-render at build time
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * Health Check Endpoint
  * GET /api/health
