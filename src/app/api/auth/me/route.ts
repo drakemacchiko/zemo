@@ -31,8 +31,10 @@ async function handler(request: AuthenticatedRequest) {
     const permissions = parsePermissions(user.permissions)
     
     return NextResponse.json({
-      ...user,
-      permissions
+      user: {
+        ...user,
+        permissions
+      }
     })
     
   } catch (error) {
