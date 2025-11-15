@@ -38,10 +38,10 @@ function extractTokenFromRequest(request: NextRequest): string | null {
 }
 
 export function withAuth(
-  handler: (req: AuthenticatedRequest) => Promise<Response>,
+  handler: (req: AuthenticatedRequest, context?: any) => Promise<Response>,
   options: { requireAuth?: boolean } = { requireAuth: true }
 ) {
-  return async (req: NextRequest): Promise<Response> => {
+  return async (req: NextRequest, context?: any): Promise<Response> => {
     const token = extractTokenFromRequest(req)
     const authenticatedReq = req as AuthenticatedRequest
     
@@ -53,7 +53,7 @@ export function withAuth(
         )
       }
       // Optional auth - continue without user
-      return handler(authenticatedReq)
+      return handler(authenticatedReq, context)
     }
     
     const payload = verifyAccessToken(token)
@@ -65,7 +65,7 @@ export function withAuth(
         )
       }
       // Optional auth - invalid token, continue without user
-      return handler(authenticatedReq)
+      return handler(authenticatedReq, context)
     }
     
     // Verify user exists in database
@@ -82,13 +82,13 @@ export function withAuth(
         )
       }
       // Optional auth - user not found, continue without user
-      return handler(authenticatedReq)
+      return handler(authenticatedReq, context)
     }
     
     // Add user to request object
     authenticatedReq.user = user
     
-    return handler(authenticatedReq)
+    return handler(authenticatedReq, context)
   }
 }
 

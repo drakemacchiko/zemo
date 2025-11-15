@@ -4,11 +4,9 @@ import { vehicleUpdateSchema, adminVehicleActionSchema } from '@/lib/validations
 import { prisma } from '@/lib/db'
 
 // GET /api/vehicles/[id] - Get vehicle details
-async function handleGet(request: AuthenticatedRequest) {
+async function handleGet(request: AuthenticatedRequest, context: { params: { id: string } }) {
   try {
-    const url = new URL(request.url)
-    const pathSegments = url.pathname.split('/')
-    const vehicleId = pathSegments[pathSegments.length - 1]
+    const vehicleId = context.params.id
 
     const vehicle = await (prisma as any).vehicle.findUnique({
       where: { id: vehicleId },
@@ -76,7 +74,7 @@ async function handleGet(request: AuthenticatedRequest) {
 }
 
 // PUT /api/vehicles/[id] - Update vehicle details
-async function handlePut(request: AuthenticatedRequest) {
+async function handlePut(request: AuthenticatedRequest, context: { params: { id: string } }) {
   try {
     if (!request.user) {
       return NextResponse.json(
@@ -85,9 +83,7 @@ async function handlePut(request: AuthenticatedRequest) {
       )
     }
 
-    const url = new URL(request.url)
-    const pathSegments = url.pathname.split('/')
-    const vehicleId = pathSegments[pathSegments.length - 1]
+    const vehicleId = context.params.id
     
     if (!vehicleId) {
       return NextResponse.json(
@@ -185,7 +181,7 @@ async function handlePut(request: AuthenticatedRequest) {
 }
 
 // DELETE /api/vehicles/[id] - Delete vehicle
-async function handleDelete(request: AuthenticatedRequest) {
+async function handleDelete(request: AuthenticatedRequest, context: { params: { id: string } }) {
   try {
     if (!request.user) {
       return NextResponse.json(
@@ -194,9 +190,7 @@ async function handleDelete(request: AuthenticatedRequest) {
       )
     }
 
-    const url = new URL(request.url)
-    const pathSegments = url.pathname.split('/')
-    const vehicleId = pathSegments[pathSegments.length - 1]
+    const vehicleId = context.params.id
 
     // Verify ownership
     const existingVehicle = await (prisma as any).vehicle.findUnique({
