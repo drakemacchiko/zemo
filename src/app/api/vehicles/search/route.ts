@@ -327,6 +327,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Vehicle search error:', error);
+    console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
     
     if (error instanceof z.ZodError) {
       return NextResponse.json({
@@ -336,7 +337,8 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      error: 'Failed to search vehicles'
+      error: 'Failed to search vehicles',
+      message: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
