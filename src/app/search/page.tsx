@@ -248,7 +248,7 @@ function SearchResults() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {vehicles.map((vehicle) => {
-                const primaryPhoto = vehicle.photos.find(p => p.isPrimary) || vehicle.photos[0]
+                const primaryPhoto = vehicle.photos?.find(p => p.isPrimary) || vehicle.photos?.[0]
                 
                 return (
                   <Link

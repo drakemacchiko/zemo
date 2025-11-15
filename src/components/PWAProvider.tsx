@@ -17,18 +17,20 @@ export function PWAProvider({ children }: { children: React.ReactNode }) {
     // Setup install prompt
     setupInstallPrompt();
 
-    // Register service worker
-    registerServiceWorker({
-      onUpdate: () => {
-        setUpdateAvailable(true);
-      },
-      onSuccess: () => {
-        // Service worker registered successfully
-      },
-      onError: (error) => {
-        console.error('Service worker registration failed:', error);
-      },
-    });
+    // Register service worker - only in production
+    if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      registerServiceWorker({
+        onUpdate: () => {
+          setUpdateAvailable(true);
+        },
+        onSuccess: () => {
+          // Service worker registered successfully
+        },
+        onError: (error) => {
+          console.warn('Service worker registration failed:', error);
+        },
+      });
+    }
 
     // Clean old cached data periodically
     const cleanupInterval = setInterval(

@@ -77,6 +77,9 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
     title: 'ZEMO',
   },
+  other: {
+    'mobile-web-app-capable': 'yes',
+  },
   formatDetection: {
     telephone: false,
   },
