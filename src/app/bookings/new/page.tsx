@@ -90,6 +90,10 @@ function NewBookingForm() {
     setError('')
 
     try {
+      // Convert dates to ISO datetime format
+      const startDateTime = new Date(startDate).toISOString()
+      const endDateTime = new Date(endDate).toISOString()
+
       const response = await fetch('/api/bookings', {
         method: 'POST',
         headers: {
@@ -98,8 +102,8 @@ function NewBookingForm() {
         },
         body: JSON.stringify({
           vehicleId,
-          startDate,
-          endDate,
+          startDate: startDateTime,
+          endDate: endDateTime,
           insuranceId: selectedInsurance || undefined,
           specialRequests: specialRequests || undefined,
         })
