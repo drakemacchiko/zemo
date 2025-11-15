@@ -49,9 +49,10 @@ async function handleGet(request: AuthenticatedRequest) {
       )
     }
 
-    // Only show vehicles that are active and verified (unless it's the owner)
+    // Only show vehicles that are active and verified/pending (unless it's the owner)
+    // Allow PENDING vehicles to be viewable publicly so search results and details match.
     const isOwner = request.user?.id === vehicle.hostId
-    if (!isOwner && (!vehicle.isActive || vehicle.verificationStatus !== 'VERIFIED')) {
+    if (!isOwner && (!vehicle.isActive || !['VERIFIED', 'PENDING'].includes(vehicle.verificationStatus))) {
       return NextResponse.json(
         { error: 'Vehicle not available' },
         { status: 404 }
