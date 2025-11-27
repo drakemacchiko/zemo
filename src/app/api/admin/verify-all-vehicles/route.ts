@@ -72,10 +72,10 @@ export async function GET() {
 
     const stats = {
       total: vehicles.length,
-      verified: vehicles.filter(v => v.verificationStatus === 'VERIFIED').length,
-      pending: vehicles.filter(v => v.verificationStatus === 'PENDING').length,
-      rejected: vehicles.filter(v => v.verificationStatus === 'REJECTED').length,
-      available: vehicles.filter(v => v.availabilityStatus === 'AVAILABLE' && v.isActive).length
+      verified: vehicles.filter((v: any) => v.verificationStatus === 'VERIFIED').length,
+      pending: vehicles.filter((v: any) => v.verificationStatus === 'PENDING').length,
+      rejected: vehicles.filter((v: any) => v.verificationStatus === 'REJECTED').length,
+      available: vehicles.filter((v: any) => v.availabilityStatus === 'AVAILABLE' && v.isActive).length
     };
 
     return NextResponse.json({
