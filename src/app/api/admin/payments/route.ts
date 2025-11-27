@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Transform to include renter name
-    const transformedPayments = payments.map(payment => ({
+    const transformedPayments = payments.map((payment: any) => ({
       ...payment,
       booking: payment.booking ? {
         ...payment.booking,

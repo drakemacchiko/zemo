@@ -117,8 +117,8 @@ export default function Header() {
     if (userData?.firstName && userData?.lastName) {
       return `${userData.firstName[0]}${userData.lastName[0]}`.toUpperCase()
     }
-    if (userData?.email) {
-      return userData.email[0].toUpperCase()
+    if (userData?.email && userData.email.length > 0) {
+      return userData.email.charAt(0).toUpperCase()
     }
     return 'U'
   }

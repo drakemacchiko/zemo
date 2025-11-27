@@ -11,6 +11,10 @@ export async function GET(request: Request) {
     }
 
     const token = authHeader.split(' ')[1]
+    if (!token) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+    }
+    
     const decoded = verifyAccessToken(token)
     if (!decoded) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
