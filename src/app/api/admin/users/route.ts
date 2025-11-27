@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Transform users to include name and isVerified
-    const transformedUsers = users.map(user => ({
+    const transformedUsers = users.map((user: any) => ({
       ...user,
       name: user.profile ? `${user.profile.firstName} ${user.profile.lastName}` : 'N/A',
       isVerified: user.emailVerified && user.phoneVerified,
