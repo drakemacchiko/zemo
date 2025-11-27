@@ -11,87 +11,88 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  password     String
-  phoneNumber  String?
-  phoneVerified Boolean @default(false)
-  otpCode      String?
-  otpExpiry    DateTime?
-  emailVerified Boolean @default(false)
-  refreshToken String?
-  
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  phoneNumber   String?
+  phoneVerified Boolean   @default(false)
+  otpCode       String?
+  otpExpiry     DateTime?
+  emailVerified Boolean   @default(false)
+  refreshToken  String?
+
   // Phase 10: Admin & Role Management
-  role         UserRole @default(USER)
-  permissions  String?  // JSON string of permissions array
-  mfaEnabled   Boolean  @default(false)
-  mfaSecret    String?  // TOTP secret for MFA
+  role           UserRole  @default(USER)
+  permissions    String? // JSON string of permissions array
+  mfaEnabled     Boolean   @default(false)
+  mfaSecret      String? // TOTP secret for MFA
   mfaBackupCodes String? // JSON string of backup codes
-  lastLoginAt  DateTime?
-  isActive     Boolean  @default(true)
-  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  lastLoginAt    DateTime?
+  isActive       Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
-  profile      UserProfile?
-  drivingLicense DrivingLicense?
-  vehicles     Vehicle[]  // User can own multiple vehicles
-  bookings     Booking[]  // User can have multiple bookings
-  payments     Payment[]
-  paymentMethods PaymentMethod[]
+  profile           UserProfile?
+  drivingLicense    DrivingLicense?
+  vehicles          Vehicle[] // User can own multiple vehicles
+  bookings          Booking[] // User can have multiple bookings
+  payments          Payment[]
+  paymentMethods    PaymentMethod[]
   insurancePolicies InsurancePolicy[] // User can have multiple insurance policies
-  claims       Claim[]     // User can file multiple claims
-  
+  claims            Claim[] // User can file multiple claims
+
   // Phase 9: Messaging & Support Relations
-  hostConversations     Conversation[] @relation("HostConversations")
-  renterConversations   Conversation[] @relation("RenterConversations")
-  sentMessages         Message[]
-  notifications        Notification[]
-  notificationPreference NotificationPreference?
-  supportTickets       SupportTicket[]
-  ticketMessages       TicketMessage[]
-  ticketAttachments    TicketAttachment[]
+  hostConversations         Conversation[]             @relation("HostConversations")
+  renterConversations       Conversation[]             @relation("RenterConversations")
+  sentMessages              Message[]
+  notifications             Notification[]
+  notificationPreference    NotificationPreference?
+  supportTickets            SupportTicket[]
+  ticketMessages            TicketMessage[]
+  ticketAttachments         TicketAttachment[]
+  vehicleDocumentSignatures VehicleDocumentSignature[]
 
   @@map("users")
 }
 
 model UserProfile {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  firstName   String
-  lastName    String
-  dateOfBirth DateTime?
-  address     String?
-  city        String?
-  country     String   @default("Zambia")
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  firstName         String
+  lastName          String
+  dateOfBirth       DateTime?
+  address           String?
+  city              String?
+  country           String    @default("Zambia")
   profilePictureUrl String?
-  kycStatus   KycStatus @default(PENDING)
-  kycDocuments Json?  // Store document URLs and metadata
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  kycStatus         KycStatus @default(PENDING)
+  kycDocuments      Json? // Store document URLs and metadata
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   // Relations
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_profiles")
 }
 
 model DrivingLicense {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  licenseNumber   String   @unique
-  issueDate       DateTime
-  expiryDate      DateTime
-  issuingCountry  String   @default("Zambia")
-  licenseClass    String   // e.g., "B", "C", "D"
-  documentUrl     String?  // URL to uploaded license document
+  id                 String             @id @default(cuid())
+  userId             String             @unique
+  licenseNumber      String             @unique
+  issueDate          DateTime
+  expiryDate         DateTime
+  issuingCountry     String             @default("Zambia")
+  licenseClass       String // e.g., "B", "C", "D"
+  documentUrl        String? // URL to uploaded license document
   verificationStatus VerificationStatus @default(PENDING)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
   // Relations
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("driving_licenses")
 }
@@ -117,14 +118,14 @@ enum UserRole {
 }
 
 model Vehicle {
-  id              String   @id @default(cuid())
-  hostId          String
-  
+  id     String @id @default(cuid())
+  hostId String
+
   // Vehicle identification
-  plateNumber     String   @unique
-  engineNumber    String?
-  chassisNumber   String?
-  
+  plateNumber   String  @unique
+  engineNumber  String?
+  chassisNumber String?
+
   // Vehicle details
   make            String
   model           String
@@ -134,45 +135,44 @@ model Vehicle {
   transmission    Transmission
   fuelType        FuelType
   seatingCapacity Int
-  
+
   // Pricing
   dailyRate       Float
   weeklyRate      Float?
   monthlyRate     Float?
   securityDeposit Float
-  
+
   // Operational data
-  currentMileage  Int
-  fuelTankCapacity Float?
+  currentMileage    Int
+  fuelTankCapacity  Float?
   locationLatitude  Float
   locationLongitude Float
   locationAddress   String
-  
+
   // Status
   availabilityStatus AvailabilityStatus @default(AVAILABLE)
   verificationStatus VerificationStatus @default(PENDING)
-  isActive        Boolean  @default(true)
-  
+  isActive           Boolean            @default(true)
+
   // Features and amenities
-  features        Json?    // Store array of features as JSON
-  
+  features Json? // Store array of features as JSON
+
   // Metadata
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
-  host            User     @relation(fields: [hostId], references: [id], onDelete: Cascade)
-  documents       VehicleDocument[]
-  photos          VehiclePhoto[]
-  bookings        Booking[]
-  inspections     VehicleInspection[]
-  
-  // Phase 9: Messaging & Support Relations
-  conversations   Conversation[]
-  notifications   Notification[]
-  supportTickets  SupportTicket[]
+  host        User                @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  documents   VehicleDocument[]
+  photos      VehiclePhoto[]
+  bookings    Booking[]
+  inspections VehicleInspection[]
 
-  @@map("vehicles")
+  // Phase 9: Messaging & Support Relations
+  conversations  Conversation[]
+  notifications  Notification[]
+  supportTickets SupportTicket[]
+
   @@index([hostId])
   @@index([availabilityStatus, isActive])
   @@index([locationLatitude, locationLongitude])
@@ -183,47 +183,49 @@ model Vehicle {
   @@index([year, make])
   @@index([verificationStatus, availabilityStatus])
   @@index([createdAt])
+  @@map("vehicles")
 }
 
 model VehicleDocument {
-  id              String   @id @default(cuid())
-  vehicleId       String
-  documentType    DocumentType
-  documentNumber  String?
-  issueDate       DateTime?
-  expiryDate      DateTime?
-  documentUrl     String
+  id                 String             @id @default(cuid())
+  vehicleId          String
+  documentType       DocumentType
+  documentNumber     String?
+  issueDate          DateTime?
+  expiryDate         DateTime?
+  documentUrl        String
   verificationStatus VerificationStatus @default(PENDING)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
   // Relations
-  vehicle         Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  vehicle    Vehicle                    @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  signatures VehicleDocumentSignature[]
 
-  @@map("vehicle_documents")
   @@index([vehicleId])
+  @@map("vehicle_documents")
 }
 
 // Signatures for vehicle documents (in-app signing or external provider)
 model VehicleDocumentSignature {
-  id                 String   @id @default(cuid())
-  vehicleDocumentId  String
-  signerId           String
-  signerRole         UserRole
-  signatureType      SignatureType
-  externalProvider   String?   // e.g., DOCUSIGN
-  externalId         String?   // provider signature id
-  ipAddress          String?
-  userAgent          String?
-  auditData          Json?     // any additional audit info (coordinates, drawn path, etc.)
-  signedAt           DateTime  @default(now())
+  id                String        @id @default(cuid())
+  vehicleDocumentId String
+  signerId          String
+  signerRole        UserRole
+  signatureType     SignatureType
+  externalProvider  String? // e.g., DOCUSIGN
+  externalId        String? // provider signature id
+  ipAddress         String?
+  userAgent         String?
+  auditData         Json? // any additional audit info (coordinates, drawn path, etc.)
+  signedAt          DateTime      @default(now())
 
-  vehicleDocument    VehicleDocument @relation(fields: [vehicleDocumentId], references: [id], onDelete: Cascade)
-  signer             User            @relation(fields: [signerId], references: [id])
+  vehicleDocument VehicleDocument @relation(fields: [vehicleDocumentId], references: [id], onDelete: Cascade)
+  signer          User            @relation(fields: [signerId], references: [id])
 
-  @@map("vehicle_document_signatures")
   @@index([vehicleDocumentId])
   @@index([signerId])
+  @@map("vehicle_document_signatures")
 }
 
 enum SignatureType {
@@ -233,186 +235,186 @@ enum SignatureType {
 }
 
 model VehiclePhoto {
-  id              String   @id @default(cuid())
-  vehicleId       String
-  photoUrl        String
-  photoType       PhotoType
-  isPrimary       Boolean  @default(false)
-  uploadDate      DateTime @default(now())
+  id         String    @id @default(cuid())
+  vehicleId  String
+  photoUrl   String
+  photoType  PhotoType
+  isPrimary  Boolean   @default(false)
+  uploadDate DateTime  @default(now())
 
   // Relations
-  vehicle         Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
 
-  @@map("vehicle_photos")
   @@index([vehicleId])
+  @@map("vehicle_photos")
 }
 
 model Booking {
-  id              String   @id @default(cuid())
-  userId          String   // Renter
-  vehicleId       String
-  hostId          String   // Vehicle owner (for quick queries)
-  
+  id        String @id @default(cuid())
+  userId    String // Renter
+  vehicleId String
+  hostId    String // Vehicle owner (for quick queries)
+
   // Booking period
-  startDate       DateTime
-  endDate         DateTime
-  
+  startDate DateTime
+  endDate   DateTime
+
   // Pricing details
-  dailyRate       Float    // Rate at time of booking
+  dailyRate       Float // Rate at time of booking
   totalDays       Int
-  subtotal        Float    // dailyRate * totalDays
-  serviceFee      Float    @default(0)
-  taxAmount       Float    @default(0)
-  totalAmount     Float    // subtotal + serviceFee + taxAmount
+  subtotal        Float // dailyRate * totalDays
+  serviceFee      Float @default(0)
+  taxAmount       Float @default(0)
+  totalAmount     Float // subtotal + serviceFee + taxAmount
   securityDeposit Float
-  
+
   // Booking status and lifecycle
-  status          BookingStatus @default(PENDING)
-  confirmationNumber String @unique
-  
+  status             BookingStatus @default(PENDING)
+  confirmationNumber String        @unique
+
   // Contact and pickup details
   pickupLocation  String?
   dropoffLocation String?
   specialRequests String?
-  
+
   // Metadata
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  confirmedAt     DateTime?
-  cancelledAt     DateTime?
-  completedAt     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  confirmedAt DateTime?
+  cancelledAt DateTime?
+  completedAt DateTime?
 
   // Relations
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  vehicle         Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-  payments        Payment[]
-  insurancePolicy InsurancePolicy? // Booking can have one insurance policy
-  claims          Claim[]  // Booking can have multiple claims
-  inspections     VehicleInspection[]
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  vehicle            Vehicle             @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  payments           Payment[]
+  insurancePolicy    InsurancePolicy? // Booking can have one insurance policy
+  claims             Claim[] // Booking can have multiple claims
+  inspections        VehicleInspection[]
   depositAdjustments DepositAdjustment[]
-  
-  // Phase 9: Messaging & Support Relations
-  conversations   Conversation[]
-  notifications   Notification[]
-  supportTickets  SupportTicket[]
 
-  @@map("bookings")
+  // Phase 9: Messaging & Support Relations
+  conversations  Conversation[]
+  notifications  Notification[]
+  supportTickets SupportTicket[]
+
+  @@unique([vehicleId, startDate, endDate], name: "no_overlap_booking")
   @@index([userId])
   @@index([vehicleId])
   @@index([hostId])
   @@index([status])
   @@index([startDate, endDate])
-  @@unique([vehicleId, startDate, endDate], name: "no_overlap_booking")
+  @@map("bookings")
 }
 
 model Payment {
-  id              String   @id @default(cuid())
-  bookingId       String
-  userId          String
-  
+  id        String @id @default(cuid())
+  bookingId String
+  userId    String
+
   // Payment details
-  amount          Float
-  currency        String   @default("ZMW") // Zambian Kwacha
-  paymentType     PaymentType
-  provider        PaymentProvider
-  
+  amount      Float
+  currency    String          @default("ZMW") // Zambian Kwacha
+  paymentType PaymentType
+  provider    PaymentProvider
+
   // Payment flow
-  status          PaymentStatus @default(PENDING)
-  intent          PaymentIntent @default(PAYMENT) // PAYMENT, HOLD, REFUND
-  
+  status PaymentStatus @default(PENDING)
+  intent PaymentIntent @default(PAYMENT) // PAYMENT, HOLD, REFUND
+
   // External provider references
   providerTransactionId String?
   providerReference     String?
-  
-  // Payment metadata
-  paymentMethodId       String?
-  failureReason         String?
-  processedAt           DateTime?
-  
-  // Audit trail
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  // Relations
-  booking         Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
-  transactions    Transaction[]
 
-  @@map("payments")
+  // Payment metadata
+  paymentMethodId String?
+  failureReason   String?
+  processedAt     DateTime?
+
+  // Audit trail
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  booking       Booking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+  transactions  Transaction[]
+
   @@index([bookingId])
   @@index([userId])
   @@index([status])
   @@index([provider])
   @@index([providerTransactionId])
+  @@map("payments")
 }
 
 model PaymentMethod {
-  id              String   @id @default(cuid())
-  userId          String
-  
-  // Payment method details
-  type            PaymentMethodType
-  provider        PaymentProvider
-  
-  // Tokenized details (no raw card data)
-  token           String   // Provider token reference
-  last4           String?  // Last 4 digits for display
-  brand           String?  // Card brand or mobile network
-  expiryMonth     Int?     // For cards only
-  expiryYear      Int?     // For cards only
-  
-  // Mobile money details
-  phoneNumber     String?  // For mobile money
-  accountName     String?  // Display name
-  
-  // Status
-  isDefault       Boolean  @default(false)
-  isActive        Boolean  @default(true)
-  
-  // Metadata
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  // Relations
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  payments        Payment[]
+  id     String @id @default(cuid())
+  userId String
 
-  @@map("payment_methods")
+  // Payment method details
+  type     PaymentMethodType
+  provider PaymentProvider
+
+  // Tokenized details (no raw card data)
+  token       String // Provider token reference
+  last4       String? // Last 4 digits for display
+  brand       String? // Card brand or mobile network
+  expiryMonth Int? // For cards only
+  expiryYear  Int? // For cards only
+
+  // Mobile money details
+  phoneNumber String? // For mobile money
+  accountName String? // Display name
+
+  // Status
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments Payment[]
+
   @@index([userId])
   @@index([type])
   @@index([provider])
+  @@map("payment_methods")
 }
 
 model Transaction {
-  id              String   @id @default(cuid())
-  paymentId       String
-  
+  id        String @id @default(cuid())
+  paymentId String
+
   // Transaction details
-  amount          Float
-  type            TransactionType
-  status          TransactionStatus @default(PENDING)
-  
+  amount Float
+  type   TransactionType
+  status TransactionStatus @default(PENDING)
+
   // External references
   providerTransactionId String?
   providerReference     String?
-  
-  // Reconciliation
-  reconciledAt    DateTime?
-  notes           String?
-  
-  // Metadata
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  // Relations
-  payment         Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 
-  @@map("transactions")
+  // Reconciliation
+  reconciledAt DateTime?
+  notes        String?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
   @@index([paymentId])
   @@index([type])
   @@index([status])
   @@index([providerTransactionId])
+  @@map("transactions")
 }
 
 enum VehicleType {
@@ -465,21 +467,21 @@ enum PhotoType {
 }
 
 enum BookingStatus {
-  PENDING      // Awaiting host confirmation
-  CONFIRMED    // Host approved booking
-  ACTIVE       // Booking is currently active (vehicle picked up)
-  COMPLETED    // Booking finished successfully
-  CANCELLED    // Cancelled by user or host
-  REJECTED     // Host rejected the booking
-  NO_SHOW      // User didn't show up
+  PENDING // Awaiting host confirmation
+  CONFIRMED // Host approved booking
+  ACTIVE // Booking is currently active (vehicle picked up)
+  COMPLETED // Booking finished successfully
+  CANCELLED // Cancelled by user or host
+  REJECTED // Host rejected the booking
+  NO_SHOW // User didn't show up
 }
 
 enum PaymentType {
-  BOOKING_PAYMENT    // Main rental payment
-  SECURITY_DEPOSIT   // Security deposit hold
-  REFUND            // Refund payment
-  PARTIAL_REFUND    // Partial refund
-  DAMAGE_CHARGE     // Additional damage charges
+  BOOKING_PAYMENT // Main rental payment
+  SECURITY_DEPOSIT // Security deposit hold
+  REFUND // Refund payment
+  PARTIAL_REFUND // Partial refund
+  DAMAGE_CHARGE // Additional damage charges
 }
 
 enum PaymentProvider {
@@ -491,20 +493,20 @@ enum PaymentProvider {
 }
 
 enum PaymentStatus {
-  PENDING       // Payment initiated
-  PROCESSING    // Payment being processed
-  COMPLETED     // Payment successful
-  FAILED        // Payment failed
-  CANCELLED     // Payment cancelled
-  REFUNDED      // Payment refunded
-  HELD          // Payment on hold (for deposits)
-  RELEASED      // Hold released
+  PENDING // Payment initiated
+  PROCESSING // Payment being processed
+  COMPLETED // Payment successful
+  FAILED // Payment failed
+  CANCELLED // Payment cancelled
+  REFUNDED // Payment refunded
+  HELD // Payment on hold (for deposits)
+  RELEASED // Hold released
 }
 
 enum PaymentIntent {
-  PAYMENT       // Regular payment
-  HOLD          // Hold funds (security deposit)
-  REFUND        // Refund transaction
+  PAYMENT // Regular payment
+  HOLD // Hold funds (security deposit)
+  REFUND // Refund transaction
 }
 
 enum PaymentMethodType {
@@ -514,11 +516,11 @@ enum PaymentMethodType {
 }
 
 enum TransactionType {
-  CHARGE        // Charge transaction
-  HOLD          // Hold funds
-  CAPTURE       // Capture held funds
-  REFUND        // Refund transaction
-  RELEASE       // Release held funds
+  CHARGE // Charge transaction
+  HOLD // Hold funds
+  CAPTURE // Capture held funds
+  REFUND // Refund transaction
+  RELEASE // Release held funds
 }
 
 enum TransactionStatus {
@@ -530,681 +532,680 @@ enum TransactionStatus {
 
 // Insurance Models
 model Insurance {
-  id               String   @id @default(cuid())
-  
+  id String @id @default(cuid())
+
   // Insurance product details
-  name             String   // e.g., "Basic Coverage", "Comprehensive"
-  description      String
-  coverageType     CoverageType
-  
+  name         String // e.g., "Basic Coverage", "Comprehensive"
+  description  String
+  coverageType CoverageType
+
   // Coverage limits and details
-  maxCoverageAmount Float   // Maximum coverage amount
-  deductibleAmount Float    // Amount user pays before insurance kicks in
-  
+  maxCoverageAmount Float // Maximum coverage amount
+  deductibleAmount  Float // Amount user pays before insurance kicks in
+
   // Coverage features
-  accidentCoverage      Boolean @default(true)
-  theftCoverage         Boolean @default(false)
-  vandalismCoverage     Boolean @default(false)
+  accidentCoverage        Boolean @default(true)
+  theftCoverage           Boolean @default(false)
+  vandalismCoverage       Boolean @default(false)
   naturalDisasterCoverage Boolean @default(false)
-  thirdPartyCoverage    Boolean @default(true)
-  
+  thirdPartyCoverage      Boolean @default(true)
+
   // Pricing
-  dailyRate        Float   // Daily insurance premium
-  weeklyRate       Float?  // Weekly rate (if different)
-  monthlyRate      Float?  // Monthly rate (if different)
-  
+  dailyRate   Float // Daily insurance premium
+  weeklyRate  Float? // Weekly rate (if different)
+  monthlyRate Float? // Monthly rate (if different)
+
   // Status
-  isActive         Boolean @default(true)
-  
+  isActive Boolean @default(true)
+
   // Provider details
-  insuranceProvider String @default("ZEMO_PARTNER")
-  policyTermsUrl   String?
-  
+  insuranceProvider String  @default("ZEMO_PARTNER")
+  policyTermsUrl    String?
+
   // Metadata
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  policies         InsurancePolicy[]
+  policies InsurancePolicy[]
 
   @@map("insurance_products")
 }
 
 model InsurancePolicy {
-  id               String   @id @default(cuid())
-  bookingId        String   @unique // One policy per booking
-  userId           String   // Policy holder
-  insuranceId      String   // Insurance product
-  
+  id          String @id @default(cuid())
+  bookingId   String @unique // One policy per booking
+  userId      String // Policy holder
+  insuranceId String // Insurance product
+
   // Policy details
-  policyNumber     String   @unique
-  coverageAmount   Float    // Actual coverage amount for this policy
-  premiumAmount    Float    // Total premium paid
-  deductibleAmount Float    // Deductible for this policy
-  
+  policyNumber     String @unique
+  coverageAmount   Float // Actual coverage amount for this policy
+  premiumAmount    Float // Total premium paid
+  deductibleAmount Float // Deductible for this policy
+
   // Policy period (matches booking period)
-  startDate        DateTime
-  endDate          DateTime
-  
+  startDate DateTime
+  endDate   DateTime
+
   // Policy status
-  status           PolicyStatus @default(PENDING)
-  
+  status PolicyStatus @default(PENDING)
+
   // External provider references
-  providerPolicyId String?  // External insurer policy ID
+  providerPolicyId  String? // External insurer policy ID
   providerReference String? // External reference
-  
+
   // Policy documents
   policyDocumentUrl String? // URL to policy document
-  
-  // Claims relationship
-  activatedAt      DateTime?
-  cancelledAt      DateTime?
-  
-  // Metadata
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  // Relations
-  booking          Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  insurance        Insurance @relation(fields: [insuranceId], references: [id])
-  claims           Claim[]
 
-  @@map("insurance_policies")
+  // Claims relationship
+  activatedAt DateTime?
+  cancelledAt DateTime?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  booking   Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  insurance Insurance @relation(fields: [insuranceId], references: [id])
+  claims    Claim[]
+
   @@index([userId])
   @@index([status])
   @@index([policyNumber])
+  @@map("insurance_policies")
 }
 
 model Claim {
-  id               String   @id @default(cuid())
-  policyId         String   // Associated insurance policy
-  bookingId        String   // Associated booking
-  userId           String   // Claimant (usually the renter)
-  
+  id        String @id @default(cuid())
+  policyId  String // Associated insurance policy
+  bookingId String // Associated booking
+  userId    String // Claimant (usually the renter)
+
   // Claim details
-  claimNumber      String   @unique
-  incidentDate     DateTime
-  incidentLocation String
+  claimNumber         String   @unique
+  incidentDate        DateTime
+  incidentLocation    String
   incidentDescription String
-  
+
   // Claim type and damage assessment
-  claimType        ClaimType
+  claimType             ClaimType
   estimatedDamageAmount Float?
   actualDamageAmount    Float?
-  
+
   // Claim status and workflow
-  status           ClaimStatus @default(SUBMITTED)
-  priority         ClaimPriority @default(NORMAL)
-  
+  status   ClaimStatus   @default(SUBMITTED)
+  priority ClaimPriority @default(NORMAL)
+
   // External references
   policeReportNumber String?
   insurerClaimId     String? // External insurer claim ID
-  
+
   // Review and processing
-  reviewedBy       String?  // Admin user ID who reviewed
-  reviewedAt       DateTime?
-  reviewNotes      String?
-  
+  reviewedBy  String? // Admin user ID who reviewed
+  reviewedAt  DateTime?
+  reviewNotes String?
+
   // Settlement
   settlementAmount Float?
   settlementDate   DateTime?
   settlementNotes  String?
-  
-  // Metadata
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  // Relations
-  policy           InsurancePolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
-  booking          Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  documents        ClaimDocument[]
 
-  @@map("claims")
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  policy    InsurancePolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  booking   Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents ClaimDocument[]
+
   @@index([userId])
   @@index([policyId])
   @@index([bookingId])
   @@index([status])
   @@index([claimNumber])
+  @@map("claims")
 }
 
 model ClaimDocument {
-  id               String   @id @default(cuid())
-  claimId          String   // Associated claim
-  
+  id      String @id @default(cuid())
+  claimId String // Associated claim
+
   // Document details
   documentType     ClaimDocumentType
   fileName         String
   originalFileName String
   fileSize         Int
   mimeType         String
-  documentUrl      String   // URL to stored document
-  
-  // Document metadata
-  uploadedBy       String   // User ID who uploaded
-  description      String?
-  
-  // Verification
-  isVerified       Boolean  @default(false)
-  verifiedBy       String?  // Admin user ID who verified
-  verifiedAt       DateTime?
-  
-  // Metadata
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  // Relations
-  claim            Claim    @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  documentUrl      String // URL to stored document
 
-  @@map("claim_documents")
+  // Document metadata
+  uploadedBy  String // User ID who uploaded
+  description String?
+
+  // Verification
+  isVerified Boolean   @default(false)
+  verifiedBy String? // Admin user ID who verified
+  verifiedAt DateTime?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  claim Claim @relation(fields: [claimId], references: [id], onDelete: Cascade)
+
   @@index([claimId])
   @@index([documentType])
+  @@map("claim_documents")
 }
 
 // Insurance and Claims Enums
 enum CoverageType {
-  BASIC           // Basic third-party coverage
-  COMPREHENSIVE   // Full coverage including theft, vandalism
-  PREMIUM         // Premium coverage with additional benefits
+  BASIC // Basic third-party coverage
+  COMPREHENSIVE // Full coverage including theft, vandalism
+  PREMIUM // Premium coverage with additional benefits
 }
 
 enum PolicyStatus {
-  PENDING         // Policy created but not activated
-  ACTIVE          // Policy is active and covers the period
-  EXPIRED         // Policy period has ended
-  CANCELLED       // Policy was cancelled
-  SUSPENDED       // Policy temporarily suspended
+  PENDING // Policy created but not activated
+  ACTIVE // Policy is active and covers the period
+  EXPIRED // Policy period has ended
+  CANCELLED // Policy was cancelled
+  SUSPENDED // Policy temporarily suspended
 }
 
 enum ClaimType {
-  ACCIDENT        // Traffic accident
-  THEFT           // Vehicle theft
-  VANDALISM       // Vandalism damage
+  ACCIDENT // Traffic accident
+  THEFT // Vehicle theft
+  VANDALISM // Vandalism damage
   NATURAL_DISASTER // Weather/natural disaster damage
-  MECHANICAL      // Mechanical breakdown (if covered)
-  THIRD_PARTY     // Third-party liability claim
+  MECHANICAL // Mechanical breakdown (if covered)
+  THIRD_PARTY // Third-party liability claim
 }
 
 enum ClaimStatus {
-  SUBMITTED       // Claim submitted by user
-  UNDER_REVIEW    // Claim being reviewed by admin
-  INVESTIGATING   // Claim under investigation
-  APPROVED        // Claim approved for settlement
-  REJECTED        // Claim rejected
-  SETTLED         // Claim settled and paid
-  CLOSED          // Claim closed (no further action)
+  SUBMITTED // Claim submitted by user
+  UNDER_REVIEW // Claim being reviewed by admin
+  INVESTIGATING // Claim under investigation
+  APPROVED // Claim approved for settlement
+  REJECTED // Claim rejected
+  SETTLED // Claim settled and paid
+  CLOSED // Claim closed (no further action)
 }
 
 enum ClaimPriority {
-  LOW             // Minor damage, no urgency
-  NORMAL          // Standard priority
-  HIGH            // Significant damage or urgent
-  URGENT          // Emergency or major incident
+  LOW // Minor damage, no urgency
+  NORMAL // Standard priority
+  HIGH // Significant damage or urgent
+  URGENT // Emergency or major incident
 }
 
 enum ClaimDocumentType {
-  PHOTOS          // Photos of damage/incident
-  POLICE_REPORT   // Official police report
-  MEDICAL_REPORT  // Medical reports (if applicable)
-  REPAIR_INVOICE  // Repair shop invoices
-  RECEIPT         // Payment receipts
+  PHOTOS // Photos of damage/incident
+  POLICE_REPORT // Official police report
+  MEDICAL_REPORT // Medical reports (if applicable)
+  REPAIR_INVOICE // Repair shop invoices
+  RECEIPT // Payment receipts
   WITNESS_STATEMENT // Witness statements
-  OTHER           // Other supporting documents
+  OTHER // Other supporting documents
 }
 
 // Phase 7: Vehicle Handover & Return Models
 model VehicleInspection {
-  id               String   @id @default(cuid())
-  bookingId        String
-  vehicleId        String
-  inspectorId      String   // User performing inspection (renter or host)
-  
+  id          String @id @default(cuid())
+  bookingId   String
+  vehicleId   String
+  inspectorId String // User performing inspection (renter or host)
+
   // Inspection type and timing
-  inspectionType   InspectionType
-  inspectionDate   DateTime @default(now())
-  
+  inspectionType InspectionType
+  inspectionDate DateTime       @default(now())
+
   // Vehicle condition at inspection
-  mileage          Int
-  fuelLevel        Float    // Percentage (0-100)
-  
+  mileage   Int
+  fuelLevel Float // Percentage (0-100)
+
   // Damage assessment
-  overallCondition VehicleCondition
-  damageScore      Float    @default(0) // 0-100, higher = more damage
-  estimatedRepairCost Float @default(0)
-  
+  overallCondition    VehicleCondition
+  damageScore         Float            @default(0) // 0-100, higher = more damage
+  estimatedRepairCost Float            @default(0)
+
   // Inspection notes
-  notes            String?
-  concerns         String?  // Specific concerns or issues noted
-  
+  notes    String?
+  concerns String? // Specific concerns or issues noted
+
   // GPS location of inspection
   locationLatitude  Float?
   locationLongitude Float?
   locationAddress   String?
-  
-  // Inspection status
-  status           InspectionStatus @default(PENDING)
-  acknowledgedBy   String?  // Other party (host/renter) acknowledgment
-  acknowledgedAt   DateTime?
-  disputeRaised    Boolean  @default(false)
-  
-  // Metadata
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  // Relations
-  booking          Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  vehicle          Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-  photos           InspectionPhoto[]
-  damageItems      DamageItem[]
 
-  @@map("vehicle_inspections")
+  // Inspection status
+  status         InspectionStatus @default(PENDING)
+  acknowledgedBy String? // Other party (host/renter) acknowledgment
+  acknowledgedAt DateTime?
+  disputeRaised  Boolean          @default(false)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  booking     Booking           @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  vehicle     Vehicle           @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  photos      InspectionPhoto[]
+  damageItems DamageItem[]
+
   @@index([bookingId])
   @@index([vehicleId])
   @@index([inspectionType])
   @@index([status])
+  @@map("vehicle_inspections")
 }
 
 model InspectionPhoto {
-  id               String   @id @default(cuid())
-  inspectionId     String
-  
-  // Photo details
-  photoUrl         String
-  photoType        InspectionPhotoType
-  viewAngle        String?  // e.g., "front-left", "dashboard", "odometer"
-  
-  // Photo metadata
-  fileName         String
-  fileSize         Int
-  mimeType         String
-  
-  // Damage association
-  isDamagePhoto    Boolean  @default(false)
-  damageDescription String? // Description of damage shown in photo
-  
-  // GPS and timestamp
-  latitude         Float?
-  longitude        Float?
-  takenAt          DateTime @default(now())
-  
-  // Metadata
-  createdAt        DateTime @default(now())
-  
-  // Relations
-  inspection       VehicleInspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  id           String @id @default(cuid())
+  inspectionId String
 
-  @@map("inspection_photos")
+  // Photo details
+  photoUrl  String
+  photoType InspectionPhotoType
+  viewAngle String? // e.g., "front-left", "dashboard", "odometer"
+
+  // Photo metadata
+  fileName String
+  fileSize Int
+  mimeType String
+
+  // Damage association
+  isDamagePhoto     Boolean @default(false)
+  damageDescription String? // Description of damage shown in photo
+
+  // GPS and timestamp
+  latitude  Float?
+  longitude Float?
+  takenAt   DateTime @default(now())
+
+  // Metadata
+  createdAt DateTime @default(now())
+
+  // Relations
+  inspection VehicleInspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+
   @@index([inspectionId])
   @@index([photoType])
+  @@map("inspection_photos")
 }
 
 model DamageItem {
-  id               String   @id @default(cuid())
-  inspectionId     String
-  
-  // Damage details
-  damageType       DamageType
-  severity         DamageSeverity
-  location         String   // e.g., "front bumper", "rear door", "windshield"
-  description      String
-  
-  // Damage assessment
-  repairRequired   Boolean  @default(true)
-  estimatedCost    Float    @default(0)
-  actualCost       Float?   // Set after repair
-  
-  // Evidence
-  photoUrls        Json?    // Array of photo URLs showing this damage
-  
-  // Processing
-  isDisputed       Boolean  @default(false)
-  resolvedBy       String?  // Admin who resolved dispute
-  resolvedAt       DateTime?
-  resolutionNotes  String?
-  
-  // Metadata
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  // Relations
-  inspection       VehicleInspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+  id           String @id @default(cuid())
+  inspectionId String
 
-  @@map("damage_items")
+  // Damage details
+  damageType  DamageType
+  severity    DamageSeverity
+  location    String // e.g., "front bumper", "rear door", "windshield"
+  description String
+
+  // Damage assessment
+  repairRequired Boolean @default(true)
+  estimatedCost  Float   @default(0)
+  actualCost     Float? // Set after repair
+
+  // Evidence
+  photoUrls Json? // Array of photo URLs showing this damage
+
+  // Processing
+  isDisputed      Boolean   @default(false)
+  resolvedBy      String? // Admin who resolved dispute
+  resolvedAt      DateTime?
+  resolutionNotes String?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  inspection VehicleInspection @relation(fields: [inspectionId], references: [id], onDelete: Cascade)
+
   @@index([inspectionId])
   @@index([damageType])
   @@index([severity])
+  @@map("damage_items")
 }
 
 model DepositAdjustment {
-  id               String   @id @default(cuid())
-  bookingId        String
+  id                 String  @id @default(cuid())
+  bookingId          String
   pickupInspectionId String?
   returnInspectionId String?
-  
+
   // Adjustment details
-  originalDeposit  Float
-  damageCharges    Float    @default(0)
-  cleaningCharges  Float    @default(0)
-  fuelCharges      Float    @default(0)
-  otherCharges     Float    @default(0)
-  adjustmentAmount Float    // Total adjustment (positive = charge, negative = refund)
-  finalDepositReturn Float  // Amount to return to renter
-  
+  originalDeposit    Float
+  damageCharges      Float @default(0)
+  cleaningCharges    Float @default(0)
+  fuelCharges        Float @default(0)
+  otherCharges       Float @default(0)
+  adjustmentAmount   Float // Total adjustment (positive = charge, negative = refund)
+  finalDepositReturn Float // Amount to return to renter
+
   // Processing
-  status           DepositStatus @default(PENDING)
-  processedBy      String?  // Admin who processed
-  processedAt      DateTime?
-  
+  status      DepositStatus @default(PENDING)
+  processedBy String? // Admin who processed
+  processedAt DateTime?
+
   // Justification
-  justification    String?  // Explanation for charges
-  evidenceUrls     Json?    // Supporting evidence URLs
-  
+  justification String? // Explanation for charges
+  evidenceUrls  Json? // Supporting evidence URLs
+
   // Dispute handling
-  isDisputed       Boolean  @default(false)
-  disputeReason    String?
+  isDisputed        Boolean   @default(false)
+  disputeReason     String?
   disputeResolvedBy String?
   disputeResolvedAt DateTime?
-  
-  // Payment processing
-  paymentId        String?  // Associated payment for additional charges
-  refundId         String?  // Associated refund payment
-  
-  // Metadata
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  // Relations
-  booking          Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
-  @@map("deposit_adjustments")
+  // Payment processing
+  paymentId String? // Associated payment for additional charges
+  refundId  String? // Associated refund payment
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
   @@index([bookingId])
   @@index([status])
+  @@map("deposit_adjustments")
 }
 
 // Phase 7 Enums
 enum InspectionType {
-  PICKUP          // Pre-rental inspection
-  RETURN          // Post-rental inspection
-  INTERMEDIATE    // Mid-rental check (for long rentals)
+  PICKUP // Pre-rental inspection
+  RETURN // Post-rental inspection
+  INTERMEDIATE // Mid-rental check (for long rentals)
   DAMAGE_ASSESSMENT // Special damage inspection
 }
 
 enum VehicleCondition {
-  EXCELLENT       // No visible damage
-  GOOD            // Minor cosmetic issues
-  FAIR            // Some wear and tear
-  POOR            // Significant damage/issues
-  DAMAGED         // Major damage requiring repair
+  EXCELLENT // No visible damage
+  GOOD // Minor cosmetic issues
+  FAIR // Some wear and tear
+  POOR // Significant damage/issues
+  DAMAGED // Major damage requiring repair
 }
 
 enum InspectionStatus {
-  PENDING         // Inspection created but not completed
-  COMPLETED       // Inspection finished by inspector
-  ACKNOWLEDGED    // Other party has acknowledged inspection
-  DISPUTED        // Dispute raised about inspection
-  RESOLVED        // Dispute resolved
+  PENDING // Inspection created but not completed
+  COMPLETED // Inspection finished by inspector
+  ACKNOWLEDGED // Other party has acknowledged inspection
+  DISPUTED // Dispute raised about inspection
+  RESOLVED // Dispute resolved
 }
 
 enum InspectionPhotoType {
   EXTERIOR_OVERVIEW // Full vehicle exterior
   INTERIOR_OVERVIEW // Interior overview
-  DASHBOARD        // Dashboard/odometer reading
-  DAMAGE_CLOSEUP   // Close-up of specific damage
-  FUEL_GAUGE       // Fuel level indicator
-  MILEAGE          // Odometer reading
-  TIRE_CONDITION   // Tire condition
-  SCRATCH_DENT     // Scratches or dents
-  OTHER            // Other inspection photos
+  DASHBOARD // Dashboard/odometer reading
+  DAMAGE_CLOSEUP // Close-up of specific damage
+  FUEL_GAUGE // Fuel level indicator
+  MILEAGE // Odometer reading
+  TIRE_CONDITION // Tire condition
+  SCRATCH_DENT // Scratches or dents
+  OTHER // Other inspection photos
 }
 
 enum DamageType {
-  SCRATCH          // Surface scratches
-  DENT             // Body dents
-  CRACK            // Cracks (windshield, etc.)
-  BROKEN_PART      // Broken components
-  MISSING_PART     // Missing parts/accessories
-  INTERIOR_DAMAGE  // Interior damage
+  SCRATCH // Surface scratches
+  DENT // Body dents
+  CRACK // Cracks (windshield, etc.)
+  BROKEN_PART // Broken components
+  MISSING_PART // Missing parts/accessories
+  INTERIOR_DAMAGE // Interior damage
   MECHANICAL_ISSUE // Mechanical problems
   ELECTRICAL_ISSUE // Electrical problems
-  TIRE_DAMAGE      // Tire damage
-  FLUID_LEAK       // Fluid leaks
-  OTHER            // Other damage types
+  TIRE_DAMAGE // Tire damage
+  FLUID_LEAK // Fluid leaks
+  OTHER // Other damage types
 }
 
 enum DamageSeverity {
-  MINOR            // Cosmetic, no functional impact
-  MODERATE         // Some functional impact, repairable
-  MAJOR            // Significant damage, costly repair
-  SEVERE           // Extensive damage, may be total loss
+  MINOR // Cosmetic, no functional impact
+  MODERATE // Some functional impact, repairable
+  MAJOR // Significant damage, costly repair
+  SEVERE // Extensive damage, may be total loss
 }
 
 enum DepositStatus {
-  PENDING          // Awaiting processing
-  CALCULATED       // Adjustment calculated
-  APPROVED         // Approved for processing
-  PROCESSED        // Payment/refund processed
-  DISPUTED         // Under dispute
-  RESOLVED         // Dispute resolved
+  PENDING // Awaiting processing
+  CALCULATED // Adjustment calculated
+  APPROVED // Approved for processing
+  PROCESSED // Payment/refund processed
+  DISPUTED // Under dispute
+  RESOLVED // Dispute resolved
 }
 
 // Phase 9: Messaging, Notifications & Support Models
 model Conversation {
-  id               String   @id @default(cuid())
-  
-  // Participants
-  hostId           String   // Vehicle host
-  renterId         String   // Vehicle renter
-  bookingId        String?  // Optional associated booking
-  vehicleId        String?  // Optional associated vehicle
-  
-  // Conversation metadata
-  title            String?  // Optional conversation title
-  lastMessageAt    DateTime?
-  isArchived       Boolean  @default(false)
-  
-  // Privacy settings
-  hostDeleted      Boolean  @default(false)
-  renterDeleted    Boolean  @default(false)
-  
-  // Metadata
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  // Relations
-  host             User     @relation("HostConversations", fields: [hostId], references: [id])
-  renter           User     @relation("RenterConversations", fields: [renterId], references: [id])
-  booking          Booking? @relation(fields: [bookingId], references: [id])
-  vehicle          Vehicle? @relation(fields: [vehicleId], references: [id])
-  messages         Message[]
+  id String @id @default(cuid())
 
-  @@map("conversations")
+  // Participants
+  hostId    String // Vehicle host
+  renterId  String // Vehicle renter
+  bookingId String? // Optional associated booking
+  vehicleId String? // Optional associated vehicle
+
+  // Conversation metadata
+  title         String? // Optional conversation title
+  lastMessageAt DateTime?
+  isArchived    Boolean   @default(false)
+
+  // Privacy settings
+  hostDeleted   Boolean @default(false)
+  renterDeleted Boolean @default(false)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  host     User      @relation("HostConversations", fields: [hostId], references: [id])
+  renter   User      @relation("RenterConversations", fields: [renterId], references: [id])
+  booking  Booking?  @relation(fields: [bookingId], references: [id])
+  vehicle  Vehicle?  @relation(fields: [vehicleId], references: [id])
+  messages Message[]
+
+  @@unique([hostId, renterId, bookingId]) // Prevent duplicate conversations
   @@index([hostId])
   @@index([renterId])
   @@index([bookingId])
   @@index([vehicleId])
   @@index([lastMessageAt])
-  @@unique([hostId, renterId, bookingId]) // Prevent duplicate conversations
+  @@map("conversations")
 }
 
 model Message {
-  id               String   @id @default(cuid())
-  conversationId   String
-  senderId         String
-  
-  // Message content
-  content          String
-  messageType      MessageType @default(TEXT)
-  
-  // Message metadata
-  isRead           Boolean  @default(false)
-  readAt           DateTime?
-  isEdited         Boolean  @default(false)
-  editedAt         DateTime?
-  
-  // Content moderation
-  isDeleted        Boolean  @default(false)
-  deletedAt        DateTime?
-  deletedBy        String?
-  
-  // Attachments
-  attachmentUrl    String?  // Optional file attachment
-  attachmentType   AttachmentType?
-  attachmentSize   Int?     // File size in bytes
-  
-  // System messages
-  systemMetadata   Json?    // For system messages (booking updates, etc.)
-  
-  // Metadata
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  // Relations
-  conversation     Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  sender           User     @relation(fields: [senderId], references: [id])
+  id             String @id @default(cuid())
+  conversationId String
+  senderId       String
 
-  @@map("messages")
+  // Message content
+  content     String
+  messageType MessageType @default(TEXT)
+
+  // Message metadata
+  isRead   Boolean   @default(false)
+  readAt   DateTime?
+  isEdited Boolean   @default(false)
+  editedAt DateTime?
+
+  // Content moderation
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  deletedBy String?
+
+  // Attachments
+  attachmentUrl  String? // Optional file attachment
+  attachmentType AttachmentType?
+  attachmentSize Int? // File size in bytes
+
+  // System messages
+  systemMetadata Json? // For system messages (booking updates, etc.)
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id])
+
   @@index([conversationId])
   @@index([senderId])
   @@index([createdAt])
   @@index([isRead])
+  @@map("messages")
 }
 
 model Notification {
-  id               String   @id @default(cuid())
-  userId           String
-  
-  // Notification content
-  type             NotificationType
-  title            String
-  message          String
-  actionUrl        String?  // URL for notification action
-  
-  // Notification metadata
-  isRead           Boolean  @default(false)
-  readAt           DateTime?
-  
-  // Delivery channels
-  deliveryChannels String   @default("IN_APP") // JSON string of channels
-  emailSent        Boolean  @default(false)
-  emailSentAt      DateTime?
-  smsSent          Boolean  @default(false)
-  smsSentAt        DateTime?
-  pushSent         Boolean  @default(false)
-  pushSentAt       DateTime?
-  
-  // Related entities
-  bookingId        String?
-  vehicleId        String?
-  conversationId   String?
-  ticketId         String?
-  
-  // Priority and scheduling
-  priority         NotificationPriority @default(NORMAL)
-  scheduledFor     DateTime? // For scheduled notifications
-  expiresAt        DateTime? // Notification expiry
-  
-  // Metadata
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  // Relations
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  booking          Booking? @relation(fields: [bookingId], references: [id])
-  vehicle          Vehicle? @relation(fields: [vehicleId], references: [id])
+  id     String @id @default(cuid())
+  userId String
 
-  @@map("notifications")
+  // Notification content
+  type      NotificationType
+  title     String
+  message   String
+  actionUrl String? // URL for notification action
+
+  // Notification metadata
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
+  // Delivery channels
+  deliveryChannels String    @default("IN_APP") // JSON string of channels
+  emailSent        Boolean   @default(false)
+  emailSentAt      DateTime?
+  smsSent          Boolean   @default(false)
+  smsSentAt        DateTime?
+  pushSent         Boolean   @default(false)
+  pushSentAt       DateTime?
+
+  // Related entities
+  bookingId      String?
+  vehicleId      String?
+  conversationId String?
+  ticketId       String?
+
+  // Priority and scheduling
+  priority     NotificationPriority @default(NORMAL)
+  scheduledFor DateTime? // For scheduled notifications
+  expiresAt    DateTime? // Notification expiry
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  booking Booking? @relation(fields: [bookingId], references: [id])
+  vehicle Vehicle? @relation(fields: [vehicleId], references: [id])
+
   @@index([userId])
   @@index([type])
   @@index([isRead])
   @@index([priority])
   @@index([scheduledFor])
   @@index([createdAt])
+  @@map("notifications")
 }
 
 model NotificationPreference {
-  id               String   @id @default(cuid())
-  userId           String   @unique
-  
+  id     String @id @default(cuid())
+  userId String @unique
+
   // Channel preferences
-  emailEnabled     Boolean  @default(true)
-  smsEnabled       Boolean  @default(true)
-  pushEnabled      Boolean  @default(true)
-  
+  emailEnabled Boolean @default(true)
+  smsEnabled   Boolean @default(true)
+  pushEnabled  Boolean @default(true)
+
   // Notification type preferences
-  bookingUpdates   Boolean  @default(true)
-  paymentUpdates   Boolean  @default(true)
-  messageAlerts    Boolean  @default(true)
-  marketingEmails  Boolean  @default(false)
-  systemAlerts     Boolean  @default(true)
-  
+  bookingUpdates  Boolean @default(true)
+  paymentUpdates  Boolean @default(true)
+  messageAlerts   Boolean @default(true)
+  marketingEmails Boolean @default(false)
+  systemAlerts    Boolean @default(true)
+
   // Timing preferences
-  quietHoursStart  Int?     // Hour (0-23) when quiet hours start
-  quietHoursEnd    Int?     // Hour (0-23) when quiet hours end
-  timezone         String   @default("Africa/Lusaka")
-  
+  quietHoursStart Int? // Hour (0-23) when quiet hours start
+  quietHoursEnd   Int? // Hour (0-23) when quiet hours end
+  timezone        String @default("Africa/Lusaka")
+
   // Metadata
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Relations
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notification_preferences")
 }
 
 model SupportTicket {
-  id               String   @id @default(cuid())
-  userId           String
-  
+  id     String @id @default(cuid())
+  userId String
+
   // Ticket identification
-  ticketNumber     String   @unique
-  
+  ticketNumber String @unique
+
   // Ticket content
-  subject          String
-  description      String
-  category         TicketCategory
-  priority         TicketPriority @default(NORMAL)
-  
+  subject     String
+  description String
+  category    TicketCategory
+  priority    TicketPriority @default(NORMAL)
+
   // Status and assignment
-  status           TicketStatus @default(OPEN)
-  assignedToId     String?  // Admin user assigned to ticket
-  
+  status       TicketStatus @default(OPEN)
+  assignedToId String? // Admin user assigned to ticket
+
   // Related entities
-  bookingId        String?
-  vehicleId        String?
-  paymentId        String?
-  
+  bookingId String?
+  vehicleId String?
+  paymentId String?
+
   // Resolution
-  resolutionNotes  String?
-  resolvedAt       DateTime?
-  resolvedBy       String?  // Admin user who resolved
-  
+  resolutionNotes String?
+  resolvedAt      DateTime?
+  resolvedBy      String? // Admin user who resolved
+
   // Customer satisfaction
-  customerRating   Int?     // 1-5 rating
+  customerRating   Int? // 1-5 rating
   customerFeedback String?
-  
+
   // Internal notes
-  internalNotes    String?
-  tags             Json?    // Array of tags for categorization
-  
+  internalNotes String?
+  tags          Json? // Array of tags for categorization
+
   // Escalation
   escalatedAt      DateTime?
   escalatedBy      String?
   escalationReason String?
-  
-  // Metadata
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  // Relations
-  user             User     @relation(fields: [userId], references: [id])
-  booking          Booking? @relation(fields: [bookingId], references: [id])
-  vehicle          Vehicle? @relation(fields: [vehicleId], references: [id])
-  messages         TicketMessage[]
-  attachments      TicketAttachment[]
 
-  @@map("support_tickets")
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user        User               @relation(fields: [userId], references: [id])
+  booking     Booking?           @relation(fields: [bookingId], references: [id])
+  vehicle     Vehicle?           @relation(fields: [vehicleId], references: [id])
+  messages    TicketMessage[]
+  attachments TicketAttachment[]
+
   @@index([userId])
   @@index([ticketNumber])
   @@index([status])
@@ -1212,135 +1213,136 @@ model SupportTicket {
   @@index([priority])
   @@index([assignedToId])
   @@index([createdAt])
+  @@map("support_tickets")
 }
 
 model TicketMessage {
-  id               String   @id @default(cuid())
-  ticketId         String
-  senderId         String
-  
-  // Message content
-  content          String
-  isInternal       Boolean  @default(false) // Internal admin notes
-  
-  // Message metadata
-  isEdited         Boolean  @default(false)
-  editedAt         DateTime?
-  
-  // Metadata
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
-  // Relations
-  ticket           SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  sender           User     @relation(fields: [senderId], references: [id])
+  id       String @id @default(cuid())
+  ticketId String
+  senderId String
 
-  @@map("ticket_messages")
+  // Message content
+  content    String
+  isInternal Boolean @default(false) // Internal admin notes
+
+  // Message metadata
+  isEdited Boolean   @default(false)
+  editedAt DateTime?
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender User          @relation(fields: [senderId], references: [id])
+
   @@index([ticketId])
   @@index([senderId])
   @@index([isInternal])
   @@index([createdAt])
+  @@map("ticket_messages")
 }
 
 model TicketAttachment {
-  id               String   @id @default(cuid())
-  ticketId         String
-  uploadedBy       String
-  
+  id         String @id @default(cuid())
+  ticketId   String
+  uploadedBy String
+
   // File details
   fileName         String
   originalFileName String
   fileSize         Int
   mimeType         String
   fileUrl          String
-  
-  // File metadata
-  description      String?
-  
-  // Metadata
-  createdAt        DateTime @default(now())
-  
-  // Relations
-  ticket           SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  uploader         User     @relation(fields: [uploadedBy], references: [id])
 
-  @@map("ticket_attachments")
+  // File metadata
+  description String?
+
+  // Metadata
+  createdAt DateTime @default(now())
+
+  // Relations
+  ticket   SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  uploader User          @relation(fields: [uploadedBy], references: [id])
+
   @@index([ticketId])
   @@index([uploadedBy])
+  @@map("ticket_attachments")
 }
 
 // Phase 9 Enums
 enum MessageType {
-  TEXT             // Regular text message
-  SYSTEM           // System-generated message
-  BOOKING_UPDATE   // Booking status update
-  PAYMENT_UPDATE   // Payment status update
-  IMAGE            // Image attachment
-  DOCUMENT         // Document attachment
+  TEXT // Regular text message
+  SYSTEM // System-generated message
+  BOOKING_UPDATE // Booking status update
+  PAYMENT_UPDATE // Payment status update
+  IMAGE // Image attachment
+  DOCUMENT // Document attachment
 }
 
 enum AttachmentType {
-  IMAGE            // Image file
-  DOCUMENT         // PDF, DOC, etc.
-  VIDEO            // Video file
-  OTHER            // Other file types
+  IMAGE // Image file
+  DOCUMENT // PDF, DOC, etc.
+  VIDEO // Video file
+  OTHER // Other file types
 }
 
 enum NotificationType {
-  BOOKING_CONFIRMED    // Booking confirmed by host
-  BOOKING_CANCELLED    // Booking cancelled
-  PAYMENT_SUCCESS      // Payment successful
-  PAYMENT_FAILED       // Payment failed
-  MESSAGE_RECEIVED     // New message received
-  VEHICLE_APPROVED     // Vehicle listing approved
-  DOCUMENT_REQUIRED    // Document upload required
-  INSPECTION_DUE       // Vehicle inspection due
-  SUPPORT_RESPONSE     // Support ticket response
-  SYSTEM_ANNOUNCEMENT  // System-wide announcement
-  MARKETING           // Marketing communication
+  BOOKING_CONFIRMED // Booking confirmed by host
+  BOOKING_CANCELLED // Booking cancelled
+  PAYMENT_SUCCESS // Payment successful
+  PAYMENT_FAILED // Payment failed
+  MESSAGE_RECEIVED // New message received
+  VEHICLE_APPROVED // Vehicle listing approved
+  DOCUMENT_REQUIRED // Document upload required
+  INSPECTION_DUE // Vehicle inspection due
+  SUPPORT_RESPONSE // Support ticket response
+  SYSTEM_ANNOUNCEMENT // System-wide announcement
+  MARKETING // Marketing communication
 }
 
 enum NotificationChannel {
-  IN_APP              // In-app notification
-  EMAIL               // Email notification
-  SMS                 // SMS notification
-  PUSH                // Push notification
+  IN_APP // In-app notification
+  EMAIL // Email notification
+  SMS // SMS notification
+  PUSH // Push notification
 }
 
 enum NotificationPriority {
-  LOW                 // Low priority
-  NORMAL              // Normal priority
-  HIGH                // High priority
-  URGENT              // Urgent priority
+  LOW // Low priority
+  NORMAL // Normal priority
+  HIGH // High priority
+  URGENT // Urgent priority
 }
 
 enum TicketCategory {
-  BOOKING_ISSUE       // Booking-related issues
-  PAYMENT_ISSUE       // Payment problems
-  VEHICLE_ISSUE       // Vehicle-related problems
-  TECHNICAL_SUPPORT   // Technical app issues
-  ACCOUNT_ISSUE       // Account-related problems
-  DAMAGE_DISPUTE      // Damage assessment disputes
-  REFUND_REQUEST      // Refund requests
-  FEATURE_REQUEST     // Feature requests
-  COMPLAINT           // General complaints
-  OTHER               // Other issues
+  BOOKING_ISSUE // Booking-related issues
+  PAYMENT_ISSUE // Payment problems
+  VEHICLE_ISSUE // Vehicle-related problems
+  TECHNICAL_SUPPORT // Technical app issues
+  ACCOUNT_ISSUE // Account-related problems
+  DAMAGE_DISPUTE // Damage assessment disputes
+  REFUND_REQUEST // Refund requests
+  FEATURE_REQUEST // Feature requests
+  COMPLAINT // General complaints
+  OTHER // Other issues
 }
 
 enum TicketPriority {
-  LOW                 // Low priority
-  NORMAL              // Normal priority
-  HIGH                // High priority
-  URGENT              // Urgent priority
-  CRITICAL            // Critical priority
+  LOW // Low priority
+  NORMAL // Normal priority
+  HIGH // High priority
+  URGENT // Urgent priority
+  CRITICAL // Critical priority
 }
 
 enum TicketStatus {
-  OPEN                // Ticket is open
-  IN_PROGRESS         // Being worked on
-  WAITING_CUSTOMER    // Waiting for customer response
-  WAITING_INTERNAL    // Waiting for internal response
-  RESOLVED            // Resolved
-  CLOSED              // Closed
-  ESCALATED           // Escalated to higher level
+  OPEN // Ticket is open
+  IN_PROGRESS // Being worked on
+  WAITING_CUSTOMER // Waiting for customer response
+  WAITING_INTERNAL // Waiting for internal response
+  RESOLVED // Resolved
+  CLOSED // Closed
+  ESCALATED // Escalated to higher level
 }
