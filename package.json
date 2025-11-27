@@ -15,6 +15,7 @@
     "test:concurrency": "node scripts/test-concurrency.js",
     "type-check": "tsc --noEmit",
     "lighthouse": "lhci autorun --config=./lighthouseci.config.js",
+    "postinstall": "prisma generate",
     "prepare": "husky install",
     "security:audit": "node scripts/security-audit.js",
     "security:scan": "npm audit --production --audit-level=moderate",
