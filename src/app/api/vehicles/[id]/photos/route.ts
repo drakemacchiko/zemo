@@ -3,6 +3,7 @@ import { withAuth, AuthenticatedRequest } from '@/lib/middleware'
 import { prisma } from '@/lib/db'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
+import { createClient } from '@supabase/supabase-js'
 
 // POST /api/vehicles/[id]/photos - Upload vehicle photos
 async function handlePost(request: AuthenticatedRequest) {
@@ -82,7 +83,20 @@ async function handlePost(request: AuthenticatedRequest) {
       }
     }
 
-    // Create upload directory
+    // Decide whether to use Supabase Storage (recommended) or local filesystem
+    const useSupabase = !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    let supabase: ReturnType<typeof createClient> | null = null
+    if (useSupabase) {
+      try {
+        supabase = createClient(process.env.SUPABASE_URL as string, process.env.SUPABASE_SERVICE_ROLE_KEY as string)
+      } catch (e) {
+        console.error('Failed to initialize Supabase client:', e)
+        supabase = null
+      }
+    }
+
+    // Create upload directory (for local fallback/dev)
     const uploadDir = join(process.cwd(), 'public', 'uploads', 'vehicles', vehicleId)
     try {
       await mkdir(uploadDir, { recursive: true })
@@ -105,7 +119,35 @@ async function handlePost(request: AuthenticatedRequest) {
       try {
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
-        await writeFile(filepath, buffer)
+
+        let finalUrl = webPath
+
+        if (supabase) {
+          // Upload to Supabase Storage bucket `vehicles`
+          const remotePath = `${vehicleId}/${filename}`
+          try {
+            const { error: uploadError } = await supabase.storage
+              .from('vehicles')
+              .upload(remotePath, buffer, { contentType: file.type })
+
+            if (uploadError) {
+              console.error('Supabase upload error:', uploadError)
+              throw uploadError
+            }
+
+            // Construct public URL for the uploaded object
+            // Supabase public object URL format: `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`
+            const supabaseUrl = process.env.SUPABASE_URL!.replace(/\/$/, '')
+            finalUrl = `${supabaseUrl}/storage/v1/object/public/vehicles/${encodeURIComponent(remotePath)}`
+          } catch (e) {
+            console.error('Failed to upload to Supabase storage:', e)
+            return NextResponse.json({ error: 'Failed to store photo in remote storage' }, { status: 500 })
+          }
+        } else {
+          // Local filesystem fallback
+          await writeFile(filepath, buffer)
+          finalUrl = webPath
+        }
 
         // Determine photo type based on filename or position
         let photoType = 'OTHER'
@@ -131,7 +173,7 @@ async function handlePost(request: AuthenticatedRequest) {
         const photoRecord = await (prisma as any).vehiclePhoto.create({
           data: {
             vehicleId,
-            photoUrl: webPath,
+            photoUrl: finalUrl,
             photoType,
             isPrimary: i === 0, // First photo is primary by default
           },

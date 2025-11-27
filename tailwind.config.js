@@ -7,30 +7,63 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // ZEMO Brand Colors
+      // ZEMO Brand Colors - Full Scale
       colors: {
-        zemo: {
-          yellow: '#FFD400',
-          black: '#0A0A0A',
-          'yellow-light': '#FFF266',
-          'yellow-dark': '#E6BF00',
-          'black-light': '#1A1A1A',
-          'gray-50': '#F9FAFB',
-          'gray-100': '#F3F4F6',
-          'gray-200': '#E5E7EB',
-          'gray-300': '#D1D5DB',
-          'gray-400': '#9CA3AF',
-          'gray-500': '#6B7280',
-          'gray-600': '#4B5563',
-          'gray-700': '#374151',
-          'gray-800': '#1F2937',
-          'gray-900': '#111827',
+        // Primary Yellow Scale
+        yellow: {
+          50: '#FFFBEB',
+          100: '#FFF3C6',
+          200: '#FFE99D',
+          300: '#FFE074',
+          400: '#FFD84B',
+          500: '#FFD400', // Primary brand color
+          600: '#E6BF00',
+          700: '#BF9F00',
+          800: '#998000',
+          900: '#736000',
         },
-        // Status colors for bookings, payments, etc.
-        success: '#10B981',
-        warning: '#F59E0B',
-        error: '#EF4444',
-        info: '#3B82F6',
+        // Neutral Gray Scale
+        gray: {
+          50: '#F9FAFB',
+          100: '#F3F4F6',
+          200: '#E5E7EB',
+          300: '#D1D5DB',
+          400: '#9CA3AF',
+          500: '#6B7280',
+          600: '#4B5563',
+          700: '#374151',
+          800: '#1F2937',
+          900: '#111827',
+          950: '#0A0A0A', // ZEMO Black
+        },
+        // Status colors
+        success: {
+          50: '#ECFDF5',
+          500: '#10B981',
+          600: '#059669',
+          700: '#047857',
+        },
+        error: {
+          50: '#FEF2F2',
+          500: '#EF4444',
+          600: '#DC2626',
+          700: '#B91C1C',
+        },
+        warning: {
+          50: '#FFFBEB',
+          500: '#F59E0B',
+          600: '#D97706',
+          700: '#B45309',
+        },
+        info: {
+          50: '#EFF6FF',
+          500: '#3B82F6',
+          600: '#2563EB',
+          700: '#1D4ED8',
+        },
+        // Legacy ZEMO shortcuts (for backward compatibility)
+        'zemo-yellow': '#FFD400',
+        'zemo-black': '#0A0A0A',
       },
       
       // ZEMO Typography
@@ -45,23 +78,32 @@ module.exports = {
         light: '400',
       },
       
-      // ZEMO Spacing Scale
+      // ZEMO Spacing Scale (4px base unit)
       spacing: {
-        '4': '0.25rem',   // 4px
-        '8': '0.5rem',    // 8px
-        '16': '1rem',     // 16px
-        '24': '1.5rem',   // 24px
-        '32': '2rem',     // 32px
-        '48': '3rem',     // 48px
-        '64': '4rem',     // 64px
+        '1': '0.25rem',   // 4px
+        '2': '0.5rem',    // 8px
+        '3': '0.75rem',   // 12px
+        '4': '1rem',      // 16px
+        '5': '1.25rem',   // 20px
+        '6': '1.5rem',    // 24px
+        '8': '2rem',      // 32px
+        '10': '2.5rem',   // 40px
+        '12': '3rem',     // 48px
+        '16': '4rem',     // 64px
+        '20': '5rem',     // 80px
+        '24': '6rem',     // 96px
+        '32': '8rem',     // 128px
       },
       
       // ZEMO Border Radius
       borderRadius: {
-        'zemo': '8px',
-        'zemo-sm': '4px',
-        'zemo-lg': '12px',
-        'zemo-xl': '16px',
+        'sm': '6px',
+        DEFAULT: '8px',
+        'md': '8px',
+        'lg': '12px',
+        'xl': '16px',
+        '2xl': '24px',
+        'full': '9999px',
       },
       
       // Mobile-first breakpoints for Zambian market

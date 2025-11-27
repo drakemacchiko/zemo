@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
 import { withAuth, AuthenticatedRequest } from '@/lib/middleware'
-import { prisma } from '@/lib/db'
+import { withPrismaRetry } from '@/lib/db'
 import { parsePermissions } from '@/lib/auth'
 
 async function handler(request: AuthenticatedRequest) {
   try {
-    const user = await prisma.user.findUnique({
+    const user = await withPrismaRetry((p) => p.user.findUnique({
       where: { id: request.user!.id },
       include: {
         profile: true,
@@ -18,7 +18,7 @@ async function handler(request: AuthenticatedRequest) {
         mfaSecret: true,
         mfaBackupCodes: true
       }
-    })
+    }))
     
     if (!user) {
       return NextResponse.json(

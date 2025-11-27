@@ -73,7 +73,8 @@ export const vehicleCreateSchema = z.object({
   dailyRate: z.number().positive('Daily rate must be positive'),
   weeklyRate: z.number().positive('Weekly rate must be positive').optional(),
   monthlyRate: z.number().positive('Monthly rate must be positive').optional(),
-  securityDeposit: z.number().positive('Security deposit must be positive'),
+  // Allow zero security deposit (hosts may set 0)
+  securityDeposit: z.number().min(0, 'Security deposit must be 0 or greater'),
   currentMileage: z.number().int().min(0, 'Mileage cannot be negative'),
   fuelTankCapacity: z.number().positive('Fuel tank capacity must be positive').optional(),
   locationLatitude: z.number().min(-90).max(90, 'Invalid latitude'),

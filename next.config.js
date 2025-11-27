@@ -19,6 +19,21 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
+    // Allow images from Supabase storage when SUPABASE_URL is configured
+    remotePatterns: (function () {
+      try {
+        const patterns = []
+        const supabaseUrl = process.env.SUPABASE_URL
+        if (supabaseUrl) {
+          // Extract hostname
+          const host = new URL(supabaseUrl).host
+          patterns.push({ protocol: 'https', hostname: host, port: '', pathname: '/storage/v1/object/public/**' })
+        }
+        return patterns
+      } catch (e) {
+        return []
+      }
+    })(),
   },
 
   // Compiler options for better performance

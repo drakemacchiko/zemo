@@ -204,6 +204,34 @@ model VehicleDocument {
   @@index([vehicleId])
 }
 
+// Signatures for vehicle documents (in-app signing or external provider)
+model VehicleDocumentSignature {
+  id                 String   @id @default(cuid())
+  vehicleDocumentId  String
+  signerId           String
+  signerRole         UserRole
+  signatureType      SignatureType
+  externalProvider   String?   // e.g., DOCUSIGN
+  externalId         String?   // provider signature id
+  ipAddress          String?
+  userAgent          String?
+  auditData          Json?     // any additional audit info (coordinates, drawn path, etc.)
+  signedAt           DateTime  @default(now())
+
+  vehicleDocument    VehicleDocument @relation(fields: [vehicleDocumentId], references: [id], onDelete: Cascade)
+  signer             User            @relation(fields: [signerId], references: [id])
+
+  @@map("vehicle_document_signatures")
+  @@index([vehicleDocumentId])
+  @@index([signerId])
+}
+
+enum SignatureType {
+  DRAW
+  UPLOAD
+  EXTERNAL
+}
+
 model VehiclePhoto {
   id              String   @id @default(cuid())
   vehicleId       String

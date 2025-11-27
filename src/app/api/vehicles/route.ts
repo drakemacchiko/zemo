@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { withAuth, AuthenticatedRequest } from '@/lib/middleware'
 import { vehicleCreateSchema, vehicleSearchSchema } from '@/lib/validations'
 import { prisma } from '@/lib/db'
+import { ZodError } from 'zod'
 
 // GET /api/vehicles - Search and list vehicles
 async function handleGet(request: AuthenticatedRequest) {
@@ -141,17 +142,25 @@ async function handlePost(request: AuthenticatedRequest) {
       )
     }
 
-    // Verify user has a verified driving license
-    const userWithLicense = await (prisma as any).user.findUnique({
-      where: { id: request.user.id },
-      include: { drivingLicense: true },
-    })
+    // Ensure user is authenticated for creating vehicles
+    // Optional dev/test bypass: set ALLOW_UNVERIFIED_LISTING=true in your env to skip driving license check
+    const allowUnverified = process.env.ALLOW_UNVERIFIED_LISTING === 'true'
 
-    if (!userWithLicense?.drivingLicense || userWithLicense.drivingLicense.verificationStatus !== 'VERIFIED') {
-      return NextResponse.json(
-        { error: 'Verified driving license required to list a vehicle' },
-        { status: 400 }
-      )
+    // Verify user has a verified driving license (skip if allowUnverified)
+    if (!allowUnverified) {
+      const userWithLicense = await (prisma as any).user.findUnique({
+        where: { id: request.user.id },
+        include: { drivingLicense: true },
+      })
+
+      if (!userWithLicense?.drivingLicense || userWithLicense.drivingLicense.verificationStatus !== 'VERIFIED') {
+        return NextResponse.json(
+          { error: 'Verified driving license required to list a vehicle' },
+          { status: 400 }
+        )
+      }
+    } else {
+      console.warn('ALLOW_UNVERIFIED_LISTING is enabled — skipping driving license verification for vehicle creation')
     }
 
     const vehicle = await (prisma as any).vehicle.create({
@@ -181,11 +190,19 @@ async function handlePost(request: AuthenticatedRequest) {
     }, { status: 201 })
   } catch (error) {
     console.error('Vehicle creation error:', error)
-    
-    if (error instanceof Error && error.message.includes('Validation error')) {
+
+    // If validation failed, return a 400 with details
+    if (error instanceof ZodError) {
       return NextResponse.json(
-        { error: error.message },
+        { error: 'Validation failed', details: error.issues },
         { status: 400 }
+      )
+    }
+
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message || 'Failed to create vehicle listing' },
+        { status: 500 }
       )
     }
 

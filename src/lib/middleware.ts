@@ -68,11 +68,32 @@ export function withAuth(
       return handler(authenticatedReq, context)
     }
     
-    // Verify user exists in database
-    const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
-      select: { id: true, email: true }
-    })
+    // Verify user exists in database (retry once on common prepared-statement errors)
+    let user
+    try {
+      user = await prisma.user.findUnique({
+        where: { id: payload.userId },
+        select: { id: true, email: true }
+      })
+    } catch (err: any) {
+      const msg = String(err?.message || '')
+      if (msg.includes('prepared statement') || msg.includes('prepared statements')) {
+        // Attempt to reset the Prisma client and retry once
+        try {
+          const { resetPrismaClient } = await import('./db')
+          await resetPrismaClient()
+          user = await prisma.user.findUnique({
+            where: { id: payload.userId },
+            select: { id: true, email: true }
+          })
+        } catch (innerErr) {
+          console.error('Prisma reconnection attempt failed:', innerErr)
+          throw err
+        }
+      } else {
+        throw err
+      }
+    }
     
     if (!user) {
       if (options.requireAuth) {

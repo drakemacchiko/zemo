@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import ConditionalLayout from '@/components/layout/ConditionalLayout';
 import { PWAProvider } from '@/components/PWAProvider';
+import { PWAInstallPrompt } from '@/components/PWAInstallPrompt';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -32,8 +33,6 @@ export const metadata: Metadata = {
   publisher: 'ZEMO',
   applicationName: 'ZEMO PWA',
   referrer: 'origin-when-cross-origin',
-  colorScheme: 'light',
-  themeColor: '#FFD400',
   classification: 'business',
   category: 'transportation',
   openGraph: {
@@ -130,6 +129,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ConditionalLayout>
             {children}
           </ConditionalLayout>
+
+          {/* PWA Install Prompt */}
+          <PWAInstallPrompt />
 
           {/* Offline notification */}
           <div

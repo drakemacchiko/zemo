@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { withPrismaRetry } from '@/lib/db';
 import { z } from 'zod';
 
 // Validation schema for search parameters
@@ -57,7 +57,7 @@ async function checkAvailability(vehicleId: string, startDate?: Date, endDate?: 
     return true; // No date filter, assume available
   }
   
-  const conflictingBookings = await prisma.booking.findFirst({
+  const conflictingBookings = await withPrismaRetry((p) => p.booking.findFirst({
     where: {
       vehicleId: vehicleId,
       status: {
@@ -87,7 +87,7 @@ async function checkAvailability(vehicleId: string, startDate?: Date, endDate?: 
         }
       ]
     }
-  });
+  }));
   
   return !conflictingBookings;
 }
@@ -186,7 +186,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get vehicles with basic filters first
-    let vehicles = await prisma.vehicle.findMany({
+      let vehicles = await withPrismaRetry((p) => p.vehicle.findMany({
       where,
       include: {
         host: {
@@ -202,12 +202,14 @@ export async function GET(request: NextRequest) {
           }
         },
         photos: {
-          where: {
-            photoType: 'EXTERIOR_FRONT'
-          },
+          // Return a single primary photo (prefer `isPrimary`) regardless of `photoType`.
           take: 1,
+          orderBy: {
+            isPrimary: 'desc'
+          },
           select: {
-            photoUrl: true
+            photoUrl: true,
+            isPrimary: true
           }
         },
         bookings: {
@@ -226,11 +228,11 @@ export async function GET(request: NextRequest) {
       orderBy: [
         { createdAt: 'desc' }
       ]
-    });
+    }));
 
     // Apply geo-filtering if coordinates provided
     if (latitude && longitude) {
-      vehicles = vehicles.filter(vehicle => {
+      vehicles = vehicles.filter((vehicle: any) => {
         const distance = calculateDistance(
           latitude,
           longitude,
@@ -254,7 +256,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Calculate distances and add to results
-    const vehiclesWithDistance = vehicles.map(vehicle => {
+    const vehiclesWithDistance = vehicles.map((vehicle: any) => {
       let distance = null;
       if (latitude && longitude) {
         distance = calculateDistance(
@@ -265,7 +267,7 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      // Extract the main photo safely
+      // Extract the main photo safely (keep photos array for frontend compatibility)
       const mainPhoto = (vehicle.photos && vehicle.photos.length > 0 && vehicle.photos[0]) ? vehicle.photos[0].photoUrl : null;
 
       return {
@@ -273,7 +275,8 @@ export async function GET(request: NextRequest) {
         distance: distance ? Math.round(distance * 10) / 10 : null, // Round to 1 decimal
         bookings: undefined, // Remove bookings from response for privacy
         mainPhoto: mainPhoto,
-        photos: undefined // Remove full photos array, only include main photo
+        // Preserve a small `photos` array (only the selected primary photo) so frontend listing UI can use `vehicle.photos` as before
+        photos: vehicle.photos && vehicle.photos.length > 0 ? vehicle.photos : []
       };
     });
 

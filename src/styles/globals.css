@@ -43,42 +43,42 @@
   }
   
   body {
-    @apply bg-white text-zemo-black font-body;
+    @apply bg-white text-gray-950;
     font-feature-settings: 'rlig' 1, 'calt' 1;
   }
   
   /* Typography Hierarchy */
   h1 {
-    @apply text-3xl md:text-4xl font-heading text-zemo-black;
+    @apply text-3xl md:text-4xl font-black text-gray-950;
     font-weight: var(--zemo-heading-weight);
   }
   
   h2 {
-    @apply text-2xl md:text-3xl font-heading text-zemo-black;
+    @apply text-2xl md:text-3xl font-black text-gray-950;
     font-weight: var(--zemo-heading-weight);
   }
   
   h3 {
-    @apply text-xl md:text-2xl font-sub-heading text-zemo-black;
+    @apply text-xl md:text-2xl font-bold text-gray-950;
   }
   
   h4 {
-    @apply text-lg md:text-xl font-sub-heading text-zemo-black;
+    @apply text-lg md:text-xl font-bold text-gray-950;
   }
   
   p {
-    @apply text-base font-body text-zemo-black leading-relaxed;
+    @apply text-base text-gray-950 leading-relaxed;
     font-weight: var(--zemo-body-weight);
   }
   
   /* Focus styles for accessibility */
   *:focus {
-    @apply outline-none ring-2 ring-zemo-yellow ring-offset-2;
+    @apply outline-none ring-2 ring-yellow-500 ring-offset-2;
   }
   
   /* Selection styles */
   ::selection {
-    @apply bg-zemo-yellow text-zemo-black;
+    @apply bg-yellow-500 text-gray-950;
   }
 }
 
@@ -86,43 +86,43 @@
 @layer components {
   /* Button Styles */
   .btn-primary {
-    @apply inline-flex items-center justify-center px-6 py-3 text-base font-sub-heading;
-    @apply bg-zemo-yellow text-zemo-black border-2 border-zemo-yellow;
-    @apply rounded-zemo transition-all duration-200 touch-target;
-    @apply hover:bg-zemo-yellow-dark hover:border-zemo-yellow-dark;
-    @apply focus:ring-2 focus:ring-zemo-yellow focus:ring-offset-2;
+    @apply inline-flex items-center justify-center px-6 py-3 text-base font-bold;
+    @apply bg-yellow-500 text-gray-950 border-2 border-yellow-500;
+    @apply rounded-lg transition-all duration-200 touch-target;
+    @apply hover:bg-yellow-600 hover:border-yellow-600;
+    @apply focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2;
     @apply active:transform active:scale-95;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
   }
   
   .btn-secondary {
-    @apply inline-flex items-center justify-center px-6 py-3 text-base font-sub-heading;
-    @apply bg-transparent text-zemo-black border-2 border-zemo-black;
-    @apply rounded-zemo transition-all duration-200 touch-target;
-    @apply hover:bg-zemo-black hover:text-white;
-    @apply focus:ring-2 focus:ring-zemo-black focus:ring-offset-2;
+    @apply inline-flex items-center justify-center px-6 py-3 text-base font-bold;
+    @apply bg-transparent text-gray-950 border-2 border-gray-950;
+    @apply rounded-lg transition-all duration-200 touch-target;
+    @apply hover:bg-gray-950 hover:text-white;
+    @apply focus:ring-2 focus:ring-gray-950 focus:ring-offset-2;
     @apply active:transform active:scale-95;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
   }
   
   .btn-ghost {
-    @apply inline-flex items-center justify-center px-4 py-2 text-base font-body;
-    @apply bg-transparent text-zemo-black border-none;
-    @apply rounded-zemo transition-all duration-200 touch-target;
-    @apply hover:bg-zemo-gray-100;
-    @apply focus:ring-2 focus:ring-zemo-yellow focus:ring-offset-2;
+    @apply inline-flex items-center justify-center px-4 py-2 text-base;
+    @apply bg-transparent text-gray-950 border-none;
+    @apply rounded-lg transition-all duration-200 touch-target;
+    @apply hover:bg-gray-100;
+    @apply focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2;
     @apply active:transform active:scale-95;
   }
   
   /* Card Styles */
   .card {
-    @apply bg-white rounded-zemo-lg border border-zemo-gray-200;
-    @apply shadow-zemo transition-shadow duration-200;
-    @apply hover:shadow-zemo-md;
+    @apply bg-white rounded-xl border border-gray-200;
+    @apply shadow-md transition-shadow duration-200;
+    @apply hover:shadow-lg;
   }
   
   .card-header {
-    @apply p-6 border-b border-zemo-gray-200;
+    @apply p-6 border-b border-gray-200;
   }
   
   .card-body {
@@ -135,29 +135,29 @@
   
   /* Input Styles */
   .input {
-    @apply w-full px-4 py-3 text-base font-body;
-    @apply bg-white border-2 border-zemo-gray-300;
-    @apply rounded-zemo transition-colors duration-200;
-    @apply placeholder:text-zemo-gray-400;
-    @apply focus:border-zemo-yellow focus:ring-2 focus:ring-zemo-yellow focus:ring-offset-2;
-    @apply disabled:bg-zemo-gray-50 disabled:cursor-not-allowed;
+    @apply w-full px-4 py-3 text-base;
+    @apply bg-white border-2 border-gray-300;
+    @apply rounded-lg transition-colors duration-200;
+    @apply placeholder:text-gray-400;
+    @apply focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2;
+    @apply disabled:bg-gray-50 disabled:cursor-not-allowed;
   }
   
   .input-error {
-    @apply border-error text-error;
-    @apply focus:border-error focus:ring-error;
+    @apply border-error-500 text-error-500;
+    @apply focus:border-error-500 focus:ring-error-500;
   }
   
   /* Navigation Styles */
   .nav-link {
-    @apply inline-flex items-center px-4 py-2 text-base font-body;
-    @apply text-zemo-black transition-colors duration-200;
-    @apply hover:text-zemo-yellow-dark;
-    @apply focus:outline-none focus:ring-2 focus:ring-zemo-yellow;
+    @apply inline-flex items-center px-4 py-2 text-base;
+    @apply text-gray-950 transition-colors duration-200;
+    @apply hover:text-yellow-600;
+    @apply focus:outline-none focus:ring-2 focus:ring-yellow-500;
   }
   
   .nav-link-active {
-    @apply text-zemo-yellow-dark font-sub-heading;
+    @apply text-yellow-600 font-bold;
   }
 }
 
@@ -202,7 +202,7 @@
   
   /* Loading states */
   .loading-skeleton {
-    @apply bg-zemo-gray-200 animate-pulse rounded;
+    @apply bg-gray-200 animate-pulse rounded;
   }
   
   /* Accessibility utilities */

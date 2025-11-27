@@ -249,21 +249,33 @@ function SearchResults() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {vehicles.map((vehicle) => {
                 const primaryPhoto = vehicle.photos?.find(p => p.isPrimary) || vehicle.photos?.[0]
-                
+
                 return (
                   <Link
                     key={vehicle.id}
                     href={`/vehicles/${vehicle.id}`}
                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
                   >
-                    {/* Vehicle Image */}
-                    <div className="relative h-48 bg-gray-200">
+                    {/* Vehicle Image - fixed aspect ratio for consistent cards */}
+                    <div className="relative w-full aspect-[16/9] bg-gray-200 overflow-hidden">
                       {primaryPhoto ? (
                         <Image
                           src={primaryPhoto.photoUrl}
                           alt={`${vehicle.make} ${vehicle.model}`}
                           fill
-                          className="object-cover"
+                          className="object-cover object-center transition-transform duration-300 ease-out hover:scale-105"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          onError={(e: any) => {
+                            try {
+                              const img = e?.currentTarget as HTMLImageElement
+                              if (img && img.src && !img.dataset.fallback) {
+                                img.src = '/placeholder-car.jpg'
+                                img.dataset.fallback = '1'
+                              }
+                            } catch (err) {
+                              // ignore
+                            }
+                          }}
                         />
                       ) : (
                         <div className="flex items-center justify-center h-full">
