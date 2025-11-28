@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { extractTokenFromRequest, verifyAccessToken } from '@/lib/auth'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Do not initialize Supabase at module scope to avoid build-time env requirements
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,8 +54,18 @@ export async function POST(request: NextRequest) {
     const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
     const filePath = `${category}/${userId}/${documentType}/${timestamp}_${sanitizedFileName}`
 
-    // Upload to Supabase Storage
+    // Upload to Supabase Storage if env is configured
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     const fileBuffer = await file.arrayBuffer()
+    if (!supabaseUrl || !supabaseKey) {
+      console.warn('Supabase env not configured; skipping upload')
+      return NextResponse.json(
+        { error: 'Storage not configured' },
+        { status: 500 }
+      )
+    }
+    const supabase = createClient(supabaseUrl, supabaseKey)
     const { error: uploadError } = await supabase.storage
       .from('documents')
       .upload(filePath, fileBuffer, {
