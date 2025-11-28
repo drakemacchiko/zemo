@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import puppeteer from 'puppeteer'
 import { prisma } from '@/lib/db'
 import { extractTokenFromRequest, verifyAccessToken } from '@/lib/auth'
-import { generateRentalAgreementHTML, RentalAgreementData } from '@/lib/agreements/rental-agreement-template'
+import { generateRentalAgreementPDF } from '@/lib/pdf-generator'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function POST(
   request: NextRequest,
@@ -82,84 +87,68 @@ export async function POST(
       (1000 * 60 * 60 * 24)
     )
 
-    const agreementData: RentalAgreementData = {
-      bookingId: booking.id,
-      agreementNumber: agreementNumber,
-      host: {
-        name: `${booking.vehicle.host.profile?.firstName || ''} ${booking.vehicle.host.profile?.lastName || ''}`.trim() || booking.vehicle.host.email,
-        email: booking.vehicle.host.email,
-        phone: booking.vehicle.host.phoneNumber || 'N/A',
-        address: 'Address on file', // TODO: Add host address field
-        idNumber: 'ID on file' // TODO: Add host ID field
-      },
-      renter: {
-        name: `${booking.user.profile?.firstName || ''} ${booking.user.profile?.lastName || ''}`.trim() || booking.user.email,
-        email: booking.user.email,
-        phone: booking.user.phoneNumber || 'N/A',
-        address: 'Address on file', // TODO: Add renter address field
-        licenseNumber: 'License on file', // TODO: Add from documents
-        idNumber: 'ID on file' // TODO: Add from documents
-      },
-      vehicle: {
-        make: booking.vehicle.make,
-        model: booking.vehicle.model,
-        year: booking.vehicle.year,
-        plateNumber: booking.vehicle.plateNumber,
-        vin: booking.vehicle.vin || 'N/A',
-        color: booking.vehicle.color || 'N/A',
-        mileage: booking.vehicle.currentMileage || 0
-      },
-      rental: {
-        startDate: booking.startDate,
-        endDate: booking.endDate,
-        pickupLocation: booking.pickupLocation || 'To be arranged',
-        dropoffLocation: booking.dropoffLocation || 'Same as pickup',
-        dailyRate: booking.vehicle.dailyRate || 0,
-        totalDays,
-        totalAmount: booking.totalAmount,
-        securityDeposit: booking.vehicle.securityDeposit || 0,
-        platformFee: booking.serviceFee
-      },
-      terms: {
-        mileageLimit: booking.vehicle.mileageAllowance || 200,
-        fuelPolicy: booking.vehicle.fuelPolicy || 'Same to Same',
-        lateReturnFee: 50, // TODO: Make configurable
-        smokingAllowed: booking.vehicle.smokingAllowed || false,
-        petsAllowed: booking.vehicle.petsAllowed || false,
-        additionalDrivers: [] // TODO: Add additional drivers field
-      }
+    const agreementData = {
+      hostName: `${booking.vehicle.host.profile?.firstName || ''} ${booking.vehicle.host.profile?.lastName || ''}`.trim() || booking.vehicle.host.email,
+      hostEmail: booking.vehicle.host.email,
+      hostPhone: booking.vehicle.host.phoneNumber || 'N/A',
+      hostAddress: 'Address on file',
+      renterName: `${booking.user.profile?.firstName || ''} ${booking.user.profile?.lastName || ''}`.trim() || booking.user.email,
+      renterEmail: booking.user.email,
+      renterPhone: booking.user.phoneNumber || 'N/A',
+      renterAddress: 'Address on file',
+      renterLicense: 'License on file',
+      vehicleMake: booking.vehicle.make,
+      vehicleModel: booking.vehicle.model,
+      vehicleYear: booking.vehicle.year.toString(),
+      vehiclePlate: booking.vehicle.plateNumber,
+      vehicleVin: booking.vehicle.vin || 'N/A',
+      rentalStartDate: booking.startDate.toISOString(),
+      rentalEndDate: booking.endDate.toISOString(),
+      pickupLocation: booking.pickupLocation || 'To be arranged',
+      returnLocation: booking.pickupLocation || 'To be arranged',
+      dailyRate: booking.vehicle.dailyRate,
+      totalDays: totalDays,
+      totalCost: booking.totalAmount,
+      securityDeposit: booking.vehicle.securityDeposit || 0,
+      mileageAllowance: 200,
+      extraMileageFee: 5,
+      fuelPolicy: 'Return with same fuel level',
+      insurancePlan: 'Standard Coverage',
+      additionalRules: [],
     }
 
-    // Generate HTML
-    const html = generateRentalAgreementHTML(agreementData)
+    // Generate PDF using jsPDF
+    const pdfBlob = await generateRentalAgreementPDF(agreementData)
+    const pdfBuffer = Buffer.from(await pdfBlob.arrayBuffer())
 
-    // Generate PDF using Puppeteer
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    })
-    
-    const page = await browser.newPage()
-    await page.setContent(html, { waitUntil: 'networkidle0' })
-    
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '20mm',
-        right: '20mm',
-        bottom: '20mm',
-        left: '20mm'
-      }
-    })
-    
-    await browser.close()
+    // Upload PDF to Supabase Storage
+    const fileName = `agreements/${bookingId}/${agreementNumber}.pdf`
+    const { error: uploadError } = await supabase.storage
+      .from('documents')
+      .upload(fileName, pdfBuffer, {
+        contentType: 'application/pdf',
+        upsert: true,
+      })
 
-    // Update agreement with generated PDF URL
-    // TODO: Upload PDF to Supabase Storage and save URL
+    if (uploadError) {
+      console.error('Failed to upload PDF:', uploadError)
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('documents')
+      .getPublicUrl(fileName)
+
+    // Update agreement with PDF URL
+    await prisma.rentalAgreement.update({
+      where: { id: agreement.id },
+      data: {
+        agreementContent: urlData.publicUrl,
+      },
+    })
 
     // Return PDF as downloadable file
-    return new NextResponse(Buffer.from(pdfBuffer), {
+    return new NextResponse(pdfBuffer, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="rental-agreement-${agreementNumber}.pdf"`

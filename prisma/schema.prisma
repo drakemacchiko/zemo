@@ -54,6 +54,8 @@ model User {
   ticketMessages            TicketMessage[]
   ticketAttachments         TicketAttachment[]
   vehicleDocumentSignatures VehicleDocumentSignature[]
+  documents                 Document[] // User's uploaded documents
+  isVerified                Boolean                    @default(false) // All required documents verified
 
   @@map("users")
 }
@@ -1617,4 +1619,50 @@ enum ConditionRating {
   GOOD
   FAIR
   POOR
+}
+
+// Phase 2: Document Verification System
+model Document {
+  id               String                    @id @default(cuid())
+  userId           String
+  type             UserDocumentType
+  fileName         String
+  fileUrl          String
+  status           DocumentStatus            @default(UNDER_REVIEW)
+  uploadedAt       DateTime                  @default(now())
+  reviewedAt       DateTime?
+  reviewedBy       String?                   // Admin user ID
+  rejectionReason  String?
+  ocrData          Json?                     // OCR extracted data
+  ocrConfidence    Float?                    // OCR confidence score
+  expiryDate       DateTime?                 // For licenses, IDs, etc.
+  isVerified       Boolean                   @default(false)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@map("documents")
+}
+
+enum UserDocumentType {
+  LICENSE           // Driver's license
+  NATIONAL_ID       // National ID card
+  PASSPORT          // Passport
+  SELFIE            // Selfie for verification
+  PROOF_OF_ADDRESS  // Utility bill, bank statement
+  VEHICLE_REGISTRATION // Vehicle registration document
+  INSURANCE_CERT    // Insurance certificate
+  ROADWORTHINESS    // Roadworthiness certificate
+  BANK_STATEMENT    // Bank statement for payout verification
+}
+
+enum DocumentStatus {
+  NOT_UPLOADED
+  UPLOADED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
 }
