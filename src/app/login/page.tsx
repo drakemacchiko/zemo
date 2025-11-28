@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react'
 
 interface LoginFormData {
@@ -11,7 +10,6 @@ interface LoginFormData {
 }
 
 export default function LoginPage() {
-  const router = useRouter()
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: ''
