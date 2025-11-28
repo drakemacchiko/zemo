@@ -119,7 +119,6 @@ export async function POST(
     // Upload PDF to Supabase Storage using server-only keys
     const supabaseUrl = process.env.SUPABASE_URL
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    let publicUrl: string | undefined
 
     if (!supabaseUrl || !supabaseKey) {
       return NextResponse.json({ error: 'Storage not configured' }, { status: 500 })
@@ -143,7 +142,7 @@ export async function POST(
     const { data: urlData } = supabase.storage
       .from('documents')
       .getPublicUrl(fileName)
-    publicUrl = urlData.publicUrl
+    const publicUrl = urlData.publicUrl
 
     // Update agreement with PDF URL
     await prisma.rentalAgreement.update({
