@@ -44,7 +44,12 @@ export async function POST(
         user: {
           select: {
             email: true,
-            name: true,
+            profile: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
+            },
           },
         },
       },
