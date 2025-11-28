@@ -88,7 +88,7 @@ export async function middleware(request: NextRequest) {
       // Token verification failed, clear it and redirect to login
       const response = NextResponse.redirect(new URL('/login', request.url))
       response.cookies.delete('accessToken')
-      logDebug('Verification Error', (error as Error).message)
+      console.log('Verification Error:', (error as Error).message)
       return response
     }
   }
