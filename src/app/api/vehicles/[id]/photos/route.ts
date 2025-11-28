@@ -84,12 +84,14 @@ async function handlePost(request: AuthenticatedRequest) {
     }
 
     // Decide whether to use Supabase Storage (recommended) or local filesystem
-    const useSupabase = !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY
+    const supabaseUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) as string | undefined
+    const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) as string | undefined
+    const useSupabase = !!supabaseUrl && !!supabaseKey
 
     let supabase: ReturnType<typeof createClient> | null = null
     if (useSupabase) {
       try {
-        supabase = createClient(process.env.SUPABASE_URL as string, process.env.SUPABASE_SERVICE_ROLE_KEY as string)
+        supabase = createClient(supabaseUrl!, supabaseKey!)
       } catch (e) {
         console.error('Failed to initialize Supabase client:', e)
         supabase = null
@@ -137,8 +139,8 @@ async function handlePost(request: AuthenticatedRequest) {
 
             // Construct public URL for the uploaded object
             // Supabase public object URL format: `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`
-            const supabaseUrl = process.env.SUPABASE_URL!.replace(/\/$/, '')
-            finalUrl = `${supabaseUrl}/storage/v1/object/public/vehicles/${encodeURIComponent(remotePath)}`
+            const baseUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)!.replace(/\/$/, '')
+            finalUrl = `${baseUrl}/storage/v1/object/public/vehicles/${encodeURIComponent(remotePath)}`
           } catch (e) {
             console.error('Failed to upload to Supabase storage:', e)
             return NextResponse.json({ error: 'Failed to store photo in remote storage' }, { status: 500 })
