@@ -38,9 +38,9 @@ export default function HostDashboard() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    checkAuth()
-    fetchVehicles()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    // Redirect to the actual dashboard
+    router.replace('/host/dashboard')
+  }, [router])
 
   const checkAuth = async () => {
     try {

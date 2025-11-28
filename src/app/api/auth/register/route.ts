@@ -81,10 +81,11 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    // Generate tokens
+    // Generate tokens with role included
     const { accessToken, refreshToken } = generateTokens({
       userId: user.id,
-      email: user.email
+      email: user.email,
+      role: user.role
     })
     
     // Store refresh token
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest) {
       data: { refreshToken }
     })
     
-    return NextResponse.json({
+    const response = NextResponse.json({
       message: 'Registration successful. Please verify your phone number.',
       user: {
         id: user.id,
@@ -107,6 +108,18 @@ export async function POST(request: NextRequest) {
         refreshToken
       }
     }, { status: 201 })
+
+    // Set access token cookie same as login for consistency
+    response.cookies.set('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60,
+      path: '/'
+    })
+    response.headers.set('X-Auth-Set', 'true')
+
+    return response
     
   } catch (error) {
     console.error('Registration error:', error)

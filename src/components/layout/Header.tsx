@@ -80,6 +80,8 @@ export default function Header() {
   const handleLogout = () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
+    // Clear the cookie
+    document.cookie = 'accessToken=; path=/; max-age=0'
     setIsAuthenticated(false)
     setUserData(null)
     setShowUserMenu(false)
@@ -170,8 +172,15 @@ export default function Header() {
 
             {isAuthenticated ? (
               <>
-                {/* Become a Host / Host Dashboard */}
-                {!isHost && (
+                {/* Host Dashboard or Become a Host */}
+                {isHost ? (
+                  <Link
+                    href="/host/dashboard"
+                    className="hidden md:block px-4 py-2 text-sm font-semibold text-yellow-600 hover:text-yellow-700 transition-colors"
+                  >
+                    Host Dashboard
+                  </Link>
+                ) : (
                   <Link
                     href="/host"
                     className="hidden md:block px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
@@ -249,6 +258,20 @@ export default function Header() {
 
                       {/* Menu Items */}
                       <div className="py-2">
+                        {isHost && (
+                          <>
+                            <Link
+                              href="/host/dashboard"
+                              onClick={() => setShowUserMenu(false)}
+                              className="flex items-center px-4 py-2 text-sm font-semibold text-yellow-600 hover:bg-yellow-50 transition-colors"
+                            >
+                              <Car className="w-4 h-4 mr-3" />
+                              Host Dashboard
+                            </Link>
+                            <div className="border-t border-gray-100 my-2" />
+                          </>
+                        )}
+                        
                         <Link
                           href="/profile"
                           onClick={() => setShowUserMenu(false)}
@@ -391,6 +414,20 @@ export default function Header() {
                     <p className="text-xs text-gray-500">{userData?.email}</p>
                   </div>
 
+                  {isHost && (
+                    <>
+                      <Link
+                        href="/host/dashboard"
+                        onClick={() => setShowMobileMenu(false)}
+                        className="flex items-center px-4 py-3 text-base font-semibold text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
+                      >
+                        <Car className="w-5 h-5 mr-3" />
+                        Host Dashboard
+                      </Link>
+                      <div className="border-t border-gray-100 my-2" />
+                    </>
+                  )}
+                  
                   <Link
                     href="/profile"
                     onClick={() => setShowMobileMenu(false)}
@@ -402,14 +439,6 @@ export default function Header() {
                   
                   {isHost && (
                     <>
-                      <Link
-                        href="/host"
-                        onClick={() => setShowMobileMenu(false)}
-                        className="flex items-center px-4 py-3 text-base text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                      >
-                        <Car className="w-5 h-5 mr-3" />
-                        Host Dashboard
-                      </Link>
                       <Link
                         href="/host/vehicles"
                         onClick={() => setShowMobileMenu(false)}

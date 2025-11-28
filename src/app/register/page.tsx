@@ -91,9 +91,13 @@ export default function RegisterPage() {
       const data = await response.json()
 
       if (response.ok) {
-        // Store tokens
+        // Store tokens in localStorage
         localStorage.setItem('accessToken', data.tokens.accessToken)
         localStorage.setItem('refreshToken', data.tokens.refreshToken)
+        
+        // Also set accessToken as a cookie for middleware authentication
+        document.cookie = `accessToken=${data.tokens.accessToken}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`
+        
         setShowOtpForm(true)
       } else {
         setErrors({ general: data.error || 'Registration failed' })

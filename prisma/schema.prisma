@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -122,40 +123,107 @@ model Vehicle {
   hostId String
 
   // Vehicle identification
-  plateNumber   String  @unique
-  engineNumber  String?
-  chassisNumber String?
+  vin                String? @unique
+  plateNumber        String  @unique
+  engineNumber       String?
+  chassisNumber      String?
+  registrationNumber String?
 
   // Vehicle details
   make            String
   model           String
   year            Int
+  trim            String?
   color           String
   vehicleType     VehicleType
+  vehicleCategory VehicleCategory?
   transmission    Transmission
   fuelType        FuelType
   seatingCapacity Int
+  numberOfDoors   Int?
 
   // Pricing
   dailyRate       Float
+  hourlyRate      Float?
   weeklyRate      Float?
   monthlyRate     Float?
+  weeklyDiscount  Float? // Percentage
+  monthlyDiscount Float? // Percentage
+  weekendPricing  Float? // Premium or discount
   securityDeposit Float
+  cleaningFee     Float?
 
-  // Operational data
-  currentMileage    Int
-  fuelTankCapacity  Float?
-  locationLatitude  Float
-  locationLongitude Float
-  locationAddress   String
+  // Mileage & Fuel
+  currentMileage   Int
+  mileageAllowance Int? // Per day in km
+  extraMileageFee  Float? // Per km
+  fuelTankCapacity Float?
+  fuelPolicy       FuelPolicy?
+  lateReturnFee    Float? // Per hour
+
+  // Location & Delivery
+  locationLatitude   Float
+  locationLongitude  Float
+  locationAddress    String
+  locationCity       String?
+  locationProvince   String?
+  locationPostalCode String?
+  hideExactLocation  Boolean @default(true)
+
+  // Delivery options
+  deliveryAvailable  Boolean @default(false)
+  deliveryRadius     Int? // In km
+  deliveryFeePerKm   Float?
+  airportDelivery    Boolean @default(false)
+  airportDeliveryFee Float?
+  pickupInstructions String? @db.Text
+
+  // Availability & Scheduling
+  alwaysAvailable      Boolean @default(true)
+  advanceNoticeHours   Int     @default(24)
+  shortestTripDuration Int     @default(1) // In days
+  longestTripDuration  Int? // In days, null = no limit
+  instantBooking       Boolean @default(false)
+
+  // Instant booking criteria
+  minRenterRating        Float?
+  minRenterTrips         Int?
+  requireVerifiedLicense Boolean @default(true)
+
+  // Rules & Requirements
+  minDriverAge         Int     @default(21)
+  minDrivingExperience Int     @default(2) // Years
+  additionalDriverFee  Float?
+  smokingAllowed       Boolean @default(false)
+  smokingFee           Float?
+  petsAllowed          Boolean @default(false)
+  petFee               Float?
+
+  // Usage restrictions (stored as JSON array)
+  usageRestrictions Json? // ["NO_OFF_ROAD", "NO_RACING", "NO_COMMERCIAL", etc.]
+  customRules       String? @db.Text
+
+  // Insurance
+  insurancePolicyNumber String?
+  insuranceCoverage     String?
+
+  // Description
+  title       String?
+  description String? @db.Text
 
   // Status
   availabilityStatus AvailabilityStatus @default(AVAILABLE)
   verificationStatus VerificationStatus @default(PENDING)
   isActive           Boolean            @default(true)
+  listingStatus      ListingStatus      @default(DRAFT)
 
-  // Features and amenities
-  features Json? // Store array of features as JSON
+  // Features and amenities (stored as JSON array)
+  features Json?
+
+  // Statistics
+  totalTrips      Int    @default(0)
+  averageRating   Float?
+  monthlyEarnings Float  @default(0)
 
   // Metadata
   createdAt DateTime @default(now())
@@ -167,6 +235,8 @@ model Vehicle {
   photos      VehiclePhoto[]
   bookings    Booking[]
   inspections VehicleInspection[]
+  extras      VehicleExtra[]
+  agreements  RentalAgreement[]
 
   // Phase 9: Messaging & Support Relations
   conversations  Conversation[]
@@ -183,6 +253,8 @@ model Vehicle {
   @@index([year, make])
   @@index([verificationStatus, availabilityStatus])
   @@index([createdAt])
+  @@index([vehicleCategory])
+  @@index([listingStatus])
   @@map("vehicles")
 }
 
@@ -292,6 +364,10 @@ model Booking {
   claims             Claim[] // Booking can have multiple claims
   inspections        VehicleInspection[]
   depositAdjustments DepositAdjustment[]
+
+  // Phase 2: Extras and Agreements
+  extras    BookingExtra[]
+  agreement RentalAgreement?
 
   // Phase 9: Messaging & Support Relations
   conversations  Conversation[]
@@ -463,7 +539,44 @@ enum PhotoType {
   INTERIOR_REAR
   DASHBOARD
   ENGINE
+  TRUNK
+  WHEELS
+  DAMAGE
   OTHER
+}
+
+enum VehicleCategory {
+  ECONOMY
+  COMPACT
+  MIDSIZE
+  FULL_SIZE
+  SUV
+  LUXURY
+  SPORTS
+  VAN
+  TRUCK
+  ELECTRIC
+}
+
+enum FuelPolicy {
+  SAME_AS_PICKUP
+  PREPAID_FULL_TANK
+  PAY_FOR_USE
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  PAUSED
+  INACTIVE
+  REJECTED
+}
+
+enum PriceType {
+  PER_DAY
+  FLAT_FEE
+  PER_KM
 }
 
 enum BookingStatus {
@@ -1345,4 +1458,163 @@ enum TicketStatus {
   RESOLVED // Resolved
   CLOSED // Closed
   ESCALATED // Escalated to higher level
+}
+
+// Phase 2: Vehicle Extras/Add-ons
+model VehicleExtra {
+  id          String    @id @default(cuid())
+  vehicleId   String
+  name        String
+  description String?   @db.Text
+  priceType   PriceType @default(PER_DAY)
+  price       Float
+  available   Boolean   @default(true)
+  quantity    Int       @default(1)
+  photoUrl    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  vehicle       Vehicle        @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  bookingExtras BookingExtra[]
+
+  @@index([vehicleId])
+  @@index([available])
+  @@map("vehicle_extras")
+}
+
+// Phase 2: Booking Extras (selected extras for a booking)
+model BookingExtra {
+  id             String   @id @default(cuid())
+  bookingId      String
+  vehicleExtraId String
+  quantity       Int      @default(1)
+  unitPrice      Float
+  totalPrice     Float
+  createdAt      DateTime @default(now())
+
+  // Relations
+  booking      Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  vehicleExtra VehicleExtra @relation(fields: [vehicleExtraId], references: [id])
+
+  @@index([bookingId])
+  @@index([vehicleExtraId])
+  @@map("booking_extras")
+}
+
+// Phase 2: Rental Agreements
+model RentalAgreement {
+  id        String @id @default(cuid())
+  bookingId String @unique
+  vehicleId String
+  hostId    String
+  renterId  String
+
+  // Agreement content
+  agreementTemplate String  @db.Text
+  agreementContent  String  @db.Text
+  pdfUrl            String?
+
+  // Signing
+  hostSigned    Boolean   @default(false)
+  hostSignedAt  DateTime?
+  hostSignature String?   @db.Text // Canvas signature or typed name
+  hostIpAddress String?
+
+  renterSigned    Boolean   @default(false)
+  renterSignedAt  DateTime?
+  renterSignature String?   @db.Text
+  renterIpAddress String?
+
+  fullyExecuted Boolean   @default(false)
+  executedAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  booking     Booking          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  vehicle     Vehicle          @relation(fields: [vehicleId], references: [id])
+  inspections TripInspection[]
+
+  @@index([bookingId])
+  @@index([vehicleId])
+  @@index([hostId])
+  @@index([renterId])
+  @@index([fullyExecuted])
+  @@map("rental_agreements")
+}
+
+// Phase 2: Trip Inspections (Pre and Post)
+model TripInspection {
+  id             String         @id @default(cuid())
+  agreementId    String
+  inspectionType InspectionType
+
+  // Exterior condition
+  frontBumper ConditionRating
+  rearBumper  ConditionRating
+  hood        ConditionRating
+  roof        ConditionRating
+  leftDoor    ConditionRating
+  rightDoor   ConditionRating
+  windows     ConditionRating
+  lights      ConditionRating
+  mirrors     ConditionRating
+  tires       ConditionRating
+
+  // Interior condition
+  seats         ConditionRating
+  dashboard     ConditionRating
+  steeringWheel ConditionRating
+  floorMats     ConditionRating
+  trunk         ConditionRating
+
+  // Functional checks
+  airConditioning Boolean
+  allLights       Boolean
+  wipers          Boolean
+  horn            Boolean
+  locks           Boolean
+
+  // Readings
+  fuelLevel        Int // Percentage 0-100
+  fuelPhotoUrl     String?
+  odometerReading  Int
+  odometerPhotoUrl String?
+  cleanliness      Int // 1-5 stars
+
+  // Photos
+  photos Json? // Array of photo URLs
+  notes  String? @db.Text
+
+  // Damage documentation (for post-inspection)
+  damageReported    Boolean @default(false)
+  damagePhotos      Json? // Array of damage photo URLs
+  damageDescription String? @db.Text
+  estimatedCost     Float?
+
+  // Signatures
+  hostSigned     Boolean   @default(false)
+  hostSignedAt   DateTime?
+  renterSigned   Boolean   @default(false)
+  renterSignedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  agreement RentalAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+
+  @@unique([agreementId, inspectionType])
+  @@index([agreementId])
+  @@index([inspectionType])
+  @@map("trip_inspections")
+}
+
+enum ConditionRating {
+  EXCELLENT
+  GOOD
+  FAIR
+  POOR
 }

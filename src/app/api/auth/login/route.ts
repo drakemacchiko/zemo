@@ -44,10 +44,11 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Generate tokens
+    // Generate tokens with role included (ensure role always present)
     const { accessToken, refreshToken } = generateTokens({
       userId: user.id,
-      email: user.email
+      email: user.email,
+      role: user.role
     })
     
     // Store refresh token
@@ -56,7 +57,8 @@ export async function POST(request: NextRequest) {
       data: { refreshToken }
     })
     
-    return NextResponse.json({
+    // Create response with tokens
+    const response = NextResponse.json({
       message: 'Login successful',
       user: {
         id: user.id,
@@ -73,6 +75,20 @@ export async function POST(request: NextRequest) {
         refreshToken
       }
     })
+    
+    // Set accessToken as httpOnly cookie for middleware (client can still use localStorage copy)
+    response.cookies.set('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60,
+      path: '/'
+    })
+
+    // Lightweight debug header to confirm issuance during troubleshooting
+    response.headers.set('X-Auth-Set', 'true')
+    
+    return response
     
   } catch (error) {
     console.error('Login error:', error)

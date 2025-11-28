@@ -59,24 +59,26 @@ export default function LoginPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        // Explicitly include credentials for future cross-site scenarios
+        credentials: 'include',
         body: JSON.stringify(formData),
       })
 
       const data = await response.json()
 
       if (response.ok) {
-        // Store tokens
+        // Store tokens in localStorage for API calls that need Authorization header
         localStorage.setItem('accessToken', data.tokens.accessToken)
         localStorage.setItem('refreshToken', data.tokens.refreshToken)
-        
-        // Redirect based on user role
+
+        // Force hard navigation to ensure middleware sees httpOnly cookie
         const userRole = data.user?.role
         if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
-          router.push('/admin')
+          window.location.href = '/admin'
         } else if (userRole === 'HOST') {
-          router.push('/host')
+          window.location.href = '/host/dashboard'
         } else {
-          router.push('/profile')
+          window.location.href = '/profile'
         }
       } else {
         setErrors({ general: data.error || 'Login failed' })

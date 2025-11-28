@@ -40,31 +40,33 @@ async function main() {
   console.log('  ZEMO Database Connection Diagnostics');
   console.log('═══════════════════════════════════════════════════');
 
-  const host = 'db.mydudeietjwoubzmmngz.supabase.co';
+  // Use AWS pooler host (works better than direct Supabase host)
+  const host = 'aws-1-eu-north-1.pooler.supabase.com';
+  const supabaseHost = 'db.mydudeietjwoubzmmngz.supabase.co';
   const password = encodeURIComponent('@421ForLife@'); // URL encoded
   const database = 'postgres';
   
   // Test different connection configurations
   const tests = [
     {
-      name: 'Session Pooler (Port 6543) with pgbouncer',
-      url: `postgresql://postgres:${password}@${host}:6543/${database}?pgbouncer=true&connection_limit=1`,
+      name: 'AWS Pooler (Port 5432) - Production Config',
+      url: `postgresql://postgres.mydudeietjwoubzmmngz:${password}@${host}:5432/${database}`,
     },
     {
-      name: 'Session Pooler (Port 6543) without pgbouncer',
-      url: `postgresql://postgres:${password}@${host}:6543/${database}`,
+      name: 'AWS Pooler (Port 6543) with pgbouncer',
+      url: `postgresql://postgres.mydudeietjwoubzmmngz:${password}@${host}:6543/${database}?pgbouncer=true&connection_limit=1`,
     },
     {
-      name: 'Transaction Pooler (Port 6543)',
-      url: `postgresql://postgres:${password}@${host}:6543/${database}?pgbouncer=true&connection_limit=1&pool_timeout=10`,
+      name: 'Direct Supabase (Port 6543) with pgbouncer',
+      url: `postgresql://postgres:${password}@${supabaseHost}:6543/${database}?pgbouncer=true&connection_limit=1`,
     },
     {
-      name: 'Direct Connection (Port 5432)',
-      url: `postgresql://postgres:${password}@${host}:5432/${database}`,
+      name: 'Direct Supabase (Port 5432)',
+      url: `postgresql://postgres:${password}@${supabaseHost}:5432/${database}`,
     },
     {
-      name: 'Direct Connection with SSL',
-      url: `postgresql://postgres:${password}@${host}:5432/${database}?sslmode=require`,
+      name: 'Direct Supabase with SSL',
+      url: `postgresql://postgres:${password}@${supabaseHost}:5432/${database}?sslmode=require`,
     },
   ];
 

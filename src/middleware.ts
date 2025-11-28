@@ -1,13 +1,25 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { verifyAccessToken } from '@/lib/auth'
+import { jwtVerify } from 'jose'
 
-export function middleware(request: NextRequest) {
+// Edge-compatible JWT verification using jose library
+async function verifyAccessToken(token: string): Promise<any | null> {
+  try {
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET!)
+    const { payload } = await jwtVerify(token, secret)
+    return payload
+  } catch (error) {
+    return null
+  }
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Get token from cookies or Authorization header
-  const token = request.cookies.get('accessToken')?.value || 
-                request.headers.get('Authorization')?.replace('Bearer ', '')
+  const cookieToken = request.cookies.get('accessToken')?.value
+  const headerToken = request.headers.get('Authorization')?.replace('Bearer ', '')
+  const token = cookieToken || headerToken
 
   // Public routes that don't require authentication
   const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/about', '/contact', '/privacy', '/terms']
@@ -34,7 +46,7 @@ export function middleware(request: NextRequest) {
   // Verify token and check role for admin/host routes
   if (token) {
     try {
-      const decoded = verifyAccessToken(token)
+      const decoded = await verifyAccessToken(token)
       
       if (!decoded) {
         // Invalid token, redirect to login
@@ -76,6 +88,7 @@ export function middleware(request: NextRequest) {
       // Token verification failed, clear it and redirect to login
       const response = NextResponse.redirect(new URL('/login', request.url))
       response.cookies.delete('accessToken')
+      logDebug('Verification Error', (error as Error).message)
       return response
     }
   }
