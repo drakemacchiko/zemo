@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     const document = await prisma.document.create({
       data: {
         userId: payload.userId,
-        type: documentType,
+        type: documentType as any,
         fileUrl: urlData.publicUrl,
         fileName: file.name,
         status: 'UNDER_REVIEW',

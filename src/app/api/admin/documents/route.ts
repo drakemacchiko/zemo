@@ -26,8 +26,13 @@ export async function GET(request: NextRequest) {
       include: {
         user: {
           select: {
-            name: true,
             email: true,
+            profile: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
+            },
           },
         },
       },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { extractTokenFromRequest, verifyAccessToken } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { UserDocumentType } from '@prisma/client';
 
 export async function POST(
   request: NextRequest,
@@ -60,7 +61,7 @@ export async function POST(
 
     // Check if all required documents are approved
     if (action === 'APPROVE') {
-      const requiredTypes = ['LICENSE', 'SELFIE'];
+      const requiredTypes: UserDocumentType[] = ['LICENSE', 'SELFIE'];
       const userDocuments = await prisma.document.findMany({
         where: {
           userId: document.userId,
