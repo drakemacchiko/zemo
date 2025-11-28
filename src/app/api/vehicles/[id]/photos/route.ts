@@ -84,8 +84,8 @@ async function handlePost(request: AuthenticatedRequest) {
     }
 
     // Decide whether to use Supabase Storage (recommended) or local filesystem
-    const supabaseUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) as string | undefined
-    const supabaseKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) as string | undefined
+    const supabaseUrl = process.env.SUPABASE_URL as string | undefined
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string | undefined
     const useSupabase = !!supabaseUrl && !!supabaseKey
 
     let supabase: ReturnType<typeof createClient> | null = null
@@ -139,7 +139,7 @@ async function handlePost(request: AuthenticatedRequest) {
 
             // Construct public URL for the uploaded object
             // Supabase public object URL format: `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`
-            const baseUrl = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)!.replace(/\/$/, '')
+            const baseUrl = process.env.SUPABASE_URL!.replace(/\/$/, '')
             finalUrl = `${baseUrl}/storage/v1/object/public/vehicles/${encodeURIComponent(remotePath)}`
           } catch (e) {
             console.error('Failed to upload to Supabase storage:', e)

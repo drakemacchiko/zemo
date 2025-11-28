@@ -116,36 +116,36 @@ export async function POST(
     const pdfBlob = await generateRentalAgreementPDF(agreementData)
     const pdfBuffer = Buffer.from(await pdfBlob.arrayBuffer())
 
-    // Upload PDF to Supabase Storage if env is configured
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    // Upload PDF to Supabase Storage using server-only keys
+    const supabaseUrl = process.env.SUPABASE_URL
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     let publicUrl: string | undefined
 
-    if (supabaseUrl && supabaseKey) {
-      const supabase = createClient(supabaseUrl, supabaseKey)
-      const fileName = `agreements/${bookingId}/${agreementNumber}.pdf`
-
-      const { error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(fileName, pdfBuffer, {
-          contentType: 'application/pdf',
-          upsert: true,
-        })
-
-      if (uploadError) {
-        console.error('Failed to upload PDF:', uploadError)
-      } else {
-        const { data: urlData } = supabase.storage
-          .from('documents')
-          .getPublicUrl(fileName)
-        publicUrl = urlData.publicUrl
-      }
-    } else {
-      // In environments without Supabase config (e.g., build-time), skip upload
-      console.warn('Supabase env not configured; skipping PDF upload')
+    if (!supabaseUrl || !supabaseKey) {
+      return NextResponse.json({ error: 'Storage not configured' }, { status: 500 })
     }
 
-    // Update agreement with PDF URL if available
+    const supabase = createClient(supabaseUrl, supabaseKey)
+    const fileName = `agreements/${bookingId}/${agreementNumber}.pdf`
+
+    const { error: uploadError } = await supabase.storage
+      .from('documents')
+      .upload(fileName, pdfBuffer, {
+        contentType: 'application/pdf',
+        upsert: true,
+      })
+
+    if (uploadError) {
+      console.error('Failed to upload PDF:', uploadError)
+      return NextResponse.json({ error: 'Failed to upload agreement' }, { status: 500 })
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('documents')
+      .getPublicUrl(fileName)
+    publicUrl = urlData.publicUrl
+
+    // Update agreement with PDF URL
     await prisma.rentalAgreement.update({
       where: { id: agreement.id },
       data: {

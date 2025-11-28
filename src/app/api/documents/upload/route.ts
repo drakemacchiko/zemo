@@ -55,11 +55,10 @@ export async function POST(request: NextRequest) {
     const filePath = `${category}/${userId}/${documentType}/${timestamp}_${sanitizedFileName}`
 
     // Upload to Supabase Storage if env is configured
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseUrl = process.env.SUPABASE_URL
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     const fileBuffer = await file.arrayBuffer()
     if (!supabaseUrl || !supabaseKey) {
-      console.warn('Supabase env not configured; skipping upload')
       return NextResponse.json(
         { error: 'Storage not configured' },
         { status: 500 }
