@@ -323,7 +323,11 @@ describe('Messaging API', () => {
       mockDb.conversation.findFirst.mockResolvedValue(mockConversation);
       mockDb.message.findMany.mockResolvedValue(mockMessages);
 
-      const getMessagesHandler = async (conversationId: string, user: any, queryParams: any = {}) => {
+      const getMessagesHandler = async (
+        conversationId: string,
+        user: any,
+        queryParams: any = {}
+      ) => {
         // Check if user is participant
         const conversation = await mockDb.conversation.findFirst({
           where: {
@@ -416,10 +420,13 @@ describe('Messaging API', () => {
       expect(result.error).toBe('content cannot be empty');
 
       // Test content too long
-      result = await sendMessageHandler({
-        conversationId: 'conv1',
-        content: 'a'.repeat(1001),
-      }, mockUser);
+      result = await sendMessageHandler(
+        {
+          conversationId: 'conv1',
+          content: 'a'.repeat(1001),
+        },
+        mockUser
+      );
       expect(result.status).toBe(400);
       expect(result.error).toBe('content too long (max 1000 characters)');
     });

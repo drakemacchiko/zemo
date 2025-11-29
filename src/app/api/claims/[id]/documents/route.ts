@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { verifyAccessToken } from '@/lib/auth'
-import { prisma } from '@/lib/db'
-import { ClaimService } from '@/lib/insurance'
-import { claimDocumentUploadSchema } from '@/lib/validations'
-import path from 'path'
-import { writeFile, mkdir } from 'fs/promises'
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyAccessToken } from '@/lib/auth';
+import { prisma } from '@/lib/db';
+import { ClaimService } from '@/lib/insurance';
+import { claimDocumentUploadSchema } from '@/lib/validations';
+import path from 'path';
+import { writeFile, mkdir } from 'fs/promises';
 
 // Simple authentication helper
 async function authenticateRequest(request: NextRequest) {
@@ -21,7 +21,7 @@ async function authenticateRequest(request: NextRequest) {
 
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { id: true, email: true }
+    select: { id: true, email: true },
   });
 
   if (!user) {
@@ -32,10 +32,7 @@ async function authenticateRequest(request: NextRequest) {
 }
 
 // POST /api/claims/[id]/documents - Upload documents for a claim
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Authenticate the request
     const authResult = await authenticateRequest(request);
@@ -58,10 +55,7 @@ export async function POST(
     const description = formData.get('description') as string | null;
 
     if (!file) {
-      return NextResponse.json(
-        { success: false, error: 'No file provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 });
     }
 
     // Validate document type
@@ -72,10 +66,10 @@ export async function POST(
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Validation failed',
-          details: validationResult.error.issues 
+          details: validationResult.error.issues,
         },
         { status: 400 }
       );
@@ -89,7 +83,7 @@ export async function POST(
       'image/webp',
       'application/pdf',
       'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
 
     if (file.size > maxSize) {
@@ -124,7 +118,7 @@ export async function POST(
 
     // Create document record
     const documentUrl = `/uploads/claims/${fileName}`;
-    
+
     const claimDocument = await prisma.claimDocument.create({
       data: {
         claimId,
@@ -139,20 +133,19 @@ export async function POST(
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      data: claimDocument,
-      message: 'Document uploaded successfully',
-    }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        success: true,
+        data: claimDocument,
+        message: 'Document uploaded successfully',
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
     console.error('Error uploading claim document:', error);
-    
+
     if (error.message.includes('not found') || error.message.includes('Unauthorized')) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: error.message }, { status: 404 });
     }
 
     return NextResponse.json(
@@ -163,10 +156,7 @@ export async function POST(
 }
 
 // GET /api/claims/[id]/documents - Get documents for a claim
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Authenticate the request
     const authResult = await authenticateRequest(request);
@@ -192,15 +182,11 @@ export async function GET(
       success: true,
       data: documents,
     });
-
   } catch (error: any) {
     console.error('Error fetching claim documents:', error);
-    
+
     if (error.message.includes('not found') || error.message.includes('Unauthorized')) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: error.message }, { status: 404 });
     }
 
     return NextResponse.json(

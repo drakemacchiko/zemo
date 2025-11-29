@@ -49,14 +49,11 @@ export default function MessagesPage() {
 
     const fetchConversationData = async () => {
       try {
-        const response = await fetch(
-          `/api/messages/conversations/${selectedConversationId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-          }
-        );
+        const response = await fetch(`/api/messages/conversations/${selectedConversationId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
 
         if (!response.ok) throw new Error('Failed to fetch conversation');
 

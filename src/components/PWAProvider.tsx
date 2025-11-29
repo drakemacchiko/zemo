@@ -18,7 +18,11 @@ export function PWAProvider({ children }: { children: React.ReactNode }) {
     setupInstallPrompt();
 
     // Register service worker - only in production
-    if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    if (
+      process.env.NODE_ENV === 'production' &&
+      typeof window !== 'undefined' &&
+      'serviceWorker' in navigator
+    ) {
       registerServiceWorker({
         onUpdate: () => {
           setUpdateAvailable(true);
@@ -26,7 +30,7 @@ export function PWAProvider({ children }: { children: React.ReactNode }) {
         onSuccess: () => {
           // Service worker registered successfully
         },
-        onError: (error) => {
+        onError: error => {
           console.warn('Service worker registration failed:', error);
         },
       });
@@ -47,7 +51,7 @@ export function PWAProvider({ children }: { children: React.ReactNode }) {
 
   const handleUpdate = () => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then((registration) => {
+      navigator.serviceWorker.ready.then(registration => {
         if (registration.waiting) {
           registration.waiting.postMessage({ type: 'SKIP_WAITING' });
           window.location.reload();
@@ -70,9 +74,7 @@ export function PWAProvider({ children }: { children: React.ReactNode }) {
         >
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
-              <p className="font-sub-heading text-sm">
-                A new version of ZEMO is available!
-              </p>
+              <p className="font-sub-heading text-sm">A new version of ZEMO is available!</p>
               <p className="text-xs mt-1 opacity-80">Update now to get the latest features.</p>
             </div>
             <button

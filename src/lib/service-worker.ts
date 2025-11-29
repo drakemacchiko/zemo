@@ -32,9 +32,12 @@ export async function registerServiceWorker(config?: ServiceWorkerConfig): Promi
     });
 
     // Check for updates every hour
-    setInterval(() => {
-      registration.update();
-    }, 60 * 60 * 1000);
+    setInterval(
+      () => {
+        registration.update();
+      },
+      60 * 60 * 1000
+    );
 
     config?.onSuccess?.(registration);
   } catch (error) {
@@ -102,7 +105,7 @@ export function promptInstall(): void {
 export function setupInstallPrompt(): void {
   if (typeof window === 'undefined') return;
 
-  window.addEventListener('beforeinstallprompt', (e) => {
+  window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     (window as any).deferredPrompt = e;
 

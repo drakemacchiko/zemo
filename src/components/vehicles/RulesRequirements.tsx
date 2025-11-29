@@ -24,8 +24,8 @@ const defaultRules: Rule[] = [
   { type: 'not-allowed', text: 'No off-road driving' },
   { type: 'not-allowed', text: 'No racing or reckless driving' },
   { type: 'not-allowed', text: 'No border crossing without permission' },
-  { type: 'info', text: 'Tolls and parking fees are renter\'s responsibility' },
-  { type: 'info', text: 'Traffic violations will be charged to renter' }
+  { type: 'info', text: "Tolls and parking fees are renter's responsibility" },
+  { type: 'info', text: 'Traffic violations will be charged to renter' },
 ];
 
 export function RulesRequirements({
@@ -33,7 +33,7 @@ export function RulesRequirements({
   minAge = 23,
   licenseRequired = true,
   securityDeposit = 50000,
-  additionalRequirements = []
+  additionalRequirements = [],
 }: RulesRequirementsProps) {
   const allowedRules = rules.filter(r => r.type === 'allowed');
   const notAllowedRules = rules.filter(r => r.type === 'not-allowed');
@@ -45,9 +45,7 @@ export function RulesRequirements({
         <AlertCircle className="w-6 h-6 text-zemo-yellow flex-shrink-0 mt-1" />
         <div>
           <h2 className="text-2xl font-bold mb-2">Rules & Requirements</h2>
-          <p className="text-gray-600">
-            Please read and follow these important guidelines
-          </p>
+          <p className="text-gray-600">Please read and follow these important guidelines</p>
         </div>
       </div>
 
@@ -60,7 +58,9 @@ export function RulesRequirements({
         <ul className="space-y-2">
           <li className="flex items-start gap-2 text-sm text-gray-700">
             <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-            <span>Minimum age: <strong>{minAge} years old</strong></span>
+            <span>
+              Minimum age: <strong>{minAge} years old</strong>
+            </span>
           </li>
           {licenseRequired && (
             <li className="flex items-start gap-2 text-sm text-gray-700">
@@ -75,7 +75,9 @@ export function RulesRequirements({
           {securityDeposit > 0 && (
             <li className="flex items-start gap-2 text-sm text-gray-700">
               <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-              <span>Security deposit: <strong>₦{securityDeposit.toLocaleString()}</strong> (refundable)</span>
+              <span>
+                Security deposit: <strong>₦{securityDeposit.toLocaleString()}</strong> (refundable)
+              </span>
             </li>
           )}
           {additionalRequirements.map((req, index) => (

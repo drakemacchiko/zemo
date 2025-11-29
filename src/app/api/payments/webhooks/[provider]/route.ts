@@ -5,28 +5,15 @@ import { prisma } from '@/lib/db';
 import { webhookPayloadSchema } from '@/lib/payments/validations';
 
 // Webhook signature verification
-function verifyWebhookSignature(
-  payload: string,
-  signature: string,
-  secret: string
-): boolean {
-  const expectedSignature = crypto
-    .createHmac('sha256', secret)
-    .update(payload)
-    .digest('hex');
-  
+function verifyWebhookSignature(payload: string, signature: string, secret: string): boolean {
+  const expectedSignature = crypto.createHmac('sha256', secret).update(payload).digest('hex');
+
   // Use timing-safe comparison
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expectedSignature)
-  );
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
 }
 
 // POST /api/payments/webhooks/[provider]
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { provider: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { provider: string } }) {
   try {
     const provider = params.provider.toUpperCase();
     const body = await request.text();
@@ -48,19 +35,13 @@ export async function POST(
         webhookSecret = process.env.DPO_WEBHOOK_SECRET || 'dpo-secret';
         break;
       default:
-        return NextResponse.json(
-          { error: 'Unsupported provider' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Unsupported provider' }, { status: 400 });
     }
 
     // Verify webhook signature
     if (!verifyWebhookSignature(body, signature, webhookSecret)) {
       console.error('Webhook signature verification failed');
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
     // Parse webhook payload
@@ -72,20 +53,17 @@ export async function POST(
       where: {
         OR: [
           { id: validatedPayload.paymentId },
-          { providerTransactionId: validatedPayload.paymentId }
-        ]
+          { providerTransactionId: validatedPayload.paymentId },
+        ],
       },
       include: {
-        booking: true
-      }
+        booking: true,
+      },
     });
 
     if (!payment) {
       console.error(`Payment not found: ${validatedPayload.paymentId}`);
-      return NextResponse.json(
-        { error: 'Payment not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
     }
 
     // Update payment status
@@ -95,7 +73,7 @@ export async function POST(
         status: validatedPayload.status as any,
         processedAt: new Date(validatedPayload.timestamp),
         providerReference: validatedPayload.providerData.reference || payment.providerReference,
-      }
+      },
     });
 
     // Update booking status if needed
@@ -106,7 +84,7 @@ export async function POST(
           data: {
             status: 'CONFIRMED',
             confirmedAt: new Date(),
-          }
+          },
         });
       }
     } else if (payment.booking && validatedPayload.status === 'FAILED') {
@@ -115,7 +93,7 @@ export async function POST(
         data: {
           status: 'CANCELLED',
           cancelledAt: new Date(),
-        }
+        },
       });
     }
 
@@ -132,16 +110,15 @@ export async function POST(
         providerTransactionId: validatedPayload.providerData.transactionId,
         providerReference: validatedPayload.providerData.reference,
         notes: `Webhook: ${validatedPayload.eventType}`,
-      }
+      },
     });
 
     return NextResponse.json({
       success: true,
       paymentId: payment.id,
       status: validatedPayload.status,
-      processed: true
+      processed: true,
     });
-
   } catch (error) {
     console.error('Webhook processing error:', error);
 
@@ -152,20 +129,14 @@ export async function POST(
       );
     }
 
-    return NextResponse.json(
-      { error: 'Webhook processing failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
   }
 }
 
 // GET /api/payments/webhooks/[provider] - Webhook verification endpoint
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { provider: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { provider: string } }) {
   const challenge = request.nextUrl.searchParams.get('challenge');
-  
+
   if (challenge) {
     // Return challenge for webhook verification (used by some providers)
     return NextResponse.json({ challenge });
@@ -174,6 +145,6 @@ export async function GET(
   return NextResponse.json({
     provider: params.provider,
     status: 'active',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 }

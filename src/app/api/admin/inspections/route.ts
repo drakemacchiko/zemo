@@ -8,31 +8,31 @@ import { z } from 'zod';
  */
 async function verifyAuthToken(request: NextRequest) {
   const token = extractTokenFromRequest(request);
-  
+
   if (!token) {
     return null;
   }
-  
+
   const payload = verifyAccessToken(token);
   if (!payload) {
     return null;
   }
-  
+
   // Verify user exists
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { 
-      id: true, 
+    select: {
+      id: true,
       email: true,
       profile: {
         select: {
           firstName: true,
           lastName: true,
-        }
-      }
-    }
+        },
+      },
+    },
   });
-  
+
   return user;
 }
 
@@ -72,11 +72,14 @@ export async function GET(request: NextRequest) {
 
     // Build query filters
     const where: any = {};
-    
-    if (status && ['PENDING', 'COMPLETED', 'ACKNOWLEDGED', 'DISPUTED', 'RESOLVED'].includes(status)) {
+
+    if (
+      status &&
+      ['PENDING', 'COMPLETED', 'ACKNOWLEDGED', 'DISPUTED', 'RESOLVED'].includes(status)
+    ) {
       where.status = status;
     }
-    
+
     if (type && ['PICKUP', 'RETURN'].includes(type)) {
       where.inspectionType = type;
     }
@@ -166,12 +169,14 @@ export async function GET(request: NextRequest) {
         hasPrev: page > 1,
       },
     });
-
   } catch (error) {
     console.error('Admin inspections list error:', error);
-    return NextResponse.json({
-      error: 'Failed to retrieve inspections',
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to retrieve inspections',
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -189,9 +194,12 @@ export async function POST(request: NextRequest) {
     const { action, inspectionIds, ...actionData } = body;
 
     if (!action || !inspectionIds || !Array.isArray(inspectionIds)) {
-      return NextResponse.json({
-        error: 'Action and inspectionIds are required',
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Action and inspectionIds are required',
+        },
+        { status: 400 }
+      );
     }
 
     const results = [];
@@ -251,18 +259,18 @@ export async function POST(request: NextRequest) {
             break;
 
           default:
-            results.push({ 
-              inspectionId, 
-              status: 'error', 
-              message: `Unknown action: ${action}` 
+            results.push({
+              inspectionId,
+              status: 'error',
+              message: `Unknown action: ${action}`,
             });
         }
       } catch (error) {
         console.error(`Error processing inspection ${inspectionId}:`, error);
-        results.push({ 
-          inspectionId, 
-          status: 'error', 
-          message: error instanceof Error ? error.message : 'Unknown error' 
+        results.push({
+          inspectionId,
+          status: 'error',
+          message: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
@@ -271,19 +279,24 @@ export async function POST(request: NextRequest) {
       message: `Bulk action ${action} completed`,
       results,
     });
-
   } catch (error) {
     console.error('Admin bulk action error:', error);
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        error: 'Validation failed',
-        details: error.issues,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Validation failed',
+          details: error.issues,
+        },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({
-      error: 'Failed to perform bulk action',
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to perform bulk action',
+      },
+      { status: 500 }
+    );
   }
 }

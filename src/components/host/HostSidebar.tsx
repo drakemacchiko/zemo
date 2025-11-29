@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Car,
@@ -25,33 +25,33 @@ import {
   ChevronDown,
   ChevronUp,
   Menu,
-  X
-} from 'lucide-react'
+  X,
+} from 'lucide-react';
 
 interface NavItem {
-  label: string
-  href?: string
-  icon: React.ReactNode
-  badge?: number
-  children?: NavItem[]
+  label: string;
+  href?: string;
+  icon: React.ReactNode;
+  badge?: number;
+  children?: NavItem[];
 }
 
 interface HostSidebarProps {
-  className?: string
+  className?: string;
 }
 
 export default function HostSidebar({ className = '' }: HostSidebarProps) {
-  const pathname = usePathname()
-  const [expandedSections, setExpandedSections] = useState<string[]>(['vehicles', 'bookings'])
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const unreadMessages = 3 // This would come from API
-  const bookingRequests = 2 // This would come from API
+  const pathname = usePathname();
+  const [expandedSections, setExpandedSections] = useState<string[]>(['vehicles', 'bookings']);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const unreadMessages = 3; // This would come from API
+  const bookingRequests = 2; // This would come from API
 
   const navigation: NavItem[] = [
     {
       label: 'Dashboard',
       href: '/host/dashboard',
-      icon: <LayoutDashboard className="h-5 w-5" />
+      icon: <LayoutDashboard className="h-5 w-5" />,
     },
     {
       label: 'Your Vehicles',
@@ -60,19 +60,19 @@ export default function HostSidebar({ className = '' }: HostSidebarProps) {
         {
           label: 'All Vehicles',
           href: '/host/vehicles',
-          icon: <Car className="h-4 w-4" />
+          icon: <Car className="h-4 w-4" />,
         },
         {
           label: 'Add New Vehicle',
           href: '/host/vehicles/new',
-          icon: <Plus className="h-4 w-4" />
+          icon: <Plus className="h-4 w-4" />,
         },
         {
           label: 'Vehicle Performance',
           href: '/host/vehicles/performance',
-          icon: <TrendingUp className="h-4 w-4" />
-        }
-      ]
+          icon: <TrendingUp className="h-4 w-4" />,
+        },
+      ],
     },
     {
       label: 'Bookings',
@@ -82,29 +82,29 @@ export default function HostSidebar({ className = '' }: HostSidebarProps) {
           label: 'Booking Requests',
           href: '/host/bookings/requests',
           icon: <Clock className="h-4 w-4" />,
-          badge: bookingRequests
+          badge: bookingRequests,
         },
         {
           label: 'Upcoming',
           href: '/host/bookings/upcoming',
-          icon: <CalendarRange className="h-4 w-4" />
+          icon: <CalendarRange className="h-4 w-4" />,
         },
         {
           label: 'Active',
           href: '/host/bookings/active',
-          icon: <CheckCircle className="h-4 w-4" />
+          icon: <CheckCircle className="h-4 w-4" />,
         },
         {
           label: 'Completed',
           href: '/host/bookings/completed',
-          icon: <CheckCircle className="h-4 w-4" />
+          icon: <CheckCircle className="h-4 w-4" />,
         },
         {
           label: 'Cancelled',
           href: '/host/bookings/cancelled',
-          icon: <XCircle className="h-4 w-4" />
-        }
-      ]
+          icon: <XCircle className="h-4 w-4" />,
+        },
+      ],
     },
     {
       label: 'Calendar',
@@ -113,14 +113,14 @@ export default function HostSidebar({ className = '' }: HostSidebarProps) {
         {
           label: 'Availability Calendar',
           href: '/host/calendar',
-          icon: <Calendar className="h-4 w-4" />
+          icon: <Calendar className="h-4 w-4" />,
         },
         {
           label: 'Blocked Dates',
           href: '/host/calendar/blocked',
-          icon: <Ban className="h-4 w-4" />
-        }
-      ]
+          icon: <Ban className="h-4 w-4" />,
+        },
+      ],
     },
     {
       label: 'Earnings',
@@ -129,64 +129,62 @@ export default function HostSidebar({ className = '' }: HostSidebarProps) {
         {
           label: 'Overview',
           href: '/host/earnings',
-          icon: <DollarSign className="h-4 w-4" />
+          icon: <DollarSign className="h-4 w-4" />,
         },
         {
           label: 'Transaction History',
           href: '/host/earnings/transactions',
-          icon: <Receipt className="h-4 w-4" />
+          icon: <Receipt className="h-4 w-4" />,
         },
         {
           label: 'Payout Methods',
           href: '/host/earnings/payout-methods',
-          icon: <CreditCard className="h-4 w-4" />
+          icon: <CreditCard className="h-4 w-4" />,
         },
         {
           label: 'Tax Documents',
           href: '/host/earnings/tax-documents',
-          icon: <FileText className="h-4 w-4" />
-        }
-      ]
+          icon: <FileText className="h-4 w-4" />,
+        },
+      ],
     },
     {
       label: 'Messages',
       href: '/host/messages',
       icon: <MessageSquare className="h-5 w-5" />,
-      badge: unreadMessages
+      badge: unreadMessages,
     },
     {
       label: 'Reviews',
       href: '/host/reviews',
-      icon: <Star className="h-5 w-5" />
+      icon: <Star className="h-5 w-5" />,
     },
     {
       label: 'Insurance & Protection',
       href: '/host/insurance',
-      icon: <Shield className="h-5 w-5" />
+      icon: <Shield className="h-5 w-5" />,
     },
     {
       label: 'Help & Resources',
       href: '/host/help',
-      icon: <HelpCircle className="h-5 w-5" />
-    }
-  ]
+      icon: <HelpCircle className="h-5 w-5" />,
+    },
+  ];
 
   const toggleSection = (label: string) => {
-    setExpandedSections((prev) =>
-      prev.includes(label)
-        ? prev.filter((item) => item !== label)
-        : [...prev, label]
-    )
-  }
+    setExpandedSections(prev =>
+      prev.includes(label) ? prev.filter(item => item !== label) : [...prev, label]
+    );
+  };
 
   const isActive = (href: string) => {
-    return pathname === href || pathname.startsWith(href + '/')
-  }
+    return pathname === href || pathname.startsWith(href + '/');
+  };
 
   const renderNavItem = (item: NavItem, depth: number = 0) => {
-    const hasChildren = item.children && item.children.length > 0
-    const isExpanded = expandedSections.includes(item.label.toLowerCase().replace(/\s+/g, '-'))
-    const active = item.href ? isActive(item.href) : false
+    const hasChildren = item.children && item.children.length > 0;
+    const isExpanded = expandedSections.includes(item.label.toLowerCase().replace(/\s+/g, '-'));
+    const active = item.href ? isActive(item.href) : false;
 
     if (hasChildren) {
       return (
@@ -194,28 +192,22 @@ export default function HostSidebar({ className = '' }: HostSidebarProps) {
           <button
             onClick={() => toggleSection(item.label.toLowerCase().replace(/\s+/g, '-'))}
             className={`w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-              active
-                ? 'bg-blue-50 text-blue-700'
-                : 'text-gray-700 hover:bg-gray-100'
+              active ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'
             }`}
           >
             <div className="flex items-center space-x-3">
               {item.icon}
               <span>{item.label}</span>
             </div>
-            {isExpanded ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
+            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </button>
           {isExpanded && (
             <div className="ml-4 mt-1 space-y-1">
-              {item.children?.map((child) => renderNavItem(child, depth + 1))}
+              {item.children?.map(child => renderNavItem(child, depth + 1))}
             </div>
           )}
         </div>
-      )
+      );
     }
 
     return (
@@ -224,11 +216,7 @@ export default function HostSidebar({ className = '' }: HostSidebarProps) {
         href={item.href || '#'}
         className={`flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
           depth > 0 ? 'pl-8' : ''
-        } ${
-          active
-            ? 'bg-blue-50 text-blue-700'
-            : 'text-gray-700 hover:bg-gray-100'
-        }`}
+        } ${active ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
       >
         <div className="flex items-center space-x-3">
           {item.icon}
@@ -240,8 +228,8 @@ export default function HostSidebar({ className = '' }: HostSidebarProps) {
           </span>
         )}
       </Link>
-    )
-  }
+    );
+  };
 
   return (
     <>
@@ -274,9 +262,7 @@ export default function HostSidebar({ className = '' }: HostSidebarProps) {
             </div>
           </Link>
 
-          <nav className="space-y-1">
-            {navigation.map((item) => renderNavItem(item))}
-          </nav>
+          <nav className="space-y-1">{navigation.map(item => renderNavItem(item))}</nav>
         </div>
       </aside>
 
@@ -302,9 +288,7 @@ export default function HostSidebar({ className = '' }: HostSidebarProps) {
                 </div>
               </Link>
 
-              <nav className="space-y-1">
-                {navigation.map((item) => renderNavItem(item))}
-              </nav>
+              <nav className="space-y-1">{navigation.map(item => renderNavItem(item))}</nav>
             </div>
           </aside>
         </div>
@@ -316,9 +300,7 @@ export default function HostSidebar({ className = '' }: HostSidebarProps) {
           <Link
             href="/host/dashboard"
             className={`flex flex-col items-center justify-center py-2 rounded-lg ${
-              pathname === '/host/dashboard'
-                ? 'bg-blue-50 text-blue-600'
-                : 'text-gray-600'
+              pathname === '/host/dashboard' ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
             }`}
           >
             <LayoutDashboard className="h-5 w-5" />
@@ -327,9 +309,7 @@ export default function HostSidebar({ className = '' }: HostSidebarProps) {
           <Link
             href="/host/vehicles"
             className={`flex flex-col items-center justify-center py-2 rounded-lg ${
-              pathname.startsWith('/host/vehicles')
-                ? 'bg-blue-50 text-blue-600'
-                : 'text-gray-600'
+              pathname.startsWith('/host/vehicles') ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
             }`}
           >
             <Car className="h-5 w-5" />
@@ -338,9 +318,7 @@ export default function HostSidebar({ className = '' }: HostSidebarProps) {
           <Link
             href="/host/bookings"
             className={`flex flex-col items-center justify-center py-2 rounded-lg relative ${
-              pathname.startsWith('/host/bookings')
-                ? 'bg-blue-50 text-blue-600'
-                : 'text-gray-600'
+              pathname.startsWith('/host/bookings') ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
             }`}
           >
             <Calendar className="h-5 w-5" />
@@ -354,9 +332,7 @@ export default function HostSidebar({ className = '' }: HostSidebarProps) {
           <Link
             href="/host/messages"
             className={`flex flex-col items-center justify-center py-2 rounded-lg relative ${
-              pathname.startsWith('/host/messages')
-                ? 'bg-blue-50 text-blue-600'
-                : 'text-gray-600'
+              pathname.startsWith('/host/messages') ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
             }`}
           >
             <MessageSquare className="h-5 w-5" />
@@ -370,5 +346,5 @@ export default function HostSidebar({ className = '' }: HostSidebarProps) {
         </div>
       </div>
     </>
-  )
+  );
 }

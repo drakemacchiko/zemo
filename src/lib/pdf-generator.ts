@@ -39,7 +39,7 @@ export async function generateRentalAgreementPDF(data: AgreementData): Promise<B
 
   // Set font
   doc.setFont('helvetica');
-  
+
   let yPosition = 20;
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 20;
@@ -49,9 +49,9 @@ export async function generateRentalAgreementPDF(data: AgreementData): Promise<B
   const addText = (text: string, fontSize: number = 10, isBold: boolean = false) => {
     doc.setFontSize(fontSize);
     doc.setFont('helvetica', isBold ? 'bold' : 'normal');
-    
+
     const lines = doc.splitTextToSize(text, maxWidth);
-    
+
     lines.forEach((line: string) => {
       if (yPosition > 270) {
         doc.addPage();
@@ -117,7 +117,7 @@ export async function generateRentalAgreementPDF(data: AgreementData): Promise<B
 
   // Terms and Conditions
   addText('TERMS AND CONDITIONS', 14, true);
-  
+
   const standardTerms = [
     'The renter agrees to use the vehicle in a safe and responsible manner.',
     'The vehicle must be returned in the same condition as provided.',

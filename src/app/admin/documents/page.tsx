@@ -36,12 +36,11 @@ export default function AdminDocumentVerificationPage() {
     setLoading(true);
     try {
       const token = localStorage.getItem('accessToken');
-      const url = filter === 'ALL' 
-        ? '/api/admin/documents'
-        : `/api/admin/documents?status=${filter}`;
-      
+      const url =
+        filter === 'ALL' ? '/api/admin/documents' : `/api/admin/documents?status=${filter}`;
+
       const response = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -61,7 +60,7 @@ export default function AdminDocumentVerificationPage() {
       const response = await fetch(`/api/admin/documents/${documentId}/verify`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ action: 'APPROVE' }),
@@ -89,7 +88,7 @@ export default function AdminDocumentVerificationPage() {
       const response = await fetch(`/api/admin/documents/${documentId}/verify`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -145,9 +144,7 @@ export default function AdminDocumentVerificationPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Document Verification</h1>
-              <p className="text-gray-600 mt-2">
-                Review and approve user-submitted documents
-              </p>
+              <p className="text-gray-600 mt-2">Review and approve user-submitted documents</p>
             </div>
             <div className="text-right">
               <div className="text-3xl font-bold text-yellow-500">{pendingCount}</div>
@@ -159,7 +156,7 @@ export default function AdminDocumentVerificationPage() {
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
           <div className="flex gap-2">
-            {(['ALL', 'PENDING', 'APPROVED', 'REJECTED'] as const).map((status) => (
+            {(['ALL', 'PENDING', 'APPROVED', 'REJECTED'] as const).map(status => (
               <button
                 key={status}
                 onClick={() => setFilter(status)}
@@ -169,7 +166,9 @@ export default function AdminDocumentVerificationPage() {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {status === 'PENDING' ? 'Pending Review' : status.charAt(0) + status.slice(1).toLowerCase()}
+                {status === 'PENDING'
+                  ? 'Pending Review'
+                  : status.charAt(0) + status.slice(1).toLowerCase()}
               </button>
             ))}
           </div>
@@ -186,7 +185,7 @@ export default function AdminDocumentVerificationPage() {
           </div>
         ) : (
           <div className="grid gap-4">
-            {documents.map((doc) => (
+            {documents.map(doc => (
               <div key={doc.id} className="bg-white rounded-lg shadow-sm p-6">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -197,7 +196,9 @@ export default function AdminDocumentVerificationPage() {
                       {getStatusBadge(doc.status)}
                     </div>
                     <div className="text-sm text-gray-600 space-y-1">
-                      <p>User: {doc.user.name} ({doc.user.email})</p>
+                      <p>
+                        User: {doc.user.name} ({doc.user.email})
+                      </p>
                       <p>Uploaded: {new Date(doc.uploadedAt).toLocaleString()}</p>
                       <p>Filename: {doc.fileName}</p>
                       {doc.rejectionReason && (
@@ -248,7 +249,7 @@ export default function AdminDocumentVerificationPage() {
               </p>
               <textarea
                 value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
+                onChange={e => setRejectionReason(e.target.value)}
                 placeholder="e.g., Image is blurry, document is expired, etc."
                 className="w-full border border-gray-300 rounded-lg p-3 mb-4 h-32 resize-none"
               />

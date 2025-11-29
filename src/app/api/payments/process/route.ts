@@ -3,10 +3,7 @@ import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { verifyAccessToken } from '@/lib/auth';
 import { PaymentServiceFactory, PaymentUtils, PaymentProvider } from '@/lib/payments';
-import { 
-  paymentCreateSchema, 
-  holdRequestSchema
-} from '@/lib/payments/validations';
+import { paymentCreateSchema, holdRequestSchema } from '@/lib/payments/validations';
 
 // Simple authentication helper
 async function authenticateRequest(request: NextRequest) {
@@ -23,7 +20,7 @@ async function authenticateRequest(request: NextRequest) {
 
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { id: true, email: true }
+    select: { id: true, email: true },
   });
 
   if (!user) {
@@ -39,31 +36,28 @@ export async function POST(request: NextRequest) {
     // Authenticate the request
     const authResult = await authenticateRequest(request);
     if (!authResult.success || !authResult.user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const body = await request.json();
-    
+
     // Determine payment type and validate accordingly
     let validatedData;
 
     if (body.intent === 'HOLD') {
       // Security deposit hold
       validatedData = holdRequestSchema.parse(body);
-      
+
       // Verify booking exists and belongs to user
       const booking = await prisma.booking.findFirst({
         where: {
           id: validatedData.bookingId,
           userId: authResult.user.id,
-          status: 'PENDING'
+          status: 'PENDING',
         },
         include: {
-          vehicle: true
-        }
+          vehicle: true,
+        },
       });
 
       if (!booking) {
@@ -85,11 +79,13 @@ export async function POST(request: NextRequest) {
           status: 'PENDING',
           intent: 'HOLD',
           paymentMethodId: validatedData.paymentMethodId,
-        }
+        },
       });
 
       // Process the hold with payment service
-      const paymentService = PaymentServiceFactory.getService(validatedData.provider as PaymentProvider);
+      const paymentService = PaymentServiceFactory.getService(
+        validatedData.provider as PaymentProvider
+      );
       const holdResult = await paymentService.holdFunds({
         amount: validatedData.amount,
         currency: validatedData.currency,
@@ -100,29 +96,29 @@ export async function POST(request: NextRequest) {
           bookingId: booking.id,
           userId: authResult.user.id,
           vehicleId: booking.vehicleId,
-        }
+        },
       });
 
       // Update payment record with result
       const updateData: any = {
         status: holdResult.success ? 'HELD' : 'FAILED',
       };
-      
+
       if (holdResult.providerTransactionId) {
         updateData.providerTransactionId = holdResult.providerTransactionId;
       }
-      
+
       if (holdResult.error) {
         updateData.failureReason = holdResult.error;
       }
-      
+
       if (holdResult.success) {
         updateData.processedAt = new Date();
       }
 
       const updatedPayment = await prisma.payment.update({
         where: { id: payment.id },
-        data: updateData
+        data: updateData,
       });
 
       if (holdResult.success) {
@@ -132,7 +128,7 @@ export async function POST(request: NextRequest) {
           data: {
             status: 'CONFIRMED',
             confirmedAt: new Date(),
-          }
+          },
         });
       }
 
@@ -145,10 +141,13 @@ export async function POST(request: NextRequest) {
           currency: updatedPayment.currency,
           provider: updatedPayment.provider,
         },
-        message: holdResult.message || (holdResult.success ? 'Security deposit hold successful' : 'Security deposit hold failed'),
+        message:
+          holdResult.message ||
+          (holdResult.success
+            ? 'Security deposit hold successful'
+            : 'Security deposit hold failed'),
         error: holdResult.error,
       });
-
     } else {
       // Regular payment
       validatedData = paymentCreateSchema.parse(body);
@@ -158,11 +157,11 @@ export async function POST(request: NextRequest) {
         where: {
           id: validatedData.bookingId,
           userId: authResult.user.id,
-          status: { in: ['PENDING', 'CONFIRMED'] }
+          status: { in: ['PENDING', 'CONFIRMED'] },
         },
         include: {
-          vehicle: true
-        }
+          vehicle: true,
+        },
       });
 
       if (!booking) {
@@ -183,18 +182,20 @@ export async function POST(request: NextRequest) {
         status: 'PENDING',
         intent: validatedData.intent,
       };
-      
+
       if (validatedData.paymentMethodId) {
         paymentData.paymentMethodId = validatedData.paymentMethodId;
       }
 
       const payment = await prisma.payment.create({
-        data: paymentData
+        data: paymentData,
       });
 
       // Process the payment with payment service
-      const paymentService = PaymentServiceFactory.getService(validatedData.provider as PaymentProvider);
-      
+      const paymentService = PaymentServiceFactory.getService(
+        validatedData.provider as PaymentProvider
+      );
+
       // Ensure paymentMethodId is provided for payment processing
       if (!validatedData.paymentMethodId) {
         return NextResponse.json(
@@ -202,7 +203,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      
+
       const paymentResult = await paymentService.processPayment({
         amount: validatedData.amount,
         currency: validatedData.currency,
@@ -213,33 +214,33 @@ export async function POST(request: NextRequest) {
           bookingId: booking.id,
           userId: authResult.user.id,
           vehicleId: booking.vehicleId,
-        }
+        },
       });
 
       // Update payment record with result
       const paymentUpdateData: any = {
         status: paymentResult.success ? 'COMPLETED' : 'FAILED',
       };
-      
+
       if (paymentResult.providerTransactionId) {
         paymentUpdateData.providerTransactionId = paymentResult.providerTransactionId;
       }
-      
+
       if (paymentResult.providerReference) {
         paymentUpdateData.providerReference = paymentResult.providerReference;
       }
-      
+
       if (paymentResult.error) {
         paymentUpdateData.failureReason = paymentResult.error;
       }
-      
+
       if (paymentResult.success) {
         paymentUpdateData.processedAt = new Date();
       }
 
       const updatedPayment = await prisma.payment.update({
         where: { id: payment.id },
-        data: paymentUpdateData
+        data: paymentUpdateData,
       });
 
       if (paymentResult.success && validatedData.paymentType === 'BOOKING_PAYMENT') {
@@ -249,7 +250,7 @@ export async function POST(request: NextRequest) {
           data: {
             status: 'CONFIRMED',
             confirmedAt: new Date(),
-          }
+          },
         });
       }
 
@@ -262,11 +263,12 @@ export async function POST(request: NextRequest) {
           currency: updatedPayment.currency,
           provider: updatedPayment.provider,
         },
-        message: paymentResult.message || (paymentResult.success ? 'Payment processed successfully' : 'Payment processing failed'),
+        message:
+          paymentResult.message ||
+          (paymentResult.success ? 'Payment processed successfully' : 'Payment processing failed'),
         error: paymentResult.error,
       });
     }
-
   } catch (error) {
     console.error('Payment processing error:', error);
 
@@ -277,10 +279,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -288,7 +287,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const supportedProviders = PaymentServiceFactory.getSupportedProviders();
-    
+
     const providerInfo = supportedProviders.map(provider => ({
       provider,
       type: PaymentServiceFactory.isMobileMoneyProvider(provider) ? 'mobile_money' : 'card',
@@ -303,9 +302,6 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Get payment info error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -19,13 +19,13 @@ export class AirtelMoneyService extends MobileMoneyService {
   constructor() {
     super();
     this.isProduction = process.env.NODE_ENV === 'production';
-    
+
     // Store API credentials for future production use
     const apiKey = process.env.AIRTEL_MONEY_API_KEY || 'sandbox_key';
     const baseUrl = this.isProduction
       ? 'https://api.airtel.co.zm/v1'
       : 'https://sandbox-api.airtel.co.zm/v1';
-    
+
     // In production, these would be used for actual API calls
     if (this.isProduction && apiKey && baseUrl) {
       // Production configuration ready
@@ -151,7 +151,7 @@ export class AirtelMoneyService extends MobileMoneyService {
     await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
 
     const paymentId = PaymentUtils.generateTransactionId('AM');
-    
+
     // Simulate success rate (90% success)
     const isSuccess = Math.random() > 0.1;
 
@@ -178,7 +178,7 @@ export class AirtelMoneyService extends MobileMoneyService {
     await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
 
     const refundId = PaymentUtils.generateTransactionId('AMR');
-    
+
     // Simulate 95% success rate for refunds
     const isSuccess = Math.random() > 0.05;
 
@@ -195,7 +195,7 @@ export class AirtelMoneyService extends MobileMoneyService {
     await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1200));
 
     const holdId = PaymentUtils.generateTransactionId('AMH');
-    
+
     // Simulate 85% success rate for holds
     const isSuccess = Math.random() > 0.15;
 
@@ -243,7 +243,7 @@ export class AirtelMoneyService extends MobileMoneyService {
     await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 2000));
 
     const transactionId = PaymentUtils.generateTransactionId('AM');
-    
+
     // Simulate success rate based on phone number (for testing)
     const normalizedPhone = PaymentUtils.normalizePhoneNumber(request.phoneNumber);
     const isSuccess = !normalizedPhone.endsWith('0000'); // Fail if phone ends with 0000
@@ -253,7 +253,7 @@ export class AirtelMoneyService extends MobileMoneyService {
       transactionId,
       providerReference: `AIRTEL-${Date.now()}`,
       status: isSuccess ? PaymentStatus.COMPLETED : PaymentStatus.FAILED,
-      message: isSuccess 
+      message: isSuccess
         ? 'Mobile payment initiated successfully. Customer will receive USSD prompt.'
         : 'Payment failed. Please check phone number and balance.',
     };

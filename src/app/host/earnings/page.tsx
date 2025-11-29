@@ -31,7 +31,7 @@ export default function EarningsOverviewPage() {
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch('/api/host/earnings/overview', {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -48,7 +48,10 @@ export default function EarningsOverviewPage() {
 
   const calculateGrowth = (): string => {
     if (!summary || summary.lastMonthEarnings === 0) return '0';
-    return ((summary.currentMonthEarnings - summary.lastMonthEarnings) / summary.lastMonthEarnings * 100).toFixed(1);
+    return (
+      ((summary.currentMonthEarnings - summary.lastMonthEarnings) / summary.lastMonthEarnings) *
+      100
+    ).toFixed(1);
   };
 
   if (loading) {
@@ -89,7 +92,9 @@ export default function EarningsOverviewPage() {
             ZMW {summary?.currentMonthEarnings.toLocaleString() || '0'}
           </p>
           {parseFloat(growth) !== 0 && (
-            <p className={`text-sm mt-2 flex items-center gap-1 ${parseFloat(growth) > 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <p
+              className={`text-sm mt-2 flex items-center gap-1 ${parseFloat(growth) > 0 ? 'text-green-600' : 'text-red-600'}`}
+            >
               <TrendingUp className="w-4 h-4" />
               {growth}% from last month
             </p>
@@ -104,9 +109,7 @@ export default function EarningsOverviewPage() {
           <p className="text-3xl font-bold text-gray-900">
             ZMW {summary?.averagePerBooking.toLocaleString() || '0'}
           </p>
-          <p className="text-sm text-gray-600 mt-2">
-            {summary?.totalBookings || 0} total bookings
-          </p>
+          <p className="text-sm text-gray-600 mt-2">{summary?.totalBookings || 0} total bookings</p>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border p-6">
@@ -140,9 +143,7 @@ export default function EarningsOverviewPage() {
           <div className="space-y-3">
             {monthlyData.map((month, index) => (
               <div key={index} className="flex items-center gap-4">
-                <div className="w-24 text-sm font-medium text-gray-700">
-                  {month.month}
-                </div>
+                <div className="w-24 text-sm font-medium text-gray-700">{month.month}</div>
                 <div className="flex-1">
                   <div className="bg-gray-200 rounded-full h-8 overflow-hidden">
                     <div

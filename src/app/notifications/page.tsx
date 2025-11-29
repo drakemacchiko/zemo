@@ -44,14 +44,11 @@ export default function NotificationsPage() {
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `/api/notifications?filter=${filter}&page=${page}&limit=20`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      );
+      const response = await fetch(`/api/notifications?filter=${filter}&page=${page}&limit=20`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -85,12 +82,10 @@ export default function NotificationsPage() {
       });
 
       // Update local state
-      setNotifications((prev) =>
-        prev.map((notif) =>
-          notificationIds.includes(notif.id) ? { ...notif, isRead: true } : notif
-        )
+      setNotifications(prev =>
+        prev.map(notif => (notificationIds.includes(notif.id) ? { ...notif, isRead: true } : notif))
       );
-      setUnreadCount((prev) => Math.max(0, prev - notificationIds.length));
+      setUnreadCount(prev => Math.max(0, prev - notificationIds.length));
       setSelectedIds(new Set());
     } catch (error) {
       console.error('Error marking as read:', error);
@@ -108,9 +103,7 @@ export default function NotificationsPage() {
         body: JSON.stringify({ markAllRead: true }),
       });
 
-      setNotifications((prev) =>
-        prev.map((notif) => ({ ...notif, isRead: true }))
-      );
+      setNotifications(prev => prev.map(notif => ({ ...notif, isRead: true })));
       setUnreadCount(0);
     } catch (error) {
       console.error('Error marking all as read:', error);
@@ -120,7 +113,7 @@ export default function NotificationsPage() {
   const deleteNotifications = async (notificationIds: string[]) => {
     try {
       await Promise.all(
-        notificationIds.map((id) =>
+        notificationIds.map(id =>
           fetch(`/api/notifications/${id}`, {
             method: 'DELETE',
             headers: {
@@ -131,9 +124,7 @@ export default function NotificationsPage() {
       );
 
       // Update local state
-      setNotifications((prev) =>
-        prev.filter((notif) => !notificationIds.includes(notif.id))
-      );
+      setNotifications(prev => prev.filter(notif => !notificationIds.includes(notif.id)));
       setSelectedIds(new Set());
     } catch (error) {
       console.error('Error deleting notifications:', error);
@@ -154,7 +145,7 @@ export default function NotificationsPage() {
     if (selectedIds.size === notifications.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(notifications.map((n) => n.id)));
+      setSelectedIds(new Set(notifications.map(n => n.id)));
     }
   };
 
@@ -195,7 +186,7 @@ export default function NotificationsPage() {
 
   const groupNotificationsByDate = () => {
     const grouped: { [key: string]: Notification[] } = {};
-    notifications.forEach((notif) => {
+    notifications.forEach(notif => {
       const dateKey = formatDate(notif.createdAt);
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
@@ -233,33 +224,29 @@ export default function NotificationsPage() {
 
           {/* Filters */}
           <div className="flex flex-wrap gap-2">
-            {(['all', 'unread', 'bookings', 'messages', 'account'] as FilterType[]).map(
-              (f) => (
-                <button
-                  key={f}
-                  onClick={() => {
-                    setFilter(f);
-                    setPage(1);
-                  }}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    filter === f
-                      ? 'bg-yellow-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {f.charAt(0).toUpperCase() + f.slice(1)}
-                </button>
-              )
-            )}
+            {(['all', 'unread', 'bookings', 'messages', 'account'] as FilterType[]).map(f => (
+              <button
+                key={f}
+                onClick={() => {
+                  setFilter(f);
+                  setPage(1);
+                }}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  filter === f
+                    ? 'bg-yellow-500 text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {f.charAt(0).toUpperCase() + f.slice(1)}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Bulk actions */}
         {selectedIds.size > 0 && (
           <div className="bg-white rounded-lg shadow-sm p-4 mb-4 flex items-center justify-between">
-            <span className="text-sm text-gray-700">
-              {selectedIds.size} selected
-            </span>
+            <span className="text-sm text-gray-700">{selectedIds.size} selected</span>
             <div className="flex gap-3">
               <button
                 onClick={() => markAsRead(Array.from(selectedIds))}
@@ -304,9 +291,7 @@ export default function NotificationsPage() {
               </svg>
               <p className="text-gray-500 text-lg">No notifications found</p>
               <p className="text-gray-400 text-sm mt-2">
-                {filter !== 'all'
-                  ? 'Try changing the filter'
-                  : "You're all caught up!"}
+                {filter !== 'all' ? 'Try changing the filter' : "You're all caught up!"}
               </p>
             </div>
           ) : (
@@ -330,11 +315,9 @@ export default function NotificationsPage() {
               {Object.entries(groupedNotifications).map(([date, notifs]) => (
                 <div key={date}>
                   <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                    <h3 className="text-sm font-semibold text-gray-700">
-                      {date}
-                    </h3>
+                    <h3 className="text-sm font-semibold text-gray-700">{date}</h3>
                   </div>
-                  {notifs.map((notification) => (
+                  {notifs.map(notification => (
                     <div
                       key={notification.id}
                       className={`border-b border-gray-200 hover:bg-gray-50 transition-colors ${
@@ -366,9 +349,7 @@ export default function NotificationsPage() {
                               >
                                 {notification.title}
                               </p>
-                              <p className="text-sm text-gray-600 mt-1">
-                                {notification.message}
-                              </p>
+                              <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
                               <p className="text-xs text-gray-400 mt-2">
                                 {new Date(notification.createdAt).toLocaleString()}
                               </p>
@@ -403,9 +384,7 @@ export default function NotificationsPage() {
                             )}
                             <button
                               onClick={() => {
-                                if (
-                                  confirm('Delete this notification?')
-                                ) {
+                                if (confirm('Delete this notification?')) {
                                   deleteNotifications([notification.id]);
                                 }
                               }}
@@ -428,7 +407,7 @@ export default function NotificationsPage() {
         {totalPages > 1 && (
           <div className="mt-6 flex items-center justify-center gap-2">
             <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -438,7 +417,7 @@ export default function NotificationsPage() {
               Page {page} of {totalPages}
             </span>
             <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
               className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >

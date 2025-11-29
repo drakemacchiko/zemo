@@ -27,14 +27,17 @@ interface SearchFiltersProps {
 }
 
 export function SearchFilters({ filters, onFiltersChange, counts }: SearchFiltersProps) {
-  const updateFilter = <K extends keyof FilterState>(
-    key: K,
-    value: FilterState[K]
-  ) => {
+  const updateFilter = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
     onFiltersChange({ ...filters, [key]: value });
   };
 
-  const toggleArrayFilter = (key: keyof Pick<FilterState, 'vehicleTypes' | 'makes' | 'features' | 'seats' | 'fuelTypes' | 'transmission'>, value: string) => {
+  const toggleArrayFilter = (
+    key: keyof Pick<
+      FilterState,
+      'vehicleTypes' | 'makes' | 'features' | 'seats' | 'fuelTypes' | 'transmission'
+    >,
+    value: string
+  ) => {
     const currentArray = filters[key] as string[];
     const newArray = currentArray.includes(value)
       ? currentArray.filter(item => item !== value)
@@ -54,7 +57,7 @@ export function SearchFilters({ filters, onFiltersChange, counts }: SearchFilter
       hasDelivery: false,
       seats: [],
       fuelTypes: [],
-      transmission: []
+      transmission: [],
     });
   };
 
@@ -85,7 +88,7 @@ export function SearchFilters({ filters, onFiltersChange, counts }: SearchFilter
     'GPS',
     'All-wheel drive',
     'Automatic transmission',
-    'Manual transmission'
+    'Manual transmission',
   ];
 
   const seatOptions = ['2', '4', '5', '7', '9'];
@@ -113,7 +116,7 @@ export function SearchFilters({ filters, onFiltersChange, counts }: SearchFilter
             max={5000}
             step={50}
             value={filters.priceRange}
-            onValueChange={(value) => updateFilter('priceRange', value as [number, number])}
+            onValueChange={value => updateFilter('priceRange', value as [number, number])}
             className="mb-4"
           />
           <div className="flex items-center justify-between text-sm text-gray-600">
@@ -122,9 +125,7 @@ export function SearchFilters({ filters, onFiltersChange, counts }: SearchFilter
           </div>
         </div>
         {counts?.total !== undefined && (
-          <div className="mt-2 text-xs text-gray-500">
-            {counts.total} cars in this range
-          </div>
+          <div className="mt-2 text-xs text-gray-500">{counts.total} cars in this range</div>
         )}
       </div>
 
@@ -132,8 +133,11 @@ export function SearchFilters({ filters, onFiltersChange, counts }: SearchFilter
       <div>
         <h3 className="text-sm font-semibold text-gray-900 mb-3">Vehicle Type</h3>
         <div className="space-y-2">
-          {vehicleTypeOptions.map((option) => (
-            <label key={option.value} className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded">
+          {vehicleTypeOptions.map(option => (
+            <label
+              key={option.value}
+              className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded"
+            >
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -153,8 +157,11 @@ export function SearchFilters({ filters, onFiltersChange, counts }: SearchFilter
       <div>
         <h3 className="text-sm font-semibold text-gray-900 mb-3">Make</h3>
         <div className="space-y-2">
-          {makeOptions.map((option) => (
-            <label key={option.value} className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded">
+          {makeOptions.map(option => (
+            <label
+              key={option.value}
+              className="flex items-center justify-between cursor-pointer hover:bg-gray-50 p-2 rounded"
+            >
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -179,7 +186,7 @@ export function SearchFilters({ filters, onFiltersChange, counts }: SearchFilter
             max={2024}
             step={1}
             value={filters.yearRange}
-            onValueChange={(value) => updateFilter('yearRange', value as [number, number])}
+            onValueChange={value => updateFilter('yearRange', value as [number, number])}
             className="mb-4"
           />
           <div className="flex items-center justify-between text-sm text-gray-600">
@@ -193,8 +200,11 @@ export function SearchFilters({ filters, onFiltersChange, counts }: SearchFilter
       <div>
         <h3 className="text-sm font-semibold text-gray-900 mb-3">Features</h3>
         <div className="space-y-2">
-          {featureOptions.map((feature) => (
-            <label key={feature} className="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded">
+          {featureOptions.map(feature => (
+            <label
+              key={feature}
+              className="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded"
+            >
               <input
                 type="checkbox"
                 checked={filters.features.includes(feature)}
@@ -213,7 +223,7 @@ export function SearchFilters({ filters, onFiltersChange, counts }: SearchFilter
           <input
             type="checkbox"
             checked={filters.instantBook}
-            onChange={(e) => updateFilter('instantBook', e.target.checked)}
+            onChange={e => updateFilter('instantBook', e.target.checked)}
             className="h-4 w-4 text-zemo-yellow focus:ring-zemo-yellow border-gray-300 rounded"
           />
           <div className="ml-3">
@@ -232,7 +242,7 @@ export function SearchFilters({ filters, onFiltersChange, counts }: SearchFilter
             max={5}
             step={0.1}
             value={[filters.minRating]}
-            onValueChange={(value) => updateFilter('minRating', value[0] || 0)}
+            onValueChange={value => updateFilter('minRating', value[0] || 0)}
             className="mb-4"
           />
           <div className="flex items-center justify-center text-sm text-gray-600">
@@ -249,7 +259,7 @@ export function SearchFilters({ filters, onFiltersChange, counts }: SearchFilter
           <input
             type="checkbox"
             checked={filters.hasDelivery}
-            onChange={(e) => updateFilter('hasDelivery', e.target.checked)}
+            onChange={e => updateFilter('hasDelivery', e.target.checked)}
             className="h-4 w-4 text-zemo-yellow focus:ring-zemo-yellow border-gray-300 rounded"
           />
           <div className="ml-3">
@@ -263,7 +273,7 @@ export function SearchFilters({ filters, onFiltersChange, counts }: SearchFilter
       <div>
         <h3 className="text-sm font-semibold text-gray-900 mb-3">Seating Capacity</h3>
         <div className="flex flex-wrap gap-2">
-          {seatOptions.map((seats) => (
+          {seatOptions.map(seats => (
             <button
               key={seats}
               onClick={() => toggleArrayFilter('seats', seats)}
@@ -283,8 +293,11 @@ export function SearchFilters({ filters, onFiltersChange, counts }: SearchFilter
       <div>
         <h3 className="text-sm font-semibold text-gray-900 mb-3">Fuel Type</h3>
         <div className="space-y-2">
-          {fuelTypeOptions.map((fuel) => (
-            <label key={fuel} className="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded">
+          {fuelTypeOptions.map(fuel => (
+            <label
+              key={fuel}
+              className="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded"
+            >
               <input
                 type="checkbox"
                 checked={filters.fuelTypes.includes(fuel)}
@@ -301,8 +314,11 @@ export function SearchFilters({ filters, onFiltersChange, counts }: SearchFilter
       <div>
         <h3 className="text-sm font-semibold text-gray-900 mb-3">Transmission</h3>
         <div className="space-y-2">
-          {['Automatic', 'Manual'].map((trans) => (
-            <label key={trans} className="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded">
+          {['Automatic', 'Manual'].map(trans => (
+            <label
+              key={trans}
+              className="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded"
+            >
               <input
                 type="checkbox"
                 checked={filters.transmission.includes(trans)}

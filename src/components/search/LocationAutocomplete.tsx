@@ -41,7 +41,7 @@ export default function LocationAutocomplete({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [gettingLocation, setGettingLocation] = useState(false);
-  
+
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteService = useRef<any>(null);
   const geocoderService = useRef<any>(null);
@@ -55,28 +55,31 @@ export default function LocationAutocomplete({
     }
   }, []);
 
-  const handleInputChange = useCallback((newValue: string) => {
-    setInputValue(newValue);
-    onInputChange?.(newValue);
+  const handleInputChange = useCallback(
+    (newValue: string) => {
+      setInputValue(newValue);
+      onInputChange?.(newValue);
 
-    if (!newValue.trim()) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      setShowPopular(true);
-      return;
-    }
+      if (!newValue.trim()) {
+        setSuggestions([]);
+        setShowSuggestions(false);
+        setShowPopular(true);
+        return;
+      }
 
-    setShowPopular(false);
-    
-    // Debounce API calls
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
+      setShowPopular(false);
 
-    debounceTimer.current = setTimeout(() => {
-      fetchSuggestions(newValue);
-    }, 300);
-  }, [onInputChange]);
+      // Debounce API calls
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+
+      debounceTimer.current = setTimeout(() => {
+        fetchSuggestions(newValue);
+      }, 300);
+    },
+    [onInputChange]
+  );
 
   const fetchSuggestions = async (input: string) => {
     if (!autocompleteService.current) {
@@ -176,7 +179,7 @@ export default function LocationAutocomplete({
     setError('');
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      async position => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
 
@@ -209,7 +212,7 @@ export default function LocationAutocomplete({
           onChange({ address: 'Current Location', lat, lng });
         }
       },
-      (_err) => {
+      _err => {
         setGettingLocation(false);
         setError('Unable to retrieve your location');
       }
@@ -223,7 +226,7 @@ export default function LocationAutocomplete({
           ref={inputRef}
           type="text"
           value={inputValue}
-          onChange={(e) => handleInputChange(e.target.value)}
+          onChange={e => handleInputChange(e.target.value)}
           onFocus={() => {
             if (!inputValue.trim()) {
               setShowPopular(true);
@@ -234,7 +237,7 @@ export default function LocationAutocomplete({
           placeholder={placeholder}
           className={`w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent ${className}`}
         />
-        
+
         {/* Location icon */}
         <svg
           className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
@@ -367,17 +370,11 @@ export default function LocationAutocomplete({
 
           {/* No results */}
           {showSuggestions && !loading && suggestions.length === 0 && (
-            <div className="px-4 py-3 text-center text-sm text-gray-500">
-              No locations found
-            </div>
+            <div className="px-4 py-3 text-center text-sm text-gray-500">No locations found</div>
           )}
 
           {/* Error message */}
-          {error && (
-            <div className="px-4 py-3 text-sm text-red-600">
-              {error}
-            </div>
-          )}
+          {error && <div className="px-4 py-3 text-sm text-red-600">{error}</div>}
         </div>
       )}
 

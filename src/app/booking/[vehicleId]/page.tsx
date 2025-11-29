@@ -101,9 +101,9 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
     const days = calculateDays();
     const extraPrices: { [key: string]: number } = {
       'child-seat': 2000,
-      'gps': 1500,
-      'wifi': 3000,
-      'driver': 15000,
+      gps: 1500,
+      wifi: 3000,
+      driver: 15000,
     };
     return Object.entries(bookingData.extras).reduce((total, [key, qty]) => {
       return total + (extraPrices[key] || 0) * qty * days;
@@ -169,9 +169,10 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
         const bookingId = bookingResult.booking.id;
 
         // Step 2: Initialize payment
-        const paymentProvider = bookingData.paymentMethod === 'mobile_money' 
-          ? 'MTN_MOMO' // Default, can be customized
-          : 'STRIPE';
+        const paymentProvider =
+          bookingData.paymentMethod === 'mobile_money'
+            ? 'MTN_MOMO' // Default, can be customized
+            : 'STRIPE';
 
         const paymentResponse = await fetch('/api/payments/create-payment-intent', {
           method: 'POST',
@@ -180,7 +181,8 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
             bookingId,
             paymentType: 'BOOKING_PAYMENT',
             provider: paymentProvider,
-            paymentMethodType: bookingData.paymentMethod === 'mobile_money' ? 'MOBILE_MONEY' : 'CREDIT_CARD',
+            paymentMethodType:
+              bookingData.paymentMethod === 'mobile_money' ? 'MOBILE_MONEY' : 'CREDIT_CARD',
           }),
         });
 
@@ -196,7 +198,9 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
           window.location.href = paymentData.paymentLink;
         } else if (paymentData.clientSecret) {
           // Stripe - redirect to confirmation with client secret for payment processing
-          router.push(`/bookings/${bookingId}/confirmation?payment=pending&clientSecret=${paymentData.clientSecret}`);
+          router.push(
+            `/bookings/${bookingId}/confirmation?payment=pending&clientSecret=${paymentData.clientSecret}`
+          );
         } else {
           // Direct confirmation if payment not required
           router.push(`/bookings/${bookingId}/confirmation`);
@@ -230,7 +234,7 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
       <div className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
-            onClick={() => currentStep > 1 ? setCurrentStep(currentStep - 1) : router.back()}
+            onClick={() => (currentStep > 1 ? setCurrentStep(currentStep - 1) : router.back())}
             className="text-gray-600 hover:text-gray-800 flex items-center"
           >
             <ChevronLeft className="w-5 h-5 mr-1" />
@@ -299,7 +303,7 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
                       <input
                         type="date"
                         value={bookingData.startDate}
-                        onChange={(e) =>
+                        onChange={e =>
                           setBookingData({ ...bookingData, startDate: e.target.value })
                         }
                         min={new Date().toISOString().split('T')[0]}
@@ -313,9 +317,7 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
                       <input
                         type="date"
                         value={bookingData.endDate}
-                        onChange={(e) =>
-                          setBookingData({ ...bookingData, endDate: e.target.value })
-                        }
+                        onChange={e => setBookingData({ ...bookingData, endDate: e.target.value })}
                         min={bookingData.startDate || new Date().toISOString().split('T')[0]}
                         className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-zemo-yellow focus:border-transparent"
                       />
@@ -330,7 +332,7 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
                       </label>
                       <select
                         value={bookingData.startTime}
-                        onChange={(e) =>
+                        onChange={e =>
                           setBookingData({ ...bookingData, startTime: e.target.value })
                         }
                         className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-zemo-yellow focus:border-transparent"
@@ -353,9 +355,7 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
                       </label>
                       <select
                         value={bookingData.endTime}
-                        onChange={(e) =>
-                          setBookingData({ ...bookingData, endTime: e.target.value })
-                        }
+                        onChange={e => setBookingData({ ...bookingData, endTime: e.target.value })}
                         className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-zemo-yellow focus:border-transparent"
                       >
                         {Array.from({ length: 48 }, (_, i) => {
@@ -438,7 +438,7 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
                       <input
                         type="text"
                         value={bookingData.deliveryAddress || ''}
-                        onChange={(e) =>
+                        onChange={e =>
                           setBookingData({ ...bookingData, deliveryAddress: e.target.value })
                         }
                         placeholder="Enter delivery address"
@@ -462,7 +462,7 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
                           desc: 'Recommended',
                         },
                         { id: 'premium', name: 'Premium', price: 30, desc: 'Full coverage' },
-                      ].map((plan) => (
+                      ].map(plan => (
                         <label
                           key={plan.id}
                           className={`p-4 border-2 rounded-lg cursor-pointer ${
@@ -500,8 +500,8 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
                 <div className="space-y-6">
                   <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <p className="text-sm text-gray-700">
-                      <strong>Requirements:</strong> Valid driver's license, minimum age 23,
-                      license held for at least 2 years
+                      <strong>Requirements:</strong> Valid driver's license, minimum age 23, license
+                      held for at least 2 years
                     </p>
                   </div>
 
@@ -512,7 +512,7 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
                     <input
                       type="text"
                       value={bookingData.driverLicense?.number || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setBookingData({
                           ...bookingData,
                           driverLicense: {
@@ -533,7 +533,7 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
                     <input
                       type="date"
                       value={bookingData.driverLicense?.expiryDate || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setBookingData({
                           ...bookingData,
                           driverLicense: {
@@ -585,9 +585,7 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
                           type="radio"
                           name="payment"
                           checked={bookingData.paymentMethod === 'card'}
-                          onChange={() =>
-                            setBookingData({ ...bookingData, paymentMethod: 'card' })
-                          }
+                          onChange={() => setBookingData({ ...bookingData, paymentMethod: 'card' })}
                         />
                         <span className="ml-3 font-medium">Credit/Debit Card</span>
                       </label>
@@ -612,7 +610,7 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
                     </label>
                     <textarea
                       value={bookingData.messageToHost || ''}
-                      onChange={(e) =>
+                      onChange={e =>
                         setBookingData({ ...bookingData, messageToHost: e.target.value })
                       }
                       rows={4}
@@ -628,33 +626,39 @@ export default function BookingPage({ params }: { params: { vehicleId: string } 
                       <input
                         type="checkbox"
                         checked={bookingData.agreedToTerms}
-                        onChange={(e) =>
+                        onChange={e =>
                           setBookingData({ ...bookingData, agreedToTerms: e.target.checked })
                         }
                         className="mt-1"
                       />
                       <span className="ml-3 text-sm">
-                        I agree to the <a href="#" className="text-blue-600 underline">Terms of Service</a>
+                        I agree to the{' '}
+                        <a href="#" className="text-blue-600 underline">
+                          Terms of Service
+                        </a>
                       </span>
                     </label>
                     <label className="flex items-start">
                       <input
                         type="checkbox"
                         checked={bookingData.agreedToPolicy}
-                        onChange={(e) =>
+                        onChange={e =>
                           setBookingData({ ...bookingData, agreedToPolicy: e.target.checked })
                         }
                         className="mt-1"
                       />
                       <span className="ml-3 text-sm">
-                        I agree to the <a href="#" className="text-blue-600 underline">Cancellation Policy</a>
+                        I agree to the{' '}
+                        <a href="#" className="text-blue-600 underline">
+                          Cancellation Policy
+                        </a>
                       </span>
                     </label>
                     <label className="flex items-start">
                       <input
                         type="checkbox"
                         checked={bookingData.agreedToRules}
-                        onChange={(e) =>
+                        onChange={e =>
                           setBookingData({ ...bookingData, agreedToRules: e.target.checked })
                         }
                         className="mt-1"

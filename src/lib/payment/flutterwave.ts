@@ -10,10 +10,7 @@ let flw: any = null;
 
 function getFlutterwaveClient() {
   if (!flw && process.env.FLUTTERWAVE_PUBLIC_KEY && process.env.FLUTTERWAVE_SECRET_KEY) {
-    flw = new Flutterwave(
-      process.env.FLUTTERWAVE_PUBLIC_KEY,
-      process.env.FLUTTERWAVE_SECRET_KEY
-    );
+    flw = new Flutterwave(process.env.FLUTTERWAVE_PUBLIC_KEY, process.env.FLUTTERWAVE_SECRET_KEY);
   }
   return flw;
 }
@@ -116,7 +113,7 @@ export async function verifyPayment(transactionId: string) {
       return { success: false, error: 'Payment service not configured' };
     }
     const response = await client.Transaction.verify({ id: transactionId });
-    
+
     if (response.data.status === 'successful' && response.data.amount >= 1) {
       return {
         success: true,
@@ -176,6 +173,6 @@ export function verifyWebhookSignature(payload: any, signature: string): boolean
     .createHmac('sha256', process.env.FLUTTERWAVE_SECRET_HASH || '')
     .update(JSON.stringify(payload))
     .digest('hex');
-  
+
   return hash === signature;
 }

@@ -22,7 +22,7 @@ const preferencesSchema = z.object({
 async function getPreferences(_request: AuthenticatedRequest) {
   try {
     // const userId = request.user!.id; // Will be used for user filtering
-    
+
     // Return default preferences for now - full implementation when Prisma client is ready
     return NextResponse.json({
       preferences: {
@@ -36,10 +36,9 @@ async function getPreferences(_request: AuthenticatedRequest) {
         systemAlerts: true,
         quietHoursStart: null,
         quietHoursEnd: null,
-        timezone: 'Africa/Lusaka'
-      }
+        timezone: 'Africa/Lusaka',
+      },
     });
-
   } catch (error) {
     console.error('Error fetching notification preferences:', error);
     return NextResponse.json(
@@ -54,24 +53,20 @@ async function updatePreferences(request: AuthenticatedRequest) {
   try {
     const body = await request.json();
     const preferences = preferencesSchema.parse(body);
-    
+
     const userId = request.user!.id;
 
     // Return success for now - full implementation when Prisma client is ready
     return NextResponse.json({
       message: 'Notification preferences API is ready - awaiting Prisma client regeneration',
       preferences,
-      userId
+      userId,
     });
-
   } catch (error) {
     console.error('Error updating notification preferences:', error);
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: error.issues },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid input', details: error.issues }, { status: 400 });
     }
 
     return NextResponse.json(

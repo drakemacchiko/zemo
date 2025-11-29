@@ -1,22 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { requireAdmin } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import { requireAdmin } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 
 export async function GET(request: NextRequest) {
-  const authResult = await requireAdmin(request, 'VIEW_BOOKINGS')
+  const authResult = await requireAdmin(request, 'VIEW_BOOKINGS');
   if (authResult.error) {
-    return NextResponse.json({ error: authResult.error }, { status: authResult.status || 500 })
+    return NextResponse.json({ error: authResult.error }, { status: authResult.status || 500 });
   }
 
   try {
-    const { searchParams } = new URL(request.url)
-    const status = searchParams.get('status')
-    const search = searchParams.get('search')
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
+    const search = searchParams.get('search');
 
-    const where: any = {}
+    const where: any = {};
 
     if (status && status !== 'all') {
-      where.status = status.toUpperCase()
+      where.status = status.toUpperCase();
     }
 
     if (search) {
@@ -27,8 +27,8 @@ export async function GET(request: NextRequest) {
               { make: { contains: search, mode: 'insensitive' } },
               { model: { contains: search, mode: 'insensitive' } },
               { plateNumber: { contains: search, mode: 'insensitive' } },
-            ]
-          }
+            ],
+          },
         },
         {
           user: {
@@ -39,13 +39,13 @@ export async function GET(request: NextRequest) {
                   OR: [
                     { firstName: { contains: search, mode: 'insensitive' } },
                     { lastName: { contains: search, mode: 'insensitive' } },
-                  ]
-                }
-              }
-            ]
-          }
-        }
-      ]
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ];
     }
 
     const bookings = await prisma.booking.findMany({
@@ -56,23 +56,23 @@ export async function GET(request: NextRequest) {
             make: true,
             model: true,
             year: true,
-            plateNumber: true
-          }
+            plateNumber: true,
+          },
         },
         user: {
           include: {
-            profile: true
-          }
-        }
+            profile: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
-    })
+        createdAt: 'desc',
+      },
+    });
 
-    return NextResponse.json({ bookings })
+    return NextResponse.json({ bookings });
   } catch (error) {
-    console.error('Admin bookings error:', error)
-    return NextResponse.json({ error: 'Failed to load bookings' }, { status: 500 })
+    console.error('Admin bookings error:', error);
+    return NextResponse.json({ error: 'Failed to load bookings' }, { status: 500 });
   }
 }

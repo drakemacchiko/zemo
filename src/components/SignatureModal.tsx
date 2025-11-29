@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import { useRef, useState, useEffect } from 'react'
-import { X, RotateCcw, Check } from 'lucide-react'
+import { useRef, useState, useEffect } from 'react';
+import { X, RotateCcw, Check } from 'lucide-react';
 
 interface SignatureModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSign: (signatureData: string) => Promise<void>
-  signerName: string
-  signerType: 'host' | 'renter'
+  isOpen: boolean;
+  onClose: () => void;
+  onSign: (signatureData: string) => Promise<void>;
+  signerName: string;
+  signerType: 'host' | 'renter';
 }
 
 export default function SignatureModal({
@@ -16,103 +16,105 @@ export default function SignatureModal({
   onClose,
   onSign,
   signerName,
-  signerType
+  signerType,
 }: SignatureModalProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [isDrawing, setIsDrawing] = useState(false)
-  const [hasDrawn, setHasDrawn] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [hasDrawn, setHasDrawn] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen && canvasRef.current) {
-      const canvas = canvasRef.current
-      const ctx = canvas.getContext('2d')
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
       if (ctx) {
         // Set canvas background to white
-        ctx.fillStyle = 'white'
-        ctx.fillRect(0, 0, canvas.width, canvas.height)
-        
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
         // Configure drawing style
-        ctx.strokeStyle = '#000000'
-        ctx.lineWidth = 2
-        ctx.lineCap = 'round'
-        ctx.lineJoin = 'round'
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
       }
     }
-  }, [isOpen])
+  }, [isOpen]);
 
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+  const startDrawing = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    setIsDrawing(true)
-    setHasDrawn(true)
+    setIsDrawing(true);
+    setHasDrawn(true);
 
-    const rect = canvas.getBoundingClientRect()
-    const x = 'touches' in e ? (e.touches[0]?.clientX ?? 0) - rect.left : e.clientX - rect.left
-    const y = 'touches' in e ? (e.touches[0]?.clientY ?? 0) - rect.top : e.clientY - rect.top
+    const rect = canvas.getBoundingClientRect();
+    const x = 'touches' in e ? (e.touches[0]?.clientX ?? 0) - rect.left : e.clientX - rect.left;
+    const y = 'touches' in e ? (e.touches[0]?.clientY ?? 0) - rect.top : e.clientY - rect.top;
 
-    ctx.beginPath()
-    ctx.moveTo(x, y)
-  }
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (!isDrawing) return
+    if (!isDrawing) return;
 
-    const canvas = canvasRef.current
-    if (!canvas) return
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    const rect = canvas.getBoundingClientRect()
-    const x = 'touches' in e ? (e.touches[0]?.clientX || 0) - rect.left : e.clientX - rect.left
-    const y = 'touches' in e ? (e.touches[0]?.clientY || 0) - rect.top : e.clientY - rect.top
+    const rect = canvas.getBoundingClientRect();
+    const x = 'touches' in e ? (e.touches[0]?.clientX || 0) - rect.left : e.clientX - rect.left;
+    const y = 'touches' in e ? (e.touches[0]?.clientY || 0) - rect.top : e.clientY - rect.top;
 
-    ctx.lineTo(x, y)
-    ctx.stroke()
-  }
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
 
   const stopDrawing = () => {
-    setIsDrawing(false)
-  }
+    setIsDrawing(false);
+  };
 
   const clearSignature = () => {
-    const canvas = canvasRef.current
-    if (!canvas) return
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
     // Clear and reset background
-    ctx.fillStyle = 'white'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-    
-    setHasDrawn(false)
-  }
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    setHasDrawn(false);
+  };
 
   const handleSubmit = async () => {
-    const canvas = canvasRef.current
-    if (!canvas || !hasDrawn) return
+    const canvas = canvasRef.current;
+    if (!canvas || !hasDrawn) return;
 
-    setSubmitting(true)
+    setSubmitting(true);
     try {
       // Convert canvas to base64 image
-      const signatureData = canvas.toDataURL('image/png')
-      await onSign(signatureData)
-      onClose()
+      const signatureData = canvas.toDataURL('image/png');
+      await onSign(signatureData);
+      onClose();
     } catch (error) {
-      console.error('Error submitting signature:', error)
-      alert('Failed to submit signature. Please try again.')
+      console.error('Error submitting signature:', error);
+      alert('Failed to submit signature. Please try again.');
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
@@ -120,9 +122,7 @@ export default function SignatureModal({
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">
-              Sign Rental Agreement
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-900">Sign Rental Agreement</h2>
             <p className="text-sm text-gray-600 mt-1">
               {signerType === 'host' ? 'Host' : 'Renter'} Signature Required
             </p>
@@ -140,7 +140,8 @@ export default function SignatureModal({
         <div className="p-6">
           <div className="mb-4">
             <p className="text-gray-700 mb-2">
-              By signing below, <span className="font-semibold">{signerName}</span>, you acknowledge that:
+              By signing below, <span className="font-semibold">{signerName}</span>, you acknowledge
+              that:
             </p>
             <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
               <li>You have read and understood all terms and conditions</li>
@@ -153,9 +154,7 @@ export default function SignatureModal({
           {/* Signature Canvas */}
           <div className="border-2 border-gray-300 rounded-lg overflow-hidden bg-white">
             <div className="bg-gray-100 px-4 py-2 border-b border-gray-300">
-              <p className="text-sm font-medium text-gray-700">
-                Draw your signature below
-              </p>
+              <p className="text-sm font-medium text-gray-700">Draw your signature below</p>
             </div>
             <canvas
               ref={canvasRef}
@@ -181,7 +180,7 @@ export default function SignatureModal({
               <span className="font-medium">Date & Time:</span>{' '}
               {new Date().toLocaleString('en-US', {
                 dateStyle: 'full',
-                timeStyle: 'short'
+                timeStyle: 'short',
               })}
             </p>
             <p className="text-sm text-blue-800 mt-1">
@@ -230,5 +229,5 @@ export default function SignatureModal({
         </div>
       </div>
     </div>
-  )
+  );
 }

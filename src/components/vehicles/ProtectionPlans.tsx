@@ -26,7 +26,7 @@ const defaultPlans: ProtectionPlan[] = [
     price: 0,
     deductible: 500000,
     coverage: ['Third Party Liability Only'],
-    description: 'Basic coverage as required by law'
+    description: 'Basic coverage as required by law',
   },
   {
     id: 'standard',
@@ -37,10 +37,10 @@ const defaultPlans: ProtectionPlan[] = [
       'Third Party Liability',
       'Collision Damage',
       'Theft Protection',
-      '₦250,000 deductible'
+      '₦250,000 deductible',
     ],
     description: 'Good protection for most trips',
-    recommended: true
+    recommended: true,
   },
   {
     id: 'premium',
@@ -53,16 +53,16 @@ const defaultPlans: ProtectionPlan[] = [
       'Theft Protection',
       'Interior Damage',
       'Windshield Protection',
-      '₦100,000 deductible'
+      '₦100,000 deductible',
     ],
-    description: 'Maximum protection and peace of mind'
-  }
+    description: 'Maximum protection and peace of mind',
+  },
 ];
 
 export function ProtectionPlans({
   plans = defaultPlans,
   selectedPlanId,
-  onSelectPlan
+  onSelectPlan,
 }: ProtectionPlansProps) {
   const [selected, setSelected] = useState(selectedPlanId || 'standard');
 
@@ -77,15 +77,13 @@ export function ProtectionPlans({
         <Shield className="w-6 h-6 text-zemo-yellow flex-shrink-0 mt-1" />
         <div>
           <h2 className="text-2xl font-bold mb-2">Protection Plans</h2>
-          <p className="text-gray-600">
-            Choose the level of coverage that's right for your trip
-          </p>
+          <p className="text-gray-600">Choose the level of coverage that's right for your trip</p>
         </div>
       </div>
 
       {/* Plans Grid */}
       <div className="grid md:grid-cols-3 gap-4 mb-6">
-        {plans.map((plan) => (
+        {plans.map(plan => (
           <button
             key={plan.id}
             onClick={() => handleSelect(plan.id)}
@@ -108,17 +106,17 @@ export function ProtectionPlans({
                 <h3 className="font-bold text-lg mb-1">{plan.name}</h3>
                 <div className="text-2xl font-bold text-gray-900">
                   {plan.price === 0 ? 'Included' : `₦${plan.price.toLocaleString()}`}
-                  {plan.price > 0 && <span className="text-sm text-gray-600 font-normal">/day</span>}
+                  {plan.price > 0 && (
+                    <span className="text-sm text-gray-600 font-normal">/day</span>
+                  )}
                 </div>
               </div>
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                selected === plan.id
-                  ? 'border-zemo-yellow bg-zemo-yellow'
-                  : 'border-gray-300'
-              }`}>
-                {selected === plan.id && (
-                  <div className="w-2.5 h-2.5 bg-gray-900 rounded-full" />
-                )}
+              <div
+                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                  selected === plan.id ? 'border-zemo-yellow bg-zemo-yellow' : 'border-gray-300'
+                }`}
+              >
+                {selected === plan.id && <div className="w-2.5 h-2.5 bg-gray-900 rounded-full" />}
               </div>
             </div>
 

@@ -2,7 +2,7 @@ export default function SupportPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <h1 className="text-4xl font-bold mb-6">Support Center</h1>
-      
+
       <div className="prose max-w-none">
         <section className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">Get Help</h2>
@@ -35,15 +35,22 @@ export default function SupportPage() {
           <div className="space-y-4">
             <div>
               <h3 className="font-semibold">How do I book a vehicle?</h3>
-              <p className="text-gray-700">Search for vehicles, select your dates, choose insurance, and complete payment.</p>
+              <p className="text-gray-700">
+                Search for vehicles, select your dates, choose insurance, and complete payment.
+              </p>
             </div>
             <div>
               <h3 className="font-semibold">What insurance options are available?</h3>
-              <p className="text-gray-700">We offer Basic, Comprehensive, and Premium coverage options.</p>
+              <p className="text-gray-700">
+                We offer Basic, Comprehensive, and Premium coverage options.
+              </p>
             </div>
             <div>
               <h3 className="font-semibold">Can I cancel my booking?</h3>
-              <p className="text-gray-700">Yes, cancellation policies vary by host. Check the booking details for specific terms.</p>
+              <p className="text-gray-700">
+                Yes, cancellation policies vary by host. Check the booking details for specific
+                terms.
+              </p>
             </div>
           </div>
         </section>

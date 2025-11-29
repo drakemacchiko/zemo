@@ -6,7 +6,7 @@ const mockProcessEnv = {
   RESEND_API_KEY: 'test_resend_key',
   TWILIO_ACCOUNT_SID: 'test_twilio_sid',
   TWILIO_AUTH_TOKEN: 'test_twilio_token',
-  TWILIO_PHONE_NUMBER: '+1234567890'
+  TWILIO_PHONE_NUMBER: '+1234567890',
 };
 
 Object.defineProperty(process, 'env', {
@@ -38,7 +38,7 @@ describe('Notification Services', () => {
       const template = {
         subject: 'Test Subject',
         html: '<p>Test HTML content</p>',
-        text: 'Test text content'
+        text: 'Test text content',
       };
 
       const result = await emailService.sendEmail('test@example.com', template);
@@ -53,7 +53,7 @@ describe('Notification Services', () => {
       const template = {
         subject: '',
         html: '',
-        text: ''
+        text: '',
       };
 
       const result = await emailService.sendEmail('', template);
@@ -72,7 +72,7 @@ describe('Notification Services', () => {
 
     it('should successfully send SMS in development mode', async () => {
       const template = {
-        message: 'Test SMS message'
+        message: 'Test SMS message',
       };
 
       const result = await smsService.sendSMS('+260771234567', template);
@@ -84,7 +84,7 @@ describe('Notification Services', () => {
 
     it('should handle SMS sending with empty message', async () => {
       const template = {
-        message: ''
+        message: '',
       };
 
       const result = await smsService.sendSMS('+260771234567', template);
@@ -100,29 +100,29 @@ describe('Notification Services', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        phoneNumber: '+260771234567'
+        phoneNumber: '+260771234567',
       },
       booking: {
         confirmationNumber: 'BOOK123',
         vehicleName: '2023 Toyota Corolla',
         startDate: '2025-01-15',
         endDate: '2025-01-20',
-        totalAmount: 500
+        totalAmount: 500,
       },
       payment: {
         amount: 500,
         provider: 'Airtel Money',
-        status: 'COMPLETED'
+        status: 'COMPLETED',
       },
       message: {
         content: 'Hello, I have a question about the vehicle.',
-        senderName: 'Jane Smith'
+        senderName: 'Jane Smith',
       },
       ticket: {
         ticketNumber: 'TICKET-12345',
         subject: 'Vehicle Issue',
-        status: 'IN_PROGRESS'
-      }
+        status: 'IN_PROGRESS',
+      },
     };
 
     it('should generate booking confirmation email template', () => {
@@ -180,24 +180,24 @@ describe('Notification Services', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        phoneNumber: '+260771234567'
+        phoneNumber: '+260771234567',
       },
       booking: {
         confirmationNumber: 'BOOK123',
         vehicleName: '2023 Toyota Corolla',
         startDate: '2025-01-15',
         endDate: '2025-01-20',
-        totalAmount: 500
+        totalAmount: 500,
       },
       payment: {
         amount: 500,
         provider: 'Airtel Money',
-        status: 'COMPLETED'
+        status: 'COMPLETED',
       },
       message: {
         content: 'Hello, I have a question about the vehicle.',
-        senderName: 'Jane Smith'
-      }
+        senderName: 'Jane Smith',
+      },
     };
 
     it('should generate booking confirmation SMS template', () => {
@@ -231,8 +231,8 @@ describe('Notification Services', () => {
         ...mockContext,
         message: {
           content: longMessage,
-          senderName: 'Jane Smith'
-        }
+          senderName: 'Jane Smith',
+        },
       };
 
       const template = generateSMSTemplate('MESSAGE_RECEIVED', contextWithLongMessage);
@@ -249,11 +249,11 @@ describe('Notification Services', () => {
 
     beforeEach(() => {
       mockEmailService = {
-        sendEmail: jest.fn()
+        sendEmail: jest.fn(),
       } as any;
-      
+
       mockSmsService = {
-        sendSMS: jest.fn()
+        sendSMS: jest.fn(),
       } as any;
 
       notificationService = new NotificationService(mockEmailService, mockSmsService);
@@ -265,25 +265,25 @@ describe('Notification Services', () => {
           firstName: 'John',
           lastName: 'Doe',
           email: 'john@example.com',
-          phoneNumber: '+260771234567'
-        }
+          phoneNumber: '+260771234567',
+        },
       };
 
       mockEmailService.sendEmail.mockResolvedValue({
         success: true,
-        messageId: 'email123'
+        messageId: 'email123',
       });
 
       mockSmsService.sendSMS.mockResolvedValue({
         success: true,
-        messageId: 'sms123'
+        messageId: 'sms123',
       });
 
-      const results = await notificationService.sendNotification(
-        'BOOKING_CONFIRMED',
-        context,
-        ['EMAIL', 'SMS', 'IN_APP']
-      );
+      const results = await notificationService.sendNotification('BOOKING_CONFIRMED', context, [
+        'EMAIL',
+        'SMS',
+        'IN_APP',
+      ]);
 
       expect(results.EMAIL.success).toBe(true);
       expect(results.SMS.success).toBe(true);
@@ -292,10 +292,7 @@ describe('Notification Services', () => {
         'john@example.com',
         expect.any(Object)
       );
-      expect(mockSmsService.sendSMS).toHaveBeenCalledWith(
-        '+260771234567',
-        expect.any(Object)
-      );
+      expect(mockSmsService.sendSMS).toHaveBeenCalledWith('+260771234567', expect.any(Object));
     });
 
     it('should handle missing contact information', async () => {
@@ -304,15 +301,14 @@ describe('Notification Services', () => {
           firstName: 'John',
           lastName: 'Doe',
           email: '',
-          phoneNumber: ''
-        }
+          phoneNumber: '',
+        },
       };
 
-      const results = await notificationService.sendNotification(
-        'BOOKING_CONFIRMED',
-        context,
-        ['EMAIL', 'SMS']
-      );
+      const results = await notificationService.sendNotification('BOOKING_CONFIRMED', context, [
+        'EMAIL',
+        'SMS',
+      ]);
 
       expect(results.EMAIL.success).toBe(false);
       expect(results.EMAIL.error).toBe('No email address provided');
@@ -326,20 +322,18 @@ describe('Notification Services', () => {
           firstName: 'John',
           lastName: 'Doe',
           email: 'john@example.com',
-          phoneNumber: '+260771234567'
-        }
+          phoneNumber: '+260771234567',
+        },
       };
 
       mockEmailService.sendEmail.mockResolvedValue({
         success: false,
-        error: 'Service unavailable'
+        error: 'Service unavailable',
       });
 
-      const results = await notificationService.sendNotification(
-        'BOOKING_CONFIRMED',
-        context,
-        ['EMAIL']
-      );
+      const results = await notificationService.sendNotification('BOOKING_CONFIRMED', context, [
+        'EMAIL',
+      ]);
 
       expect(results.EMAIL.success).toBe(false);
       expect(results.EMAIL.error).toBe('Service unavailable');
@@ -360,7 +354,7 @@ describe('Notification Services', () => {
         RESEND_API_KEY: 'test_resend_key',
         TWILIO_ACCOUNT_SID: 'test_twilio_sid',
         TWILIO_AUTH_TOKEN: 'test_twilio_token',
-        TWILIO_PHONE_NUMBER: '+1234567890'
+        TWILIO_PHONE_NUMBER: '+1234567890',
       };
 
       const service = createNotificationService();

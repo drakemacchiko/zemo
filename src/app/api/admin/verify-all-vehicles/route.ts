@@ -10,11 +10,11 @@ export async function POST() {
     // Update all PENDING vehicles to VERIFIED
     const result = await prisma.vehicle.updateMany({
       where: {
-        verificationStatus: 'PENDING'
+        verificationStatus: 'PENDING',
       },
       data: {
-        verificationStatus: 'VERIFIED'
-      }
+        verificationStatus: 'VERIFIED',
+      },
     });
 
     // Get updated vehicles
@@ -26,17 +26,16 @@ export async function POST() {
         model: true,
         verificationStatus: true,
         availabilityStatus: true,
-        isActive: true
-      }
+        isActive: true,
+      },
     });
 
     return NextResponse.json({
       success: true,
       message: `Verified ${result.count} vehicles`,
       updatedCount: result.count,
-      vehicles: vehicles
+      vehicles: vehicles,
     });
-
   } catch (error: any) {
     console.error('Error verifying vehicles:', error);
     return NextResponse.json(
@@ -64,10 +63,10 @@ export async function GET() {
         isActive: true,
         host: {
           select: {
-            email: true
-          }
-        }
-      }
+            email: true,
+          },
+        },
+      },
     });
 
     const stats = {
@@ -75,15 +74,15 @@ export async function GET() {
       verified: vehicles.filter((v: any) => v.verificationStatus === 'VERIFIED').length,
       pending: vehicles.filter((v: any) => v.verificationStatus === 'PENDING').length,
       rejected: vehicles.filter((v: any) => v.verificationStatus === 'REJECTED').length,
-      available: vehicles.filter((v: any) => v.availabilityStatus === 'AVAILABLE' && v.isActive).length
+      available: vehicles.filter((v: any) => v.availabilityStatus === 'AVAILABLE' && v.isActive)
+        .length,
     };
 
     return NextResponse.json({
       success: true,
       stats,
-      vehicles
+      vehicles,
     });
-
   } catch (error: any) {
     console.error('Error fetching vehicles:', error);
     return NextResponse.json(

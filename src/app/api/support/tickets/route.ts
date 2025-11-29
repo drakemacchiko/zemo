@@ -10,7 +10,7 @@ const createTicketSchema = z.object({
   description: z.string().min(1, 'Description is required').max(2000),
   category: z.enum([
     'BOOKING_ISSUE',
-    'PAYMENT_ISSUE', 
+    'PAYMENT_ISSUE',
     'VEHICLE_ISSUE',
     'TECHNICAL_SUPPORT',
     'ACCOUNT_ISSUE',
@@ -18,7 +18,7 @@ const createTicketSchema = z.object({
     'REFUND_REQUEST',
     'FEATURE_REQUEST',
     'COMPLAINT',
-    'OTHER'
+    'OTHER',
   ]),
   priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT', 'CRITICAL']).optional().default('NORMAL'),
   bookingId: z.string().optional(),
@@ -51,13 +51,13 @@ async function getTickets(request: AuthenticatedRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const query = querySchema.parse(Object.fromEntries(searchParams.entries()));
-    
+
     const page = parseInt(query.page);
     const limit = Math.min(parseInt(query.limit), 50); // Max 50 per page
     // const offset = (page - 1) * limit; // Will be used for pagination
-    
+
     // const userId = request.user!.id; // Will be used for user filtering
-    
+
     // For now, return empty array with proper structure
     // This will work once Prisma client is regenerated
     return NextResponse.json({
@@ -68,13 +68,12 @@ async function getTickets(request: AuthenticatedRequest) {
         totalCount: 0,
         totalPages: 0,
         hasNextPage: false,
-        hasPrevPage: false
-      }
+        hasPrevPage: false,
+      },
     });
-
   } catch (error) {
     console.error('Error fetching support tickets:', error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid query parameters', details: error.issues },
@@ -82,10 +81,7 @@ async function getTickets(request: AuthenticatedRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to fetch support tickets' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch support tickets' }, { status: 500 });
   }
 }
 
@@ -93,46 +89,42 @@ async function getTickets(request: AuthenticatedRequest) {
 async function createTicket(request: AuthenticatedRequest) {
   try {
     const body = await request.json();
-    const { subject, description, category, priority, bookingId, vehicleId, paymentId } = 
+    const { subject, description, category, priority, bookingId, vehicleId, paymentId } =
       createTicketSchema.parse(body);
-    
+
     const userId = request.user!.id;
-    
+
     // Generate ticket number
     const ticketNumber = `TICKET-${Date.now()}-${generateId().substring(0, 6).toUpperCase()}`;
 
     // Return success for now - full implementation when Prisma client is ready
-    return NextResponse.json({
-      message: 'Support ticket API is ready - awaiting Prisma client regeneration',
-      ticket: {
-        ticketNumber,
-        subject,
-        description,
-        category,
-        priority,
-        status: 'OPEN',
-        userId,
-        bookingId,
-        vehicleId,
-        paymentId,
-        createdAt: new Date().toISOString()
-      }
-    }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        message: 'Support ticket API is ready - awaiting Prisma client regeneration',
+        ticket: {
+          ticketNumber,
+          subject,
+          description,
+          category,
+          priority,
+          status: 'OPEN',
+          userId,
+          bookingId,
+          vehicleId,
+          paymentId,
+          createdAt: new Date().toISOString(),
+        },
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error creating support ticket:', error);
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: error.issues },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid input', details: error.issues }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to create support ticket' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to create support ticket' }, { status: 500 });
   }
 }
 

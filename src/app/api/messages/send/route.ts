@@ -28,10 +28,7 @@ export async function POST(request: NextRequest) {
 
     const payload = verifyAccessToken(token);
     if (!payload) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
     }
 
     const userId = payload.userId;
@@ -114,9 +111,7 @@ export async function POST(request: NextRequest) {
 
     // Determine recipient (the other party in conversation)
     const recipientId =
-      conversation.hostId === userId
-        ? conversation.renterId
-        : conversation.hostId;
+      conversation.hostId === userId ? conversation.renterId : conversation.hostId;
 
     // Create notification for recipient
     await prisma.notification.create({

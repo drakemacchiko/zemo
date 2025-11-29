@@ -8,20 +8,14 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('verif-hash');
 
     if (!signature) {
-      return NextResponse.json(
-        { error: 'No signature provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No signature provided' }, { status: 400 });
     }
 
     // Verify webhook signature
     const isValid = flutterwave.verifyWebhookSignature(body, signature);
 
     if (!isValid) {
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
     // Handle different event types
@@ -46,10 +40,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   } catch (error: any) {
     console.error('Flutterwave webhook error:', error);
-    return NextResponse.json(
-      { error: 'Webhook handler failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
   }
 }
 
@@ -58,10 +49,7 @@ async function handleChargeCompleted(data: any) {
     // Find payment by provider transaction ID
     const payment = await prisma.payment.findFirst({
       where: {
-        OR: [
-          { providerTransactionId: data.id.toString() },
-          { providerReference: data.tx_ref },
-        ],
+        OR: [{ providerTransactionId: data.id.toString() }, { providerReference: data.tx_ref }],
       },
       include: {
         booking: {
@@ -130,10 +118,7 @@ async function handleChargeFailed(data: any) {
   try {
     const payment = await prisma.payment.findFirst({
       where: {
-        OR: [
-          { providerTransactionId: data.id.toString() },
-          { providerReference: data.tx_ref },
-        ],
+        OR: [{ providerTransactionId: data.id.toString() }, { providerReference: data.tx_ref }],
       },
     });
 

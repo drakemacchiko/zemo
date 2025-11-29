@@ -54,34 +54,37 @@ export default function MessageThread({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   // Fetch messages
-  const fetchMessages = useCallback(async (pageNum = 1) => {
-    try {
-      const response = await fetch(
-        `/api/messages/conversations/${conversationId}?page=${pageNum}&limit=50`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      );
+  const fetchMessages = useCallback(
+    async (pageNum = 1) => {
+      try {
+        const response = await fetch(
+          `/api/messages/conversations/${conversationId}?page=${pageNum}&limit=50`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          }
+        );
 
-      if (!response.ok) throw new Error('Failed to fetch messages');
+        if (!response.ok) throw new Error('Failed to fetch messages');
 
-      const data = await response.json();
-      if (data.success) {
-        if (pageNum === 1) {
-          setMessages(data.messages);
-        } else {
-          setMessages((prev) => [...data.messages, ...prev]);
+        const data = await response.json();
+        if (data.success) {
+          if (pageNum === 1) {
+            setMessages(data.messages);
+          } else {
+            setMessages(prev => [...data.messages, ...prev]);
+          }
+          setHasMore(data.pagination.page < data.pagination.totalPages);
         }
-        setHasMore(data.pagination.page < data.pagination.totalPages);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [conversationId]);
+    },
+    [conversationId]
+  );
 
   useEffect(() => {
     fetchMessages();
@@ -123,7 +126,7 @@ export default function MessageThread({
 
       const data = await response.json();
       if (data.success) {
-        setMessages((prev) => [...prev, data.message]);
+        setMessages(prev => [...prev, data.message]);
         setNewMessage('');
       }
     } catch (error) {
@@ -155,8 +158,8 @@ export default function MessageThread({
 
   const groupMessagesByDate = (messages: Message[]) => {
     const groups: { [key: string]: Message[] } = {};
-    
-    messages.forEach((message) => {
+
+    messages.forEach(message => {
       const date = new Date(message.createdAt);
       const today = new Date();
       const yesterday = new Date(today);
@@ -213,9 +216,7 @@ export default function MessageThread({
             )}
             <div>
               <h3 className="font-semibold text-gray-900">{otherParty.name}</h3>
-              {vehicle && (
-                <p className="text-sm text-gray-500">{vehicle.name}</p>
-              )}
+              {vehicle && <p className="text-sm text-gray-500">{vehicle.name}</p>}
             </div>
           </div>
 
@@ -231,10 +232,7 @@ export default function MessageThread({
       </div>
 
       {/* Messages */}
-      <div
-        ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50"
-      >
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
         {hasMore && (
           <button
             onClick={() => {
@@ -252,22 +250,17 @@ export default function MessageThread({
           <div key={date}>
             {/* Date divider */}
             <div className="flex items-center justify-center my-4">
-              <div className="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">
-                {date}
-              </div>
+              <div className="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-full">{date}</div>
             </div>
 
             {/* Messages for this date */}
-            {dateMessages.map((message) => {
+            {dateMessages.map(message => {
               const isOwnMessage = message.senderId === currentUserId;
               const isSystemMessage = message.messageType === 'SYSTEM';
 
               if (isSystemMessage) {
                 return (
-                  <div
-                    key={message.id}
-                    className="flex justify-center my-2"
-                  >
+                  <div key={message.id} className="flex justify-center my-2">
                     <div className="bg-gray-200 text-gray-600 text-sm px-4 py-2 rounded-lg max-w-md text-center">
                       {message.content}
                     </div>
@@ -278,15 +271,11 @@ export default function MessageThread({
               return (
                 <div
                   key={message.id}
-                  className={`flex ${
-                    isOwnMessage ? 'justify-end' : 'justify-start'
-                  } mb-2`}
+                  className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-2`}
                 >
                   <div
                     className={`max-w-[70%] ${
-                      isOwnMessage
-                        ? 'bg-yellow-500 text-white'
-                        : 'bg-white text-gray-900'
+                      isOwnMessage ? 'bg-yellow-500 text-white' : 'bg-white text-gray-900'
                     } rounded-lg px-4 py-2 shadow-sm`}
                   >
                     {message.attachmentUrl && (
@@ -309,14 +298,10 @@ export default function MessageThread({
                         )}
                       </div>
                     )}
-                    <p className="text-sm whitespace-pre-wrap break-words">
-                      {message.content}
-                    </p>
+                    <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                     <div className="flex items-center justify-between mt-1 space-x-2">
                       <span
-                        className={`text-xs ${
-                          isOwnMessage ? 'text-yellow-100' : 'text-gray-500'
-                        }`}
+                        className={`text-xs ${isOwnMessage ? 'text-yellow-100' : 'text-gray-500'}`}
                       >
                         {formatMessageTime(message.createdAt)}
                       </span>
@@ -340,16 +325,13 @@ export default function MessageThread({
       </div>
 
       {/* Message input */}
-      <form
-        onSubmit={handleSendMessage}
-        className="bg-white border-t border-gray-200 p-4"
-      >
+      <form onSubmit={handleSendMessage} className="bg-white border-t border-gray-200 p-4">
         <div className="flex items-end space-x-2">
           <div className="flex-1">
             <textarea
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyDown={(e) => {
+              onChange={e => setNewMessage(e.target.value)}
+              onKeyDown={e => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
                   handleSendMessage(e);

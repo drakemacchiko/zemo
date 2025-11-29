@@ -12,10 +12,10 @@ interface LocationMapProps {
   showDirections?: boolean;
 }
 
-export function LocationMap({ 
-  location, 
+export function LocationMap({
+  location,
   coordinates = { lat: 6.5244, lng: 3.3792 }, // Default to Lagos
-  showDirections = true 
+  showDirections = true,
 }: LocationMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
 
@@ -46,11 +46,11 @@ export function LocationMap({
       </div>
 
       {/* Map Container */}
-      <div className="relative rounded-lg overflow-hidden bg-gray-100 mb-4" style={{ height: '400px' }}>
-        <div 
-          ref={mapRef}
-          className="w-full h-full flex items-center justify-center"
-        >
+      <div
+        className="relative rounded-lg overflow-hidden bg-gray-100 mb-4"
+        style={{ height: '400px' }}
+      >
+        <div ref={mapRef} className="w-full h-full flex items-center justify-center">
           {/* Placeholder - Replace with actual map */}
           <div className="text-center">
             <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-2" />
@@ -76,9 +76,9 @@ export function LocationMap({
       {/* Additional Location Info */}
       <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <p className="text-sm text-gray-700">
-          <strong>Pickup & Return:</strong> The host will provide the exact pickup location 
-          and any parking instructions after your booking is confirmed. Free parking is typically 
-          available at the pickup location.
+          <strong>Pickup & Return:</strong> The host will provide the exact pickup location and any
+          parking instructions after your booking is confirmed. Free parking is typically available
+          at the pickup location.
         </p>
       </div>
     </div>

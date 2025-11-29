@@ -14,18 +14,12 @@ export async function POST(request: NextRequest) {
   try {
     const token = extractTokenFromRequest(request);
     if (!token) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const payload = verifyAccessToken(token);
     if (!payload) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -46,18 +40,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (!payment) {
-      return NextResponse.json(
-        { error: 'Payment not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
     }
 
     // Verify user owns this payment
     if (payment.userId !== payload.userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     // Verify payment with provider
@@ -67,7 +55,7 @@ export async function POST(request: NextRequest) {
       const result = await stripe.getPaymentIntent(
         validatedData.providerTransactionId || payment.providerReference || ''
       );
-      
+
       if (result.success && result.data?.status === 'succeeded') {
         verified = true;
       }
@@ -76,17 +64,14 @@ export async function POST(request: NextRequest) {
       const result = await flutterwave.verifyPayment(
         validatedData.providerTransactionId || payment.providerReference || ''
       );
-      
+
       if (result.success && result.status === 'successful') {
         verified = true;
       }
     }
 
     if (!verified) {
-      return NextResponse.json(
-        { error: 'Payment verification failed' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Payment verification failed' }, { status: 400 });
     }
 
     // Update payment status
@@ -145,7 +130,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('Confirm payment error:', error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid request data', details: error.issues },
@@ -153,9 +138,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

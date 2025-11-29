@@ -5,27 +5,18 @@ import { extractTokenFromRequest, verifyAccessToken } from '@/lib/auth';
 const prisma = new PrismaClient();
 
 // PUT /api/bookings/extensions/[id]/approve - Host approves extension
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const extensionId = params.id;
     const token = extractTokenFromRequest(request);
 
     if (!token) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
     const decoded = verifyAccessToken(token);
     if (!decoded || !decoded.userId) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, message: 'Invalid token' }, { status: 401 });
     }
 
     const hostId = decoded.userId;

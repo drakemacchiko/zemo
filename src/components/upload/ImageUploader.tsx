@@ -1,22 +1,22 @@
-'use client'
+'use client';
 
-import { useState, useRef, useCallback } from 'react'
-import Image from 'next/image'
-import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { useState, useRef, useCallback } from 'react';
+import Image from 'next/image';
+import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 
 export interface UploadedImage {
-  id: string
-  url: string
-  type?: string
-  isPrimary?: boolean
+  id: string;
+  url: string;
+  type?: string;
+  isPrimary?: boolean;
 }
 
 interface ImageUploaderProps {
-  vehicleId: string
-  existingImages?: UploadedImage[]
-  onUploadComplete?: (images: UploadedImage[]) => void
-  maxImages?: number
-  maxSizeMB?: number
+  vehicleId: string;
+  existingImages?: UploadedImage[];
+  onUploadComplete?: (images: UploadedImage[]) => void;
+  maxImages?: number;
+  maxSizeMB?: number;
 }
 
 export default function ImageUploader({
@@ -26,102 +26,108 @@ export default function ImageUploader({
   maxImages = 20,
   maxSizeMB = 10,
 }: ImageUploaderProps) {
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [uploading, setUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [error, setError] = useState('')
-  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>(existingImages)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const dropZoneRef = useRef<HTMLDivElement>(null)
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState('');
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>(existingImages);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
 
-  const handleFileSelect = useCallback((files: FileList | null) => {
-    if (!files) return
+  const handleFileSelect = useCallback(
+    (files: FileList | null) => {
+      if (!files) return;
 
-    const filesArray = Array.from(files)
-    const totalImages = uploadedImages.length + selectedFiles.length + filesArray.length
+      const filesArray = Array.from(files);
+      const totalImages = uploadedImages.length + selectedFiles.length + filesArray.length;
 
-    if (totalImages > maxImages) {
-      setError(`Maximum ${maxImages} photos allowed per vehicle.`)
-      return
-    }
-
-    // Validate all files
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
-    
-    for (const file of filesArray) {
-      if (!allowedTypes.includes(file.type)) {
-        setError(`${file.name}: Invalid file type. Please use JPEG, PNG, or WebP.`)
-        return
+      if (totalImages > maxImages) {
+        setError(`Maximum ${maxImages} photos allowed per vehicle.`);
+        return;
       }
-      
-      if (file.size > maxSizeMB * 1024 * 1024) {
-        setError(`${file.name}: File too large (max ${maxSizeMB}MB).`)
-        return
+
+      // Validate all files
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+
+      for (const file of filesArray) {
+        if (!allowedTypes.includes(file.type)) {
+          setError(`${file.name}: Invalid file type. Please use JPEG, PNG, or WebP.`);
+          return;
+        }
+
+        if (file.size > maxSizeMB * 1024 * 1024) {
+          setError(`${file.name}: File too large (max ${maxSizeMB}MB).`);
+          return;
+        }
       }
-    }
 
-    setSelectedFiles((prev) => [...prev, ...filesArray])
-    setError('')
-  }, [uploadedImages.length, selectedFiles.length, maxImages, maxSizeMB])
+      setSelectedFiles(prev => [...prev, ...filesArray]);
+      setError('');
+    },
+    [uploadedImages.length, selectedFiles.length, maxImages, maxSizeMB]
+  );
 
-  const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
-    if (dropZoneRef.current) {
-      dropZoneRef.current.classList.remove('border-yellow-500', 'bg-yellow-50')
-    }
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    handleFileSelect(e.dataTransfer.files)
-  }, [handleFileSelect])
+      if (dropZoneRef.current) {
+        dropZoneRef.current.classList.remove('border-yellow-500', 'bg-yellow-50');
+      }
+
+      handleFileSelect(e.dataTransfer.files);
+    },
+    [handleFileSelect]
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
+    e.preventDefault();
+    e.stopPropagation();
+
     if (dropZoneRef.current) {
-      dropZoneRef.current.classList.add('border-yellow-500', 'bg-yellow-50')
+      dropZoneRef.current.classList.add('border-yellow-500', 'bg-yellow-50');
     }
-  }, [])
+  }, []);
 
   const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
-    
+    e.preventDefault();
+    e.stopPropagation();
+
     if (dropZoneRef.current) {
-      dropZoneRef.current.classList.remove('border-yellow-500', 'bg-yellow-50')
+      dropZoneRef.current.classList.remove('border-yellow-500', 'bg-yellow-50');
     }
-  }, [])
+  }, []);
 
   const removeSelectedFile = (index: number) => {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
-  }
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
 
   const uploadPhotos = async () => {
-    if (selectedFiles.length === 0) return
+    if (selectedFiles.length === 0) return;
 
-    setUploading(true)
-    setUploadProgress(0)
-    setError('')
+    setUploading(true);
+    setUploadProgress(0);
+    setError('');
 
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       if (!token) {
-        setError('Please sign in to upload photos')
-        return
+        setError('Please sign in to upload photos');
+        return;
       }
 
-      const formData = new FormData()
-      formData.append('vehicleId', vehicleId)
-      
-      selectedFiles.forEach((file) => {
-        formData.append('photos', file)
-      })
+      const formData = new FormData();
+      formData.append('vehicleId', vehicleId);
+
+      selectedFiles.forEach(file => {
+        formData.append('photos', file);
+      });
 
       // Simulate progress
       const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => Math.min(prev + 10, 90))
-      }, 200)
+        setUploadProgress(prev => Math.min(prev + 10, 90));
+      }, 200);
 
       const response = await fetch('/api/upload/vehicle-images', {
         method: 'POST',
@@ -129,35 +135,35 @@ export default function ImageUploader({
           Authorization: `Bearer ${token}`,
         },
         body: formData,
-      })
+      });
 
-      clearInterval(progressInterval)
-      setUploadProgress(100)
+      clearInterval(progressInterval);
+      setUploadProgress(100);
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
-        setUploadedImages((prev) => [...prev, ...data.photos])
-        setSelectedFiles([])
-        
+        setUploadedImages(prev => [...prev, ...data.photos]);
+        setSelectedFiles([]);
+
         if (fileInputRef.current) {
-          fileInputRef.current.value = ''
+          fileInputRef.current.value = '';
         }
 
         if (onUploadComplete) {
-          onUploadComplete(data.photos)
+          onUploadComplete(data.photos);
         }
       } else {
-        setError(data.error || 'Failed to upload photos')
+        setError(data.error || 'Failed to upload photos');
       }
     } catch (error) {
-      console.error('Upload error:', error)
-      setError('Failed to upload photos. Please try again.')
+      console.error('Upload error:', error);
+      setError('Failed to upload photos. Please try again.');
     } finally {
-      setUploading(false)
-      setTimeout(() => setUploadProgress(0), 1000)
+      setUploading(false);
+      setTimeout(() => setUploadProgress(0), 1000);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -182,23 +188,23 @@ export default function ImageUploader({
           type="file"
           multiple
           accept="image/jpeg,image/jpg,image/png,image/webp"
-          onChange={(e) => handleFileSelect(e.target.files)}
+          onChange={e => handleFileSelect(e.target.files)}
           className="hidden"
         />
-        
+
         <div className="flex flex-col items-center">
           <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
             <ImageIcon className="w-8 h-8 text-yellow-600" />
           </div>
-          
+
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             Drop photos here or click to browse
           </h3>
-          
+
           <p className="text-sm text-gray-600 mb-4">
             Upload up to {maxImages} photos (JPEG, PNG, WebP - max {maxSizeMB}MB each)
           </p>
-          
+
           <button
             type="button"
             className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold px-6 py-2 rounded-lg transition-colors inline-flex items-center"
@@ -235,18 +241,16 @@ export default function ImageUploader({
                     className="w-full h-full object-cover"
                   />
                 </div>
-                
+
                 <button
                   onClick={() => removeSelectedFile(index)}
                   className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <X className="w-4 h-4" />
                 </button>
-                
-                <p className="text-xs text-gray-600 mt-1 truncate">
-                  {file.name}
-                </p>
-                
+
+                <p className="text-xs text-gray-600 mt-1 truncate">{file.name}</p>
+
                 {index === 0 && uploadedImages.length === 0 && (
                   <span className="absolute top-2 left-2 bg-yellow-400 text-black text-xs px-2 py-1 rounded font-semibold">
                     Primary
@@ -299,7 +303,7 @@ export default function ImageUploader({
           <h3 className="text-lg font-semibold text-gray-900">
             Uploaded Photos ({uploadedImages.length}/{maxImages})
           </h3>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {uploadedImages.map((image, index) => (
               <div key={image.id} className="relative">
@@ -312,13 +316,13 @@ export default function ImageUploader({
                     className="w-full h-full object-cover"
                   />
                 </div>
-                
+
                 {image.isPrimary && (
                   <span className="absolute top-2 left-2 bg-yellow-400 text-black text-xs px-2 py-1 rounded font-semibold">
                     Primary
                   </span>
                 )}
-                
+
                 {image.type && (
                   <span className="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
                     {image.type.replace('_', ' ')}
@@ -342,5 +346,5 @@ export default function ImageUploader({
         </ul>
       </div>
     </div>
-  )
+  );
 }

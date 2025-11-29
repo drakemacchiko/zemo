@@ -18,10 +18,7 @@ export async function PATCH(request: NextRequest) {
 
     const payload = verifyAccessToken(token);
     if (!payload) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
     }
 
     const userId = payload.userId;

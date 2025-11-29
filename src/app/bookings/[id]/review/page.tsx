@@ -75,7 +75,7 @@ export default function ReviewPage({ params }: ReviewPageProps) {
       const data = await response.json();
       if (data.success) {
         setBooking(data.booking);
-        
+
         // Determine if user is host
         const currentUserId = localStorage.getItem('userId');
         setIsHost(data.booking.vehicle.hostId === currentUserId);
@@ -94,7 +94,7 @@ export default function ReviewPage({ params }: ReviewPageProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (rating === 0) {
       setError('Please provide an overall rating');
       return;
@@ -167,7 +167,7 @@ export default function ReviewPage({ params }: ReviewPageProps) {
       <div className="flex items-center gap-4">
         <span className="text-sm font-medium text-gray-700 w-32">{label}</span>
         <div className="flex gap-1">
-          {[1, 2, 3, 4, 5].map((star) => (
+          {[1, 2, 3, 4, 5].map(star => (
             <button
               key={star}
               type="button"
@@ -178,9 +178,7 @@ export default function ReviewPage({ params }: ReviewPageProps) {
             >
               <svg
                 className={`w-8 h-8 ${
-                  star <= (hover || value)
-                    ? 'text-yellow-400 fill-current'
-                    : 'text-gray-300'
+                  star <= (hover || value) ? 'text-yellow-400 fill-current' : 'text-gray-300'
                 }`}
                 fill="none"
                 stroke="currentColor"
@@ -235,12 +233,7 @@ export default function ReviewPage({ params }: ReviewPageProps) {
           onClick={() => router.back()}
           className="flex items-center text-gray-600 hover:text-gray-900 mb-6"
         >
-          <svg
-            className="w-5 h-5 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -257,9 +250,7 @@ export default function ReviewPage({ params }: ReviewPageProps) {
               ? `How was ${booking.user.profile.firstName}?`
               : `How was your trip with ${booking.vehicle.year} ${booking.vehicle.make} ${booking.vehicle.model}?`}
           </h1>
-          <p className="text-gray-600">
-            Your review helps build trust in the ZEMO community
-          </p>
+          <p className="text-gray-600">Your review helps build trust in the ZEMO community</p>
         </div>
 
         {/* Booking summary */}
@@ -283,9 +274,7 @@ export default function ReviewPage({ params }: ReviewPageProps) {
                 {new Date(booking.startDate).toLocaleDateString()} -{' '}
                 {new Date(booking.endDate).toLocaleDateString()}
               </p>
-              <p className="text-sm text-gray-500">
-                Confirmation: {booking.confirmationNumber}
-              </p>
+              <p className="text-sm text-gray-500">Confirmation: {booking.confirmationNumber}</p>
             </div>
           </div>
         </div>
@@ -300,43 +289,23 @@ export default function ReviewPage({ params }: ReviewPageProps) {
 
           {/* Overall rating */}
           <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Overall Rating *
-            </h3>
-            <StarRating
-              value={rating}
-              onChange={setRating}
-              label="Overall"
-            />
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Overall Rating *</h3>
+            <StarRating value={rating} onChange={setRating} label="Overall" />
           </div>
 
           {/* Category ratings (renter only) */}
           {!isHost && (
             <div className="mb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Rate Your Experience
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Rate Your Experience</h3>
               <div className="space-y-4">
-                <StarRating
-                  value={cleanliness}
-                  onChange={setCleanliness}
-                  label="Cleanliness"
-                />
+                <StarRating value={cleanliness} onChange={setCleanliness} label="Cleanliness" />
                 <StarRating
                   value={communication}
                   onChange={setCommunication}
                   label="Communication"
                 />
-                <StarRating
-                  value={convenience}
-                  onChange={setConvenience}
-                  label="Convenience"
-                />
-                <StarRating
-                  value={accuracy}
-                  onChange={setAccuracy}
-                  label="Accuracy"
-                />
+                <StarRating value={convenience} onChange={setConvenience} label="Convenience" />
+                <StarRating value={accuracy} onChange={setAccuracy} label="Accuracy" />
               </div>
             </div>
           )}
@@ -380,7 +349,7 @@ export default function ReviewPage({ params }: ReviewPageProps) {
                 </label>
                 <select
                   value={vehicleCondition}
-                  onChange={(e) => setVehicleCondition(e.target.value)}
+                  onChange={e => setVehicleCondition(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                 >
                   <option value="">Select condition</option>
@@ -402,7 +371,7 @@ export default function ReviewPage({ params }: ReviewPageProps) {
               <input
                 type="text"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={e => setTitle(e.target.value)}
                 placeholder="Summarize your experience"
                 maxLength={100}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
@@ -417,7 +386,7 @@ export default function ReviewPage({ params }: ReviewPageProps) {
             </label>
             <textarea
               value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              onChange={e => setComment(e.target.value)}
               placeholder={
                 isHost
                   ? 'Share details about your experience with this renter...'
@@ -438,11 +407,9 @@ export default function ReviewPage({ params }: ReviewPageProps) {
             </label>
             <textarea
               value={privateFeedback}
-              onChange={(e) => setPrivateFeedback(e.target.value)}
+              onChange={e => setPrivateFeedback(e.target.value)}
               placeholder={
-                isHost
-                  ? 'Any suggestions for the renter?'
-                  : 'Any suggestions for the host?'
+                isHost ? 'Any suggestions for the renter?' : 'Any suggestions for the host?'
               }
               rows={3}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"

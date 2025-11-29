@@ -56,7 +56,7 @@ describe('Offline Queue Manager', () => {
     // };
     // const id = await offlineQueue.queueBooking(booking);
     // expect(id).toBeGreaterThan(0);
-    
+
     expect(true).toBe(true); // Placeholder
   });
 });
@@ -134,7 +134,7 @@ describe('PWA Features', () => {
     // Mock matchMedia for standalone detection
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
-      value: jest.fn().mockImplementation((query) => ({
+      value: jest.fn().mockImplementation(query => ({
         matches: query === '(display-mode: standalone)',
         media: query,
         onchange: null,

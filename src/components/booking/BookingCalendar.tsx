@@ -21,7 +21,7 @@ export function BookingCalendar({
   dailyRate,
   onDateSelect,
   selectedStartDate,
-  selectedEndDate
+  selectedEndDate,
 }: BookingCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [bookedDates, setBookedDates] = useState<BookedDate[]>([]);
@@ -87,7 +87,9 @@ export function BookingCalendar({
 
   const isDatePending = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0];
-    return bookedDates.some(bookedDate => bookedDate.date === dateStr && bookedDate.status === 'pending');
+    return bookedDates.some(
+      bookedDate => bookedDate.date === dateStr && bookedDate.status === 'pending'
+    );
   };
 
   const isDateInPast = (date: Date) => {
@@ -98,15 +100,15 @@ export function BookingCalendar({
 
   const isDateSelected = (date: Date) => {
     if (!localStartDate && !localEndDate) return false;
-    
+
     if (localStartDate && !localEndDate) {
       return date.getTime() === localStartDate.getTime();
     }
-    
+
     if (localStartDate && localEndDate) {
       return date >= localStartDate && date <= localEndDate;
     }
-    
+
     return false;
   };
 
@@ -127,7 +129,7 @@ export function BookingCalendar({
       } else {
         setLocalEndDate(date);
       }
-      
+
       // Notify parent component
       if (onDateSelect) {
         const start = date < localStartDate ? date : localStartDate;
@@ -156,15 +158,26 @@ export function BookingCalendar({
 
   const calculateTotalPrice = () => {
     if (!localStartDate || !localEndDate) return 0;
-    
-    const days = Math.ceil((localEndDate.getTime() - localStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+    const days =
+      Math.ceil((localEndDate.getTime() - localStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
     return days * dailyRate;
   };
 
   const days = getDaysInMonth(currentMonth);
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -180,7 +193,12 @@ export function BookingCalendar({
             disabled={isLoading}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
           <span className="font-medium text-gray-900 min-w-[140px] text-center">
@@ -206,19 +224,19 @@ export function BookingCalendar({
             {dayName}
           </div>
         ))}
-        
+
         {/* Calendar days */}
         {days.map((day, index) => {
           if (!day) {
             return <div key={index} className="aspect-square" />;
           }
-          
+
           const isBooked = isDateBooked(day);
           const isPending = isDatePending(day);
           const isInPast = isDateInPast(day);
           const isSelected = isDateSelected(day);
           const isClickable = !isInPast && !isBooked;
-          
+
           return (
             <button
               key={day.getTime()}
@@ -226,26 +244,15 @@ export function BookingCalendar({
               disabled={!isClickable || isLoading}
               className={`
                 aspect-square text-sm font-medium rounded-lg transition-all duration-200
-                ${isSelected 
-                  ? 'bg-zemo-yellow text-zemo-black ring-2 ring-zemo-yellow ring-offset-2' 
-                  : 'hover:bg-gray-100'
+                ${
+                  isSelected
+                    ? 'bg-zemo-yellow text-zemo-black ring-2 ring-zemo-yellow ring-offset-2'
+                    : 'hover:bg-gray-100'
                 }
-                ${isBooked && !isPending 
-                  ? 'bg-red-100 text-red-500 cursor-not-allowed' 
-                  : ''
-                }
-                ${isPending 
-                  ? 'bg-orange-100 text-orange-600 cursor-not-allowed' 
-                  : ''
-                }
-                ${isInPast && !isBooked 
-                  ? 'text-gray-300 cursor-not-allowed' 
-                  : ''
-                }
-                ${isClickable && !isSelected 
-                  ? 'text-gray-900 hover:bg-gray-100' 
-                  : ''
-                }
+                ${isBooked && !isPending ? 'bg-red-100 text-red-500 cursor-not-allowed' : ''}
+                ${isPending ? 'bg-orange-100 text-orange-600 cursor-not-allowed' : ''}
+                ${isInPast && !isBooked ? 'text-gray-300 cursor-not-allowed' : ''}
+                ${isClickable && !isSelected ? 'text-gray-900 hover:bg-gray-100' : ''}
               `}
             >
               {day.getDate()}
@@ -275,10 +282,7 @@ export function BookingCalendar({
         <div className="bg-gray-50 rounded-lg p-4">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-gray-600">Selected dates:</span>
-            <button
-              onClick={clearSelection}
-              className="text-sm text-red-600 hover:text-red-700"
-            >
+            <button onClick={clearSelection} className="text-sm text-red-600 hover:text-red-700">
               Clear
             </button>
           </div>
@@ -289,8 +293,10 @@ export function BookingCalendar({
             Total: {formatCurrency(calculateTotalPrice())}
           </div>
           <div className="text-sm text-gray-600">
-            {Math.ceil((localEndDate.getTime() - localStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1} days
-            × {formatCurrency(dailyRate)}/day
+            {Math.ceil(
+              (localEndDate.getTime() - localStartDate.getTime()) / (1000 * 60 * 60 * 24)
+            ) + 1}{' '}
+            days × {formatCurrency(dailyRate)}/day
           </div>
         </div>
       )}

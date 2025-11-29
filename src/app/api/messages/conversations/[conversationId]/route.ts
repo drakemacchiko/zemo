@@ -21,10 +21,7 @@ export async function GET(
 
     const payload = verifyAccessToken(token);
     if (!payload) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
     }
 
     const userId = payload.userId;
@@ -155,8 +152,7 @@ export async function GET(
     });
 
     // Determine other party
-    const otherParty =
-      conversation.hostId === userId ? conversation.renter : conversation.host;
+    const otherParty = conversation.hostId === userId ? conversation.renter : conversation.host;
 
     return NextResponse.json({
       success: true,

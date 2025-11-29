@@ -5,10 +5,7 @@ import { prisma } from '@/lib/db';
  * GET /api/vehicles/[id]/reviews
  * Get reviews for a vehicle with rating breakdown
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const vehicleId = params.id;
     const { searchParams } = new URL(request.url);
@@ -93,10 +90,10 @@ export async function GET(
       stats.averageRating = totalRating / allReviews.length;
 
       // Category averages
-      const withCleanliness = allReviews.filter((r) => r.cleanliness !== null);
-      const withCommunication = allReviews.filter((r) => r.communication !== null);
-      const withConvenience = allReviews.filter((r) => r.convenience !== null);
-      const withAccuracy = allReviews.filter((r) => r.accuracy !== null);
+      const withCleanliness = allReviews.filter(r => r.cleanliness !== null);
+      const withCommunication = allReviews.filter(r => r.communication !== null);
+      const withConvenience = allReviews.filter(r => r.convenience !== null);
+      const withAccuracy = allReviews.filter(r => r.accuracy !== null);
 
       if (withCleanliness.length > 0) {
         stats.categoryRatings.cleanliness =
@@ -118,12 +115,11 @@ export async function GET(
 
       if (withAccuracy.length > 0) {
         stats.categoryRatings.accuracy =
-          withAccuracy.reduce((sum, r) => sum + (r.accuracy || 0), 0) /
-          withAccuracy.length;
+          withAccuracy.reduce((sum, r) => sum + (r.accuracy || 0), 0) / withAccuracy.length;
       }
 
       // Rating distribution
-      allReviews.forEach((review) => {
+      allReviews.forEach(review => {
         const roundedRating = Math.round(review.rating) as 1 | 2 | 3 | 4 | 5;
         stats.ratingDistribution[roundedRating]++;
       });
@@ -144,9 +140,6 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error fetching vehicle reviews:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch reviews' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Failed to fetch reviews' }, { status: 500 });
   }
 }

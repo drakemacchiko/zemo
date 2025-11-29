@@ -1,11 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { verifyAccessToken } from '@/lib/auth'
-import { prisma } from '@/lib/db'
-import { ClaimService } from '@/lib/insurance'
-import { 
-  claimCreateSchema, 
-  claimSearchSchema,
-} from '@/lib/validations'
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyAccessToken } from '@/lib/auth';
+import { prisma } from '@/lib/db';
+import { ClaimService } from '@/lib/insurance';
+import { claimCreateSchema, claimSearchSchema } from '@/lib/validations';
 
 // Simple authentication helper
 async function authenticateRequest(request: NextRequest) {
@@ -22,7 +19,7 @@ async function authenticateRequest(request: NextRequest) {
 
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { id: true, email: true }
+    select: { id: true, email: true },
   });
 
   if (!user) {
@@ -45,15 +42,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    
+
     // Validate request body
     const validationResult = claimCreateSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Validation failed',
-          details: validationResult.error.issues 
+          details: validationResult.error.issues,
         },
         { status: 400 }
       );
@@ -62,46 +59,37 @@ export async function POST(request: NextRequest) {
     const claimData = validationResult.data;
 
     // Create claim using service
-    const claim = await ClaimService.createClaim(
-      claimData.policyId,
-      authResult.user.id,
+    const claim = await ClaimService.createClaim(claimData.policyId, authResult.user.id, {
+      incidentDate: new Date(claimData.incidentDate),
+      incidentLocation: claimData.incidentLocation,
+      incidentDescription: claimData.incidentDescription,
+      claimType: claimData.claimType,
+      ...(claimData.estimatedDamageAmount && {
+        estimatedDamageAmount: claimData.estimatedDamageAmount,
+      }),
+      ...(claimData.policeReportNumber && { policeReportNumber: claimData.policeReportNumber }),
+    });
+
+    return NextResponse.json(
       {
-        incidentDate: new Date(claimData.incidentDate),
-        incidentLocation: claimData.incidentLocation,
-        incidentDescription: claimData.incidentDescription,
-        claimType: claimData.claimType,
-        ...(claimData.estimatedDamageAmount && { estimatedDamageAmount: claimData.estimatedDamageAmount }),
-        ...(claimData.policeReportNumber && { policeReportNumber: claimData.policeReportNumber }),
-      }
+        success: true,
+        data: claim,
+        message: 'Claim submitted successfully',
+      },
+      { status: 201 }
     );
-
-    return NextResponse.json({
-      success: true,
-      data: claim,
-      message: 'Claim submitted successfully',
-    }, { status: 201 });
-
   } catch (error: any) {
     console.error('Error creating claim:', error);
-    
+
     if (error.message.includes('not found') || error.message.includes('Unauthorized')) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: error.message }, { status: 404 });
     }
 
     if (error.message.includes('not active') || error.message.includes('outside')) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { success: false, error: 'Failed to create claim' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Failed to create claim' }, { status: 500 });
   }
 }
 
@@ -133,10 +121,10 @@ export async function GET(request: NextRequest) {
     const validationResult = claimSearchSchema.safeParse(queryData);
     if (!validationResult.success) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Invalid query parameters',
-          details: validationResult.error.issues 
+          details: validationResult.error.issues,
         },
         { status: 400 }
       );
@@ -165,12 +153,8 @@ export async function GET(request: NextRequest) {
       success: true,
       data: result,
     });
-
   } catch (error) {
     console.error('Error fetching claims:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch claims' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Failed to fetch claims' }, { status: 500 });
   }
 }

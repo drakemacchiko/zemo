@@ -1,132 +1,142 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useRef } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { 
-  Menu, X, Search, Bell, MessageSquare, User, 
-  LogOut, Car, Calendar, HelpCircle, Shield 
-} from 'lucide-react'
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import {
+  Menu,
+  X,
+  Search,
+  Bell,
+  MessageSquare,
+  User,
+  LogOut,
+  Car,
+  Calendar,
+  HelpCircle,
+  Shield,
+} from 'lucide-react';
 
 interface UserData {
-  id: string
-  email: string
-  firstName?: string
-  lastName?: string
-  profilePhoto?: string
-  role?: string
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  profilePhoto?: string;
+  role?: string;
 }
 
 export default function Header() {
-  const router = useRouter()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [userData, setUserData] = useState<UserData | null>(null)
-  const [showUserMenu, setShowUserMenu] = useState(false)
-  const [showMobileMenu, setShowMobileMenu] = useState(false)
-  const [notificationCount, setNotificationCount] = useState(0)
-  const [messageCount, setMessageCount] = useState(0)
-  const userMenuRef = useRef<HTMLDivElement>(null)
-  const mobileMenuRef = useRef<HTMLDivElement>(null)
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [messageCount, setMessageCount] = useState(0);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    checkAuth()
-  }, [])
+    checkAuth();
+  }, []);
 
   const checkAuth = () => {
-    const token = localStorage.getItem('accessToken')
+    const token = localStorage.getItem('accessToken');
     if (token) {
-      setIsAuthenticated(true)
-      fetchUserData(token)
+      setIsAuthenticated(true);
+      fetchUserData(token);
     }
-  }
+  };
 
   const fetchUserData = async (token: string) => {
     try {
       const response = await fetch('/api/auth/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (response.ok) {
-        const data = await response.json()
-        setUserData(data.user)
-        fetchNotificationCounts(token)
+        const data = await response.json();
+        setUserData(data.user);
+        fetchNotificationCounts(token);
       }
     } catch (err) {
-      console.error('Failed to fetch user data:', err)
+      console.error('Failed to fetch user data:', err);
     }
-  }
+  };
 
   const fetchNotificationCounts = async (token: string) => {
     try {
       const notifResponse = await fetch('/api/notifications/unread-count', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (notifResponse.ok) {
-        const data = await notifResponse.json()
-        setNotificationCount(data.count || 0)
+        const data = await notifResponse.json();
+        setNotificationCount(data.count || 0);
       }
 
       const msgResponse = await fetch('/api/messages/unread-count', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (msgResponse.ok) {
-        const data = await msgResponse.json()
-        setMessageCount(data.count || 0)
+        const data = await msgResponse.json();
+        setMessageCount(data.count || 0);
       }
     } catch (err) {
       // Silent fail
     }
-  }
+  };
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     // Clear the cookie
-    document.cookie = 'accessToken=; path=/; max-age=0'
-    setIsAuthenticated(false)
-    setUserData(null)
-    setShowUserMenu(false)
-    router.push('/')
-  }
+    document.cookie = 'accessToken=; path=/; max-age=0';
+    setIsAuthenticated(false);
+    setUserData(null);
+    setShowUserMenu(false);
+    router.push('/');
+  };
 
   // Close menus on outside click or ESC
   useEffect(() => {
     function onDocClick(e: MouseEvent) {
-      const target = e.target as Node
+      const target = e.target as Node;
       if (showUserMenu && userMenuRef.current && !userMenuRef.current.contains(target)) {
-        setShowUserMenu(false)
+        setShowUserMenu(false);
       }
       if (showMobileMenu && mobileMenuRef.current && !mobileMenuRef.current.contains(target)) {
-        setShowMobileMenu(false)
+        setShowMobileMenu(false);
       }
     }
 
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
-        setShowUserMenu(false)
-        setShowMobileMenu(false)
+        setShowUserMenu(false);
+        setShowMobileMenu(false);
       }
     }
 
-    document.addEventListener('click', onDocClick)
-    document.addEventListener('keydown', onKey)
+    document.addEventListener('click', onDocClick);
+    document.addEventListener('keydown', onKey);
     return () => {
-      document.removeEventListener('click', onDocClick)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [showUserMenu, showMobileMenu])
+      document.removeEventListener('click', onDocClick);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [showUserMenu, showMobileMenu]);
 
   const getInitials = () => {
     if (userData?.firstName && userData?.lastName) {
-      return `${userData.firstName[0]}${userData.lastName[0]}`.toUpperCase()
+      return `${userData.firstName[0]}${userData.lastName[0]}`.toUpperCase();
     }
     if (userData?.email && userData.email.length > 0) {
-      return userData.email.charAt(0).toUpperCase()
+      return userData.email.charAt(0).toUpperCase();
     }
-    return 'U'
-  }
+    return 'U';
+  };
 
-  const isHost = userData?.role === 'HOST' || userData?.role === 'SUPER_ADMIN' || userData?.role === 'ADMIN'
-  const isAdmin = userData?.role === 'SUPER_ADMIN' || userData?.role === 'ADMIN'
+  const isHost =
+    userData?.role === 'HOST' || userData?.role === 'SUPER_ADMIN' || userData?.role === 'ADMIN';
+  const isAdmin = userData?.role === 'SUPER_ADMIN' || userData?.role === 'ADMIN';
 
   return (
     <header className="sticky top-0 z-50 w-full bg-white shadow-sm">
@@ -138,7 +148,9 @@ export default function Header() {
               <div className="w-10 h-10 lg:w-12 lg:h-12 bg-yellow-500 rounded-lg flex items-center justify-center group-hover:bg-yellow-600 transition-colors">
                 <span className="text-black font-bold text-lg lg:text-xl">Z</span>
               </div>
-              <span className="text-2xl lg:text-3xl font-bold text-gray-900 hidden sm:block">ZEMO</span>
+              <span className="text-2xl lg:text-3xl font-bold text-gray-900 hidden sm:block">
+                ZEMO
+              </span>
             </Link>
           </div>
 
@@ -220,9 +232,9 @@ export default function Header() {
                 {/* User Menu */}
                 <div className="relative" ref={userMenuRef}>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setShowUserMenu(!showUserMenu)
+                    onClick={e => {
+                      e.stopPropagation();
+                      setShowUserMenu(!showUserMenu);
                     }}
                     className="flex items-center space-x-2 p-2 rounded-full hover:shadow-md transition-all border border-gray-300 hover:border-yellow-500"
                     aria-label="User menu"
@@ -237,9 +249,7 @@ export default function Header() {
                       />
                     ) : (
                       <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                        <span className="text-black text-sm font-semibold">
-                          {getInitials()}
-                        </span>
+                        <span className="text-black text-sm font-semibold">{getInitials()}</span>
                       </div>
                     )}
                     <Menu className="w-4 h-4 text-gray-700 hidden md:block" />
@@ -271,7 +281,7 @@ export default function Header() {
                             <div className="border-t border-gray-100 my-2" />
                           </>
                         )}
-                        
+
                         <Link
                           href="/profile"
                           onClick={() => setShowUserMenu(false)}
@@ -280,7 +290,7 @@ export default function Header() {
                           <User className="w-4 h-4 mr-3" />
                           Profile settings
                         </Link>
-                        
+
                         {isHost && (
                           <Link
                             href="/host/vehicles"
@@ -291,7 +301,7 @@ export default function Header() {
                             Your vehicles
                           </Link>
                         )}
-                        
+
                         <Link
                           href="/bookings"
                           onClick={() => setShowUserMenu(false)}
@@ -300,7 +310,7 @@ export default function Header() {
                           <Calendar className="w-4 h-4 mr-3" />
                           Your bookings
                         </Link>
-                        
+
                         <Link
                           href="/messages"
                           onClick={() => setShowUserMenu(false)}
@@ -309,7 +319,7 @@ export default function Header() {
                           <MessageSquare className="w-4 h-4 mr-3" />
                           Messages
                         </Link>
-                        
+
                         <Link
                           href="/notifications"
                           onClick={() => setShowUserMenu(false)}
@@ -318,7 +328,7 @@ export default function Header() {
                           <Bell className="w-4 h-4 mr-3" />
                           Notifications
                         </Link>
-                        
+
                         <Link
                           href="/support"
                           onClick={() => setShowUserMenu(false)}
@@ -368,14 +378,14 @@ export default function Header() {
                 >
                   Become a host
                 </Link>
-                
+
                 <Link
                   href="/login"
                   className="hidden md:block px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
                 >
                   Sign in
                 </Link>
-                
+
                 <Link
                   href="/register"
                   className="px-4 py-2 bg-yellow-500 text-black text-sm font-semibold rounded-lg hover:bg-yellow-600 transition-colors"
@@ -402,7 +412,10 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {showMobileMenu && (
-          <div ref={mobileMenuRef} className="lg:hidden border-t border-gray-200 py-4 animate-slide-down">
+          <div
+            ref={mobileMenuRef}
+            className="lg:hidden border-t border-gray-200 py-4 animate-slide-down"
+          >
             <nav className="flex flex-col space-y-1">
               {isAuthenticated ? (
                 <>
@@ -427,7 +440,7 @@ export default function Header() {
                       <div className="border-t border-gray-100 my-2" />
                     </>
                   )}
-                  
+
                   <Link
                     href="/profile"
                     onClick={() => setShowMobileMenu(false)}
@@ -436,7 +449,7 @@ export default function Header() {
                     <User className="w-5 h-5 mr-3" />
                     Profile
                   </Link>
-                  
+
                   {isHost && (
                     <>
                       <Link
@@ -449,7 +462,7 @@ export default function Header() {
                       </Link>
                     </>
                   )}
-                  
+
                   <Link
                     href="/bookings"
                     onClick={() => setShowMobileMenu(false)}
@@ -458,7 +471,7 @@ export default function Header() {
                     <Calendar className="w-5 h-5 mr-3" />
                     Your Bookings
                   </Link>
-                  
+
                   <Link
                     href="/messages"
                     onClick={() => setShowMobileMenu(false)}
@@ -472,7 +485,7 @@ export default function Header() {
                       </span>
                     )}
                   </Link>
-                  
+
                   <Link
                     href="/notifications"
                     onClick={() => setShowMobileMenu(false)}
@@ -502,11 +515,11 @@ export default function Header() {
                   )}
 
                   <div className="border-t border-gray-200 my-2" />
-                  
+
                   <button
                     onClick={() => {
-                      handleLogout()
-                      setShowMobileMenu(false)
+                      handleLogout();
+                      setShowMobileMenu(false);
                     }}
                     className="flex items-center px-4 py-3 text-base text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   >
@@ -523,7 +536,7 @@ export default function Header() {
                   >
                     Browse Cars
                   </Link>
-                  
+
                   <Link
                     href="/host"
                     onClick={() => setShowMobileMenu(false)}
@@ -531,7 +544,7 @@ export default function Header() {
                   >
                     Become a Host
                   </Link>
-                  
+
                   <Link
                     href="/about"
                     onClick={() => setShowMobileMenu(false)}
@@ -539,7 +552,7 @@ export default function Header() {
                   >
                     About
                   </Link>
-                  
+
                   <Link
                     href="/support"
                     onClick={() => setShowMobileMenu(false)}
@@ -549,7 +562,7 @@ export default function Header() {
                   </Link>
 
                   <div className="border-t border-gray-200 my-2" />
-                  
+
                   <Link
                     href="/login"
                     onClick={() => setShowMobileMenu(false)}
@@ -557,7 +570,7 @@ export default function Header() {
                   >
                     Sign in
                   </Link>
-                  
+
                   <Link
                     href="/register"
                     onClick={() => setShowMobileMenu(false)}
@@ -572,5 +585,5 @@ export default function Header() {
         )}
       </div>
     </header>
-  )
+  );
 }

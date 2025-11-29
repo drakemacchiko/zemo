@@ -17,18 +17,12 @@ export async function POST(request: NextRequest) {
   try {
     const token = extractTokenFromRequest(request);
     if (!token) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const payload = verifyAccessToken(token);
     if (!payload) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -41,10 +35,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     // Get booking
@@ -57,24 +48,19 @@ export async function POST(request: NextRequest) {
     });
 
     if (!booking) {
-      return NextResponse.json(
-        { error: 'Booking not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
     }
 
     // Verify user is the renter
     if (booking.userId !== user.id) {
-      return NextResponse.json(
-        { error: 'Unauthorized - not booking owner' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Unauthorized - not booking owner' }, { status: 403 });
     }
 
     // Determine amount based on payment type
-    const amount = validatedData.paymentType === 'BOOKING_PAYMENT'
-      ? booking.totalAmount
-      : booking.securityDeposit;
+    const amount =
+      validatedData.paymentType === 'BOOKING_PAYMENT'
+        ? booking.totalAmount
+        : booking.securityDeposit;
 
     const currency = 'ZMW';
     const customerName = user.profile
@@ -122,9 +108,12 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        const network = validatedData.provider === 'MTN_MOMO' ? 'MTN'
-          : validatedData.provider === 'AIRTEL_MONEY' ? 'AIRTEL'
-          : 'ZAMTEL';
+        const network =
+          validatedData.provider === 'MTN_MOMO'
+            ? 'MTN'
+            : validatedData.provider === 'AIRTEL_MONEY'
+              ? 'AIRTEL'
+              : 'ZAMTEL';
 
         result = await flutterwave.initializeMobileMoneyPayment({
           amount,
@@ -185,7 +174,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('Create payment intent error:', error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid request data', details: error.issues },
@@ -193,9 +182,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

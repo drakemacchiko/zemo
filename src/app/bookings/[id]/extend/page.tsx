@@ -202,7 +202,10 @@ export default function ExtendTripPage({ params }: { params: { id: string } }) {
       </div>
 
       {/* Extension Form */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+      >
         <div className="space-y-6">
           {/* New End Date */}
           <div>
@@ -213,10 +216,12 @@ export default function ExtendTripPage({ params }: { params: { id: string } }) {
               type="date"
               id="newEndDate"
               value={newEndDate}
-              onChange={(e) => setNewEndDate(e.target.value)}
-              min={new Date(new Date(booking.endDate).getTime() + 24 * 60 * 60 * 1000)
-                .toISOString()
-                .split('T')[0]}
+              onChange={e => setNewEndDate(e.target.value)}
+              min={
+                new Date(new Date(booking.endDate).getTime() + 24 * 60 * 60 * 1000)
+                  .toISOString()
+                  .split('T')[0]
+              }
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
             />
@@ -233,7 +238,7 @@ export default function ExtendTripPage({ params }: { params: { id: string } }) {
             <textarea
               id="reason"
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              onChange={e => setReason(e.target.value)}
               rows={3}
               placeholder="Let the host know why you need more time..."
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
@@ -244,7 +249,7 @@ export default function ExtendTripPage({ params }: { params: { id: string } }) {
           {extensionDetails && (
             <div className="bg-gray-50 rounded-lg p-6 space-y-3">
               <h3 className="font-semibold text-gray-900 mb-4">Extension Cost</h3>
-              
+
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">
                   {extensionDetails.additionalDays} additional day

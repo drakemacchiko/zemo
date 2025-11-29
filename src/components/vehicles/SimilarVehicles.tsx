@@ -36,7 +36,7 @@ export function SimilarVehicles({ vehicles, currentVehicleId }: SimilarVehiclesP
       <h2 className="text-2xl font-bold mb-6">Similar Vehicles</h2>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredVehicles.map((vehicle) => (
+        {filteredVehicles.map(vehicle => (
           <Link
             key={vehicle.id}
             href={`/vehicles/${vehicle.id}`}
@@ -50,7 +50,7 @@ export function SimilarVehicles({ vehicles, currentVehicleId }: SimilarVehiclesP
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              
+
               {/* Instant Booking Badge */}
               {vehicle.instantBooking && (
                 <div className="absolute top-3 left-3 bg-zemo-yellow px-2 py-1 rounded-md flex items-center gap-1">
@@ -72,9 +72,7 @@ export function SimilarVehicles({ vehicles, currentVehicleId }: SimilarVehiclesP
                 {vehicle.rating && vehicle.rating > 0 ? (
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-semibold text-gray-900">
-                      {vehicle.rating.toFixed(1)}
-                    </span>
+                    <span className="font-semibold text-gray-900">{vehicle.rating.toFixed(1)}</span>
                     <span>({vehicle.tripCount || 0})</span>
                   </div>
                 ) : (

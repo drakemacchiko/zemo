@@ -1,11 +1,11 @@
-import type { Metadata } from 'next'
-import Hero from '@/components/sections/Hero'
-import { FeaturedVehicles } from '@/components/sections/FeaturedVehicles'
-import { HowItWorks } from '@/components/sections/HowItWorks'
-import { Testimonials } from '@/components/sections/Testimonials'
-import { BecomeAHost } from '@/components/sections/BecomeAHost'
-import { WhyZEMO } from '@/components/sections/WhyZEMO'
-import { DownloadApp } from '@/components/sections/DownloadApp'
+import type { Metadata } from 'next';
+import Hero from '@/components/sections/Hero';
+import { FeaturedVehicles } from '@/components/sections/FeaturedVehicles';
+import { HowItWorks } from '@/components/sections/HowItWorks';
+import { Testimonials } from '@/components/sections/Testimonials';
+import { BecomeAHost } from '@/components/sections/BecomeAHost';
+import { WhyZEMO } from '@/components/sections/WhyZEMO';
+import { DownloadApp } from '@/components/sections/DownloadApp';
 
 export const metadata: Metadata = {
   title: 'ZEMO - Car Rental Marketplace in Zambia',
@@ -15,10 +15,18 @@ export const metadata: Metadata = {
     title: 'ZEMO - Car Rental Marketplace',
     description: 'Discover the best car rental deals in Zambia',
     url: 'https://zemo.zm',
-    images: ['/images/og-image.jpg']
+    images: ['/images/og-image.jpg'],
   },
-  keywords: ['car rental', 'Zambia', 'peer-to-peer', 'car sharing', 'ZEMO', 'Lusaka', 'vehicle rental']
-}
+  keywords: [
+    'car rental',
+    'Zambia',
+    'peer-to-peer',
+    'car sharing',
+    'ZEMO',
+    'Lusaka',
+    'vehicle rental',
+  ],
+};
 
 export default function HomePage() {
   return (
@@ -44,5 +52,5 @@ export default function HomePage() {
       {/* Download Mobile App */}
       <DownloadApp />
     </>
-  )
+  );
 }

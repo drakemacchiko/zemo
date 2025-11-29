@@ -1,40 +1,40 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function PickupInspectionPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const [photos, setPhotos] = useState<File[]>([])
-  const [mileage, setMileage] = useState('')
-  const [submitting, setSubmitting] = useState(false)
+  const router = useRouter();
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [mileage, setMileage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setPhotos([...photos, ...Array.from(e.target.files)])
+      setPhotos([...photos, ...Array.from(e.target.files)]);
     }
-  }
+  };
 
   const handleSubmit = async () => {
-    setSubmitting(true)
-    const token = localStorage.getItem('accessToken')
-    const formData = new FormData()
-    formData.append('mileage', mileage)
-    photos.forEach((photo, i) => formData.append(`photo${i}`, photo))
+    setSubmitting(true);
+    const token = localStorage.getItem('accessToken');
+    const formData = new FormData();
+    formData.append('mileage', mileage);
+    photos.forEach((photo, i) => formData.append(`photo${i}`, photo));
 
     try {
       await fetch(`/api/bookings/${params.id}/pickup`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
-      })
-      router.push(`/bookings/${params.id}`)
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      router.push(`/bookings/${params.id}`);
     } catch (err) {
-      alert('Inspection failed')
+      alert('Inspection failed');
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -43,7 +43,13 @@ export default function PickupInspectionPage({ params }: { params: { id: string 
         <div className="bg-white rounded-lg shadow-md p-6 space-y-6">
           <div>
             <label className="block font-bold mb-2">Vehicle Photos</label>
-            <input type="file" multiple accept="image/*" onChange={handlePhotoUpload} className="w-full" />
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              className="w-full"
+            />
             <p className="text-sm text-gray-600 mt-1">{photos.length} photos selected</p>
           </div>
           <div>
@@ -51,7 +57,7 @@ export default function PickupInspectionPage({ params }: { params: { id: string 
             <input
               type="number"
               value={mileage}
-              onChange={(e) => setMileage(e.target.value)}
+              onChange={e => setMileage(e.target.value)}
               className="w-full border rounded-lg px-3 py-2"
             />
           </div>
@@ -65,5 +71,5 @@ export default function PickupInspectionPage({ params }: { params: { id: string 
         </div>
       </div>
     </div>
-  )
+  );
 }

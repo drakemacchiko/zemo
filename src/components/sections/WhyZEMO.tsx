@@ -1,32 +1,35 @@
-import { Shield, CheckCircle, Clock, Award } from 'lucide-react'
+import { Shield, CheckCircle, Clock, Award } from 'lucide-react';
 
 export function WhyZEMO() {
   const features = [
     {
       icon: Shield,
       title: 'Comprehensive Insurance',
-      description: 'Every trip is covered with up to K500,000 in liability protection and damage coverage',
-      color: 'bg-blue-500'
+      description:
+        'Every trip is covered with up to K500,000 in liability protection and damage coverage',
+      color: 'bg-blue-500',
     },
     {
       icon: CheckCircle,
       title: 'Verified Community',
-      description: 'All hosts and renters are verified with ID checks and secure payment processing',
-      color: 'bg-green-500'
+      description:
+        'All hosts and renters are verified with ID checks and secure payment processing',
+      color: 'bg-green-500',
     },
     {
       icon: Clock,
       title: '24/7 Support',
-      description: 'Our dedicated team is always available to help you with any questions or issues',
-      color: 'bg-purple-500'
+      description:
+        'Our dedicated team is always available to help you with any questions or issues',
+      color: 'bg-purple-500',
     },
     {
       icon: Award,
       title: 'Quality Guarantee',
       description: 'All vehicles undergo safety inspections and must meet our quality standards',
-      color: 'bg-yellow-500'
-    }
-  ]
+      color: 'bg-yellow-500',
+    },
+  ];
 
   return (
     <section className="py-16 md:py-24 bg-white">
@@ -37,8 +40,8 @@ export function WhyZEMO() {
             Why choose ZEMO?
           </h2>
           <p className="text-lg text-gray-600">
-            We're building Zambia's most trusted car sharing community with safety, 
-            convenience, and quality at the forefront
+            We're building Zambia's most trusted car sharing community with safety, convenience, and
+            quality at the forefront
           </p>
         </div>
 
@@ -49,15 +52,13 @@ export function WhyZEMO() {
               key={index}
               className="bg-gray-50 rounded-xl p-6 hover:shadow-lg transition-shadow"
             >
-              <div className={`w-14 h-14 ${feature.color} rounded-lg flex items-center justify-center mb-4`}>
+              <div
+                className={`w-14 h-14 ${feature.color} rounded-lg flex items-center justify-center mb-4`}
+              >
                 <feature.icon className="w-7 h-7 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {feature.title}
-              </h3>
-              <p className="text-gray-600">
-                {feature.description}
-              </p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
+              <p className="text-gray-600">{feature.description}</p>
             </div>
           ))}
         </div>
@@ -83,5 +84,5 @@ export function WhyZEMO() {
         </div>
       </div>
     </section>
-  )
+  );
 }

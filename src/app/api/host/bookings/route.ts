@@ -25,39 +25,39 @@ export async function GET(request: NextRequest) {
     // Build where clause
     const whereClause: any = {
       vehicle: {
-        hostId: userId
+        hostId: userId,
       },
       OR: [
         {
           startDate: {
             gte: startDate,
-            lte: endDate
-          }
+            lte: endDate,
+          },
         },
         {
           endDate: {
             gte: startDate,
-            lte: endDate
-          }
+            lte: endDate,
+          },
         },
         {
           AND: [
             {
               startDate: {
-                lte: startDate
-              }
+                lte: startDate,
+              },
             },
             {
               endDate: {
-                gte: endDate
-              }
-            }
-          ]
-        }
+                gte: endDate,
+              },
+            },
+          ],
+        },
       ],
       status: {
-        in: ['PENDING', 'CONFIRMED', 'ACTIVE', 'COMPLETED']
-      }
+        in: ['PENDING', 'CONFIRMED', 'ACTIVE', 'COMPLETED'],
+      },
     };
 
     // Filter by vehicle if specified
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Fetch bookings
-    const bookings = await withPrismaRetry(async (prisma) =>
+    const bookings = await withPrismaRetry(async prisma =>
       prisma.booking.findMany({
         where: whereClause,
         include: {
@@ -76,8 +76,8 @@ export async function GET(request: NextRequest) {
               make: true,
               model: true,
               year: true,
-              plateNumber: true
-            }
+              plateNumber: true,
+            },
           },
           user: {
             select: {
@@ -87,15 +87,15 @@ export async function GET(request: NextRequest) {
                 select: {
                   firstName: true,
                   lastName: true,
-                  profilePictureUrl: true
-                }
-              }
-            }
-          }
+                  profilePictureUrl: true,
+                },
+              },
+            },
+          },
         },
         orderBy: {
-          startDate: 'asc'
-        }
+          startDate: 'asc',
+        },
       })
     );
 
@@ -109,28 +109,27 @@ export async function GET(request: NextRequest) {
         id: booking.user.id,
         name: `${booking.user.profile?.firstName || ''} ${booking.user.profile?.lastName || ''}`.trim(),
         email: booking.user.email,
-        avatar: booking.user.profile?.profilePictureUrl
+        avatar: booking.user.profile?.profilePictureUrl,
       },
       startDate: booking.startDate.toISOString(),
       endDate: booking.endDate.toISOString(),
       status: booking.status,
       totalAmount: booking.totalAmount,
       pickupTime: booking.startTime,
-      returnTime: booking.endTime
+      returnTime: booking.endTime,
     }));
 
     return NextResponse.json({
       bookings: formattedBookings,
       month,
-      year
+      year,
     });
-
   } catch (error) {
     console.error('Calendar bookings error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to fetch calendar bookings',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

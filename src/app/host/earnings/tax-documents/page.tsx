@@ -24,7 +24,7 @@ export default function TaxDocumentsPage() {
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch('/api/host/earnings/tax-documents', {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -42,7 +42,7 @@ export default function TaxDocumentsPage() {
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch(`/api/host/earnings/tax-documents/${documentId}/download`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -80,8 +80,9 @@ export default function TaxDocumentsPage() {
       {/* Info Banner */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <p className="text-sm text-blue-800">
-          <strong>Tax Information:</strong> Your annual earning statements are generated at the end of each tax year. 
-          Please consult with a tax professional for guidance on reporting rental income.
+          <strong>Tax Information:</strong> Your annual earning statements are generated at the end
+          of each tax year. Please consult with a tax professional for guidance on reporting rental
+          income.
         </p>
       </div>
 
@@ -108,7 +109,10 @@ export default function TaxDocumentsPage() {
                       {doc.documentType} - {doc.year}
                     </h3>
                     <p className="text-sm text-gray-600 mb-2">
-                      Total Earnings: <span className="font-semibold text-gray-900">ZMW {doc.totalEarnings.toLocaleString()}</span>
+                      Total Earnings:{' '}
+                      <span className="font-semibold text-gray-900">
+                        ZMW {doc.totalEarnings.toLocaleString()}
+                      </span>
                     </p>
                     <p className="text-xs text-gray-500">
                       Generated on {new Date(doc.generatedAt).toLocaleDateString()}

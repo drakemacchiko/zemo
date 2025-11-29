@@ -228,25 +228,32 @@ export default function EarlyReturnPage({ params }: { params: { id: string } }) 
           <div>
             <h3 className="font-semibold text-yellow-900 mb-1">Early Return Policy</h3>
             <p className="text-sm text-yellow-800">
-              You will receive a 50% refund for unused rental days. Service fees and taxes are non-refundable. The host will be notified of your early return.
+              You will receive a 50% refund for unused rental days. Service fees and taxes are
+              non-refundable. The host will be notified of your early return.
             </p>
           </div>
         </div>
       </div>
 
       {/* Early Return Form */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+      >
         <div className="space-y-6">
           {/* Actual Return Date */}
           <div>
-            <label htmlFor="actualReturnDate" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="actualReturnDate"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Actual Return Date
             </label>
             <input
               type="date"
               id="actualReturnDate"
               value={actualReturnDate}
-              onChange={(e) => setActualReturnDate(e.target.value)}
+              onChange={e => setActualReturnDate(e.target.value)}
               min={bookingStart}
               max={today}
               required
@@ -265,7 +272,7 @@ export default function EarlyReturnPage({ params }: { params: { id: string } }) 
             <textarea
               id="reason"
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
+              onChange={e => setReason(e.target.value)}
               rows={3}
               placeholder="Plans changed, emergency, etc."
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
@@ -276,7 +283,7 @@ export default function EarlyReturnPage({ params }: { params: { id: string } }) 
           {refundDetails && (
             <div className="bg-green-50 rounded-lg p-6 space-y-3">
               <h3 className="font-semibold text-gray-900 mb-4">Refund Breakdown</h3>
-              
+
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Unused days</span>
                 <span className="text-gray-900 font-medium">{refundDetails.daysUnused} day(s)</span>
@@ -290,7 +297,9 @@ export default function EarlyReturnPage({ params }: { params: { id: string } }) 
               </div>
 
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Refund rate ({refundDetails.refundPercentage}%)</span>
+                <span className="text-gray-600">
+                  Refund rate ({refundDetails.refundPercentage}%)
+                </span>
                 <span className="text-gray-900">Early Return Policy</span>
               </div>
 

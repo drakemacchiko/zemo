@@ -23,19 +23,19 @@ const policies = {
       {
         timeframe: '24+ hours before trip',
         refundPercentage: 100,
-        description: 'Full refund of trip cost'
+        description: 'Full refund of trip cost',
       },
       {
         timeframe: '6-24 hours before trip',
         refundPercentage: 50,
-        description: '50% refund of trip cost'
+        description: '50% refund of trip cost',
       },
       {
         timeframe: 'Less than 6 hours',
         refundPercentage: 0,
-        description: 'No refund'
-      }
-    ]
+        description: 'No refund',
+      },
+    ],
   },
   moderate: {
     name: 'Moderate',
@@ -44,19 +44,19 @@ const policies = {
       {
         timeframe: '5+ days before trip',
         refundPercentage: 100,
-        description: 'Full refund of trip cost'
+        description: 'Full refund of trip cost',
       },
       {
         timeframe: '2-5 days before trip',
         refundPercentage: 50,
-        description: '50% refund of trip cost'
+        description: '50% refund of trip cost',
       },
       {
         timeframe: 'Less than 2 days',
         refundPercentage: 0,
-        description: 'No refund'
-      }
-    ]
+        description: 'No refund',
+      },
+    ],
   },
   strict: {
     name: 'Strict',
@@ -65,25 +65,25 @@ const policies = {
       {
         timeframe: '7+ days before trip',
         refundPercentage: 100,
-        description: 'Full refund of trip cost'
+        description: 'Full refund of trip cost',
       },
       {
         timeframe: '3-7 days before trip',
         refundPercentage: 50,
-        description: '50% refund of trip cost'
+        description: '50% refund of trip cost',
       },
       {
         timeframe: 'Less than 3 days',
         refundPercentage: 0,
-        description: 'No refund'
-      }
-    ]
-  }
+        description: 'No refund',
+      },
+    ],
+  },
 };
 
 export function CancellationPolicy({
   policyType = 'moderate',
-  customPolicy
+  customPolicy,
 }: CancellationPolicyProps) {
   const policy = customPolicy || policies[policyType];
 
@@ -118,11 +118,15 @@ export function CancellationPolicy({
                 </div>
               </div>
               <div className="text-right ml-4">
-                <div className={`text-2xl font-bold ${
-                  tier.refundPercentage === 100 ? 'text-green-600' :
-                  tier.refundPercentage > 0 ? 'text-yellow-600' :
-                  'text-red-600'
-                }`}>
+                <div
+                  className={`text-2xl font-bold ${
+                    tier.refundPercentage === 100
+                      ? 'text-green-600'
+                      : tier.refundPercentage > 0
+                        ? 'text-yellow-600'
+                        : 'text-red-600'
+                  }`}
+                >
                   {tier.refundPercentage}%
                 </div>
                 <div className="text-xs text-gray-600">refund</div>
@@ -168,7 +172,7 @@ export function CancellationPolicy({
             <div className="text-sm text-gray-700">
               <p className="font-semibold mb-2">If the Host Cancels</p>
               <p>
-                If your host cancels your trip, you'll receive a full refund including service fees. 
+                If your host cancels your trip, you'll receive a full refund including service fees.
                 We'll also help you find a similar vehicle if available.
               </p>
             </div>
@@ -182,9 +186,9 @@ export function CancellationPolicy({
             <div className="text-sm text-gray-700">
               <p className="font-semibold mb-2">Extenuating Circumstances</p>
               <p>
-                In rare cases like natural disasters, medical emergencies, or government travel restrictions, 
-                you may be eligible for a full refund regardless of the cancellation policy. 
-                Documentation may be required.
+                In rare cases like natural disasters, medical emergencies, or government travel
+                restrictions, you may be eligible for a full refund regardless of the cancellation
+                policy. Documentation may be required.
               </p>
             </div>
           </div>

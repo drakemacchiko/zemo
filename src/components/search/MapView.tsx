@@ -40,7 +40,7 @@ export default function MapView({
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
   const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
-  
+
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [searchingThisArea, setSearchingThisArea] = useState(false);
 
@@ -94,13 +94,13 @@ export default function MapView({
     if (!mapInstanceRef.current || !isGoogleMapsLoaded()) return;
 
     // Clear existing markers
-    markersRef.current.forEach((marker) => {
+    markersRef.current.forEach(marker => {
       marker.map = null;
     });
     markersRef.current = [];
 
     // Create new markers
-    vehicles.forEach((vehicle) => {
+    vehicles.forEach(vehicle => {
       // Create marker content
       const content = document.createElement('div');
       content.className = 'relative cursor-pointer';
@@ -182,7 +182,7 @@ export default function MapView({
   // Update marker highlight when selectedVehicleId changes
   useEffect(() => {
     if (selectedVehicleId && mapInstanceRef.current) {
-      const vehicle = vehicles.find((v) => v.id === selectedVehicleId);
+      const vehicle = vehicles.find(v => v.id === selectedVehicleId);
       if (vehicle) {
         // Pan to vehicle
         mapInstanceRef.current.panTo({
@@ -191,11 +191,9 @@ export default function MapView({
         });
 
         // Find and click the marker to show info window
-        const marker = markersRef.current.find((m) => {
+        const marker = markersRef.current.find(m => {
           const position = m.position as google.maps.LatLngLiteral;
-          return (
-            position.lat === vehicle.location.lat && position.lng === vehicle.location.lng
-          );
+          return position.lat === vehicle.location.lat && position.lng === vehicle.location.lng;
         });
 
         if (marker) {

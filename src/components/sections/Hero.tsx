@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { SearchBar } from '@/components/search/SearchBar'
+import { SearchBar } from '@/components/search/SearchBar';
 
 export default function Hero() {
   return (
@@ -12,12 +12,12 @@ export default function Hero() {
           src="/images/hero-bg.jpg"
           alt="Car rental"
           className="w-full h-full object-cover"
-          onError={(e) => {
+          onError={e => {
             // Fallback to gradient if image doesn't exist
-            e.currentTarget.style.display = 'none'
-            const parent = e.currentTarget.parentElement
+            e.currentTarget.style.display = 'none';
+            const parent = e.currentTarget.parentElement;
             if (parent) {
-              parent.style.background = 'linear-gradient(135deg, #1a1a1a 0%, #333 100%)'
+              parent.style.background = 'linear-gradient(135deg, #1a1a1a 0%, #333 100%)';
             }
           }}
         />
@@ -66,5 +66,5 @@ export default function Hero() {
         </div>
       </div>
     </section>
-  )
+  );
 }

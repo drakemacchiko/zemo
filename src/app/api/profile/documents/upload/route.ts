@@ -25,43 +25,30 @@ export async function POST(request: NextRequest) {
     const documentType = formData.get('documentType') as string;
 
     if (!file || !documentType) {
-      return NextResponse.json(
-        { error: 'File and document type are required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File and document type are required' }, { status: 400 });
     }
 
     // Validate file size (10MB max)
     if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json(
-        { error: 'File size must be less than 10MB' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File size must be less than 10MB' }, { status: 400 });
     }
 
     // Upload to Supabase Storage
     const fileExt = file.name.split('.').pop();
     const fileName = `${payload.userId}/${documentType}_${Date.now()}.${fileExt}`;
-    
-    const { error: uploadError } = await supabase.storage
-      .from('documents')
-      .upload(fileName, file, {
-        contentType: file.type,
-        upsert: false,
-      });
+
+    const { error: uploadError } = await supabase.storage.from('documents').upload(fileName, file, {
+      contentType: file.type,
+      upsert: false,
+    });
 
     if (uploadError) {
       console.error('Supabase upload error:', uploadError);
-      return NextResponse.json(
-        { error: 'Failed to upload file' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
     }
 
     // Get public URL
-    const { data: urlData } = supabase.storage
-      .from('documents')
-      .getPublicUrl(fileName);
+    const { data: urlData } = supabase.storage.from('documents').getPublicUrl(fileName);
 
     // Save document record in database
     const document = await prisma.document.create({
@@ -81,16 +68,13 @@ export async function POST(request: NextRequest) {
       // await queueOCRProcessing(document.id);
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       document,
-      message: 'Document uploaded successfully. It will be reviewed shortly.' 
+      message: 'Document uploaded successfully. It will be reviewed shortly.',
     });
   } catch (error) {
     console.error('Error uploading document:', error);
-    return NextResponse.json(
-      { error: 'Failed to upload document' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to upload document' }, { status: 500 });
   }
 }

@@ -28,17 +28,9 @@ export const PaymentStatusSchema = z.enum([
   'RELEASED',
 ]);
 
-export const PaymentIntentSchema = z.enum([
-  'PAYMENT',
-  'HOLD',
-  'REFUND',
-]);
+export const PaymentIntentSchema = z.enum(['PAYMENT', 'HOLD', 'REFUND']);
 
-export const PaymentMethodTypeSchema = z.enum([
-  'MOBILE_MONEY',
-  'CREDIT_CARD',
-  'DEBIT_CARD',
-]);
+export const PaymentMethodTypeSchema = z.enum(['MOBILE_MONEY', 'CREDIT_CARD', 'DEBIT_CARD']);
 
 // Payment request validation
 export const paymentCreateSchema = z.object({
@@ -53,8 +45,7 @@ export const paymentCreateSchema = z.object({
 });
 
 export const mobileMoneyPaymentSchema = z.object({
-  phoneNumber: z.string()
-    .regex(/^(\+260|0)?[7-9][0-9]{8}$/, 'Invalid Zambian phone number format'),
+  phoneNumber: z.string().regex(/^(\+260|0)?[7-9][0-9]{8}$/, 'Invalid Zambian phone number format'),
   amount: z.number().positive('Amount must be positive').max(1000000, 'Amount too large'),
   currency: z.string().length(3, 'Currency must be 3 characters').default('ZMW'),
   provider: z.enum(['AIRTEL_MONEY', 'MTN_MOMO', 'ZAMTEL_KWACHA']),
@@ -72,11 +63,16 @@ export const cardPaymentSchema = z.object({
 });
 
 export const cardTokenizationSchema = z.object({
-  cardNumber: z.string()
+  cardNumber: z
+    .string()
     .regex(/^[0-9]{13,19}$/, 'Invalid card number format')
     .transform(val => val.replace(/\s/g, '')), // Remove spaces
   expiryMonth: z.number().int().min(1).max(12),
-  expiryYear: z.number().int().min(new Date().getFullYear()).max(new Date().getFullYear() + 20),
+  expiryYear: z
+    .number()
+    .int()
+    .min(new Date().getFullYear())
+    .max(new Date().getFullYear() + 20),
   cvv: z.string().regex(/^[0-9]{3,4}$/, 'Invalid CVV format'),
   cardholderName: z.string().min(2, 'Cardholder name required').max(100, 'Name too long'),
   customerId: z.string().optional(),
@@ -107,7 +103,8 @@ export const paymentMethodCreateSchema = z.object({
   brand: z.string().max(50, 'Brand name too long').optional(),
   expiryMonth: z.number().int().min(1).max(12).optional(),
   expiryYear: z.number().int().min(new Date().getFullYear()).optional(),
-  phoneNumber: z.string()
+  phoneNumber: z
+    .string()
     .regex(/^(\+260|0)?[7-9][0-9]{8}$/, 'Invalid phone number format')
     .optional(),
   accountName: z.string().max(100, 'Account name too long').optional(),

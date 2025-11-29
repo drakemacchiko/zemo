@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken, extractTokenFromRequest } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { 
-  bookingCreateSchema, 
+import {
+  bookingCreateSchema,
   bookingSearchSchema,
   type BookingCreateInput,
-  type BookingSearchInput 
+  type BookingSearchInput,
 } from '@/lib/validations';
-import { 
-  calculateBookingPrice, 
-  generateConfirmationNumber 
-} from '@/lib/utils';
+import { calculateBookingPrice, generateConfirmationNumber } from '@/lib/utils';
 import { InsurancePricingService } from '@/lib/insurance';
 
 /**
@@ -18,26 +15,26 @@ import { InsurancePricingService } from '@/lib/insurance';
  */
 async function verifyAuthToken(request: NextRequest) {
   const token = extractTokenFromRequest(request);
-  
+
   if (!token) {
     return { success: false, userId: null };
   }
-  
+
   const payload = verifyAccessToken(token);
   if (!payload) {
     return { success: false, userId: null };
   }
-  
+
   // Verify user exists
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { id: true }
+    select: { id: true },
   });
-  
+
   if (!user) {
     return { success: false, userId: null };
   }
-  
+
   return { success: true, userId: user.id };
 }
 
@@ -49,22 +46,19 @@ export async function POST(request: NextRequest) {
     // Verify authentication
     const authResult = await verifyAuthToken(request);
     if (!authResult.success || !authResult.userId) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
-    
+
     // Validate request body
     const validationResult = bookingCreateSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Validation failed',
-          details: validationResult.error.flatten().fieldErrors
+          details: validationResult.error.flatten().fieldErrors,
         },
         { status: 400 }
       );
@@ -77,17 +71,17 @@ export async function POST(request: NextRequest) {
     const result = await prisma.$transaction(async (tx: any) => {
       // Check if vehicle exists and is available
       const vehicle = await tx.vehicle.findUnique({
-        where: { 
+        where: {
           id: bookingData.vehicleId,
           isActive: true,
           availabilityStatus: 'AVAILABLE',
-          verificationStatus: 'VERIFIED'
+          verificationStatus: 'VERIFIED',
         },
         include: {
           host: {
-            select: { id: true, email: true }
-          }
-        }
+            select: { id: true, email: true },
+          },
+        },
       });
 
       if (!vehicle) {
@@ -104,29 +98,29 @@ export async function POST(request: NextRequest) {
         where: {
           vehicleId: bookingData.vehicleId,
           status: {
-            in: ['PENDING', 'CONFIRMED', 'ACTIVE']
+            in: ['PENDING', 'CONFIRMED', 'ACTIVE'],
           },
           OR: [
             {
               AND: [
                 { startDate: { lte: new Date(bookingData.startDate) } },
-                { endDate: { gt: new Date(bookingData.startDate) } }
-              ]
+                { endDate: { gt: new Date(bookingData.startDate) } },
+              ],
             },
             {
               AND: [
                 { startDate: { lt: new Date(bookingData.endDate) } },
-                { endDate: { gte: new Date(bookingData.endDate) } }
-              ]
+                { endDate: { gte: new Date(bookingData.endDate) } },
+              ],
             },
             {
               AND: [
                 { startDate: { gte: new Date(bookingData.startDate) } },
-                { endDate: { lte: new Date(bookingData.endDate) } }
-              ]
-            }
-          ]
-        }
+                { endDate: { lte: new Date(bookingData.endDate) } },
+              ],
+            },
+          ],
+        },
       });
 
       if (overlappingBookings.length > 0) {
@@ -142,7 +136,7 @@ export async function POST(request: NextRequest) {
 
       // Handle insurance if selected
       let insurancePremium = 0;
-      
+
       if (bookingData.insuranceId && bookingData.insuranceCoverageAmount) {
         // Calculate insurance premium
         const insurancePricing = await InsurancePricingService.calculatePremium(
@@ -152,7 +146,7 @@ export async function POST(request: NextRequest) {
           new Date(bookingData.endDate),
           bookingData.insuranceCoverageAmount
         );
-        
+
         insurancePremium = insurancePricing.totalPremium;
       }
 
@@ -181,7 +175,7 @@ export async function POST(request: NextRequest) {
           pickupLocation: bookingData.pickupLocation || null,
           dropoffLocation: bookingData.dropoffLocation || null,
           specialRequests: bookingData.specialRequests || null,
-          status: 'PENDING'
+          status: 'PENDING',
         },
         include: {
           vehicle: {
@@ -192,8 +186,8 @@ export async function POST(request: NextRequest) {
               year: true,
               plateNumber: true,
               dailyRate: true,
-              locationAddress: true
-            }
+              locationAddress: true,
+            },
           },
           user: {
             select: {
@@ -202,12 +196,12 @@ export async function POST(request: NextRequest) {
               profile: {
                 select: {
                   firstName: true,
-                  lastName: true
-                }
-              }
-            }
-          }
-        }
+                  lastName: true,
+                },
+              },
+            },
+          },
+        },
       });
 
       // Create insurance policy if selected
@@ -221,7 +215,7 @@ export async function POST(request: NextRequest) {
           new Date(bookingData.startDate),
           new Date(bookingData.endDate)
         );
-        
+
         // Return booking with insurance policy information
         return {
           ...booking,
@@ -233,20 +227,19 @@ export async function POST(request: NextRequest) {
       return booking;
     });
 
-    return NextResponse.json({
-      success: true,
-      data: result
-    }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        success: true,
+        data: result,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Booking creation error:', error);
-    
+
     const errorMessage = error instanceof Error ? error.message : 'Failed to create booking';
-    
-    return NextResponse.json(
-      { success: false, error: errorMessage },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   }
 }
 
@@ -258,18 +251,15 @@ export async function GET(request: NextRequest) {
     // Verify authentication
     const authResult = await verifyAuthToken(request);
     if (!authResult.success || !authResult.userId) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
-    
+
     // Parse query parameters with proper type conversion
     const rawParams = Object.fromEntries(searchParams.entries());
     const queryParams: any = { ...rawParams };
-    
+
     // Convert page and limit to numbers if they exist
     if (queryParams.page) {
       queryParams.page = parseInt(queryParams.page as string, 10);
@@ -282,10 +272,10 @@ export async function GET(request: NextRequest) {
     const validationResult = bookingSearchSchema.safeParse(queryParams);
     if (!validationResult.success) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Invalid query parameters',
-          details: validationResult.error.flatten().fieldErrors
+          details: validationResult.error.flatten().fieldErrors,
         },
         { status: 400 }
       );
@@ -296,7 +286,7 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     const where: any = {
-      userId // Only user's own bookings
+      userId, // Only user's own bookings
     };
 
     if (searchData.status) {
@@ -335,16 +325,16 @@ export async function GET(request: NextRequest) {
               photos: {
                 where: { isPrimary: true },
                 select: { photoUrl: true },
-                take: 1
-              }
-            }
-          }
+                take: 1,
+              },
+            },
+          },
         },
         orderBy: { createdAt: 'desc' },
         skip,
-        take: searchData.limit
+        take: searchData.limit,
       }),
-      prisma.booking.count({ where })
+      prisma.booking.count({ where }),
     ]);
 
     // Calculate pagination info
@@ -361,13 +351,12 @@ export async function GET(request: NextRequest) {
         total: totalCount,
         totalPages,
         hasNext,
-        hasPrev
-      }
+        hasPrev,
+      },
     });
-
   } catch (error) {
     console.error('Get bookings error:', error);
-    
+
     return NextResponse.json(
       { success: false, error: 'Failed to fetch bookings' },
       { status: 500 }

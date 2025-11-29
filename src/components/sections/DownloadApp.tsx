@@ -1,4 +1,4 @@
-import { Smartphone } from 'lucide-react'
+import { Smartphone } from 'lucide-react';
 
 export function DownloadApp() {
   return (
@@ -11,14 +11,14 @@ export function DownloadApp() {
               <Smartphone className="w-5 h-5" />
               <span className="font-semibold">Coming Soon</span>
             </div>
-            
+
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
               Take ZEMO with you everywhere
             </h2>
-            
+
             <p className="text-lg text-white/90 mb-8 max-w-xl">
-              Download the ZEMO mobile app for seamless booking on the go. Browse cars, 
-              manage trips, and connect with hosts—all from your phone.
+              Download the ZEMO mobile app for seamless booking on the go. Browse cars, manage
+              trips, and connect with hosts—all from your phone.
             </p>
 
             {/* App Store Buttons */}
@@ -85,7 +85,7 @@ export function DownloadApp() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Notch */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-6 bg-gray-900 rounded-b-2xl" />
             </div>
@@ -93,5 +93,5 @@ export function DownloadApp() {
         </div>
       </div>
     </section>
-  )
+  );
 }

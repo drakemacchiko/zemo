@@ -33,15 +33,15 @@ export default function RatingBreakdown({
 
     return (
       <div className="flex">
-        {[1, 2, 3, 4, 5].map((star) => (
+        {[1, 2, 3, 4, 5].map(star => (
           <svg
             key={star}
             className={`${sizeClasses[size]} ${
               star <= Math.floor(rating)
                 ? 'text-yellow-400 fill-current'
                 : star === Math.ceil(rating) && rating % 1 !== 0
-                ? 'text-yellow-400'
-                : 'text-gray-300'
+                  ? 'text-yellow-400'
+                  : 'text-gray-300'
             }`}
             viewBox="0 0 24 24"
           >
@@ -73,9 +73,7 @@ export default function RatingBreakdown({
       {/* Overall rating */}
       <div className="flex items-start gap-6 mb-6 pb-6 border-b border-gray-200">
         <div className="text-center">
-          <div className="text-5xl font-bold text-gray-900 mb-2">
-            {averageRating.toFixed(1)}
-          </div>
+          <div className="text-5xl font-bold text-gray-900 mb-2">{averageRating.toFixed(1)}</div>
           {renderStars(averageRating, 'lg')}
           <p className="text-sm text-gray-600 mt-2">
             {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}
@@ -85,7 +83,7 @@ export default function RatingBreakdown({
         {/* Rating distribution */}
         {ratingDistribution && (
           <div className="flex-1">
-            {[5, 4, 3, 2, 1].map((stars) => {
+            {[5, 4, 3, 2, 1].map(stars => {
               const count = ratingDistribution[stars as keyof typeof ratingDistribution] || 0;
               const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
 
@@ -93,10 +91,7 @@ export default function RatingBreakdown({
                 <div key={stars} className="flex items-center gap-3 mb-2">
                   <span className="text-sm text-gray-700 w-10">{stars} star</span>
                   <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-yellow-400"
-                      style={{ width: `${percentage}%` }}
-                    />
+                    <div className="h-full bg-yellow-400" style={{ width: `${percentage}%` }} />
                   </div>
                   <span className="text-sm text-gray-600 w-12 text-right">
                     {Math.round(percentage)}%

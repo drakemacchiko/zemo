@@ -29,10 +29,7 @@ interface NotificationCenterProps {
   onClose: () => void;
 }
 
-export default function NotificationCenter({
-  isOpen,
-  onClose,
-}: NotificationCenterProps) {
+export default function NotificationCenter({ isOpen, onClose }: NotificationCenterProps) {
   const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,12 +73,10 @@ export default function NotificationCenter({
       });
 
       // Update local state
-      setNotifications((prev) =>
-        prev.map((notif) =>
-          notif.id === notificationId ? { ...notif, isRead: true } : notif
-        )
+      setNotifications(prev =>
+        prev.map(notif => (notif.id === notificationId ? { ...notif, isRead: true } : notif))
       );
-      setUnreadCount((prev) => Math.max(0, prev - 1));
+      setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
@@ -99,9 +94,7 @@ export default function NotificationCenter({
       });
 
       // Update local state
-      setNotifications((prev) =>
-        prev.map((notif) => ({ ...notif, isRead: true }))
-      );
+      setNotifications(prev => prev.map(notif => ({ ...notif, isRead: true })));
       setUnreadCount(0);
     } catch (error) {
       console.error('Error marking all as read:', error);
@@ -223,16 +216,8 @@ export default function NotificationCenter({
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -244,9 +229,7 @@ export default function NotificationCenter({
         </div>
         {unreadCount > 0 && (
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-600">
-              {unreadCount} unread
-            </span>
+            <span className="text-sm text-gray-600">{unreadCount} unread</span>
             <button
               onClick={markAllAsRead}
               className="text-sm text-yellow-600 hover:text-yellow-700 font-medium"
@@ -282,7 +265,7 @@ export default function NotificationCenter({
           </div>
         ) : (
           <div>
-            {notifications.map((notification) => (
+            {notifications.map(notification => (
               <button
                 key={notification.id}
                 onClick={() => handleNotificationClick(notification)}
@@ -300,9 +283,7 @@ export default function NotificationCenter({
                     >
                       {notification.title}
                     </p>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {notification.message}
-                    </p>
+                    <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
                     <p className="text-xs text-gray-400 mt-2">
                       {formatTime(notification.createdAt)}
                     </p>

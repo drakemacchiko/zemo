@@ -1,24 +1,18 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter, useParams } from 'next/navigation'
-import {
-  Plus,
-  Trash2,
-  Package,
-  ToggleLeft,
-  ToggleRight
-} from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { Plus, Trash2, Package, ToggleLeft, ToggleRight } from 'lucide-react';
 
 interface VehicleExtra {
-  id: string
-  name: string
-  description: string | null
-  priceType: 'PER_DAY' | 'FLAT_FEE' | 'PER_KM'
-  price: number
-  available: boolean
-  quantity: number
-  photoUrl: string | null
+  id: string;
+  name: string;
+  description: string | null;
+  priceType: 'PER_DAY' | 'FLAT_FEE' | 'PER_KM';
+  price: number;
+  available: boolean;
+  quantity: number;
+  photoUrl: string | null;
 }
 
 const DEFAULT_EXTRAS = [
@@ -35,203 +29,201 @@ const DEFAULT_EXTRAS = [
   { name: 'Toll Pass', priceType: 'PER_DAY', defaultPrice: 25 },
   { name: 'Airport Delivery', priceType: 'FLAT_FEE', defaultPrice: 200 },
   { name: 'Custom Location Delivery', priceType: 'PER_KM', defaultPrice: 10 },
-]
+];
 
 export default function VehicleExtrasPage() {
-  const router = useRouter()
-  const params = useParams()
-  const vehicleId = params.id as string
+  const router = useRouter();
+  const params = useParams();
+  const vehicleId = params.id as string;
 
-  const [extras, setExtras] = useState<VehicleExtra[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showAddCustom, setShowAddCustom] = useState(false)
-  const [vehicle, setVehicle] = useState<any>(null)
-  
+  const [extras, setExtras] = useState<VehicleExtra[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAddCustom, setShowAddCustom] = useState(false);
+  const [vehicle, setVehicle] = useState<any>(null);
+
   const [customExtra, setCustomExtra] = useState({
     name: '',
     description: '',
     priceType: 'PER_DAY' as const,
     price: 0,
-    quantity: 1
-  })
+    quantity: 1,
+  });
 
   const fetchVehicle = useCallback(async () => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       const res = await fetch(`/api/vehicles/${vehicleId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (res.ok) {
-        const data = await res.json()
-        setVehicle(data.vehicle)
+        const data = await res.json();
+        setVehicle(data.vehicle);
       }
     } catch (error) {
-      console.error('Error fetching vehicle:', error)
+      console.error('Error fetching vehicle:', error);
     }
-  }, [vehicleId])
+  }, [vehicleId]);
 
   const fetchExtras = useCallback(async () => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       const res = await fetch(`/api/vehicles/${vehicleId}/extras`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       if (res.ok) {
-        const data = await res.json()
-        setExtras(data.extras)
+        const data = await res.json();
+        setExtras(data.extras);
       }
     } catch (error) {
-      console.error('Error fetching extras:', error)
+      console.error('Error fetching extras:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [vehicleId])
+  }, [vehicleId]);
 
   useEffect(() => {
-    fetchVehicle()
-    fetchExtras()
-  }, [fetchVehicle, fetchExtras])
+    fetchVehicle();
+    fetchExtras();
+  }, [fetchVehicle, fetchExtras]);
 
-  const handleAddDefaultExtra = async (defaultExtra: typeof DEFAULT_EXTRAS[0]) => {
+  const handleAddDefaultExtra = async (defaultExtra: (typeof DEFAULT_EXTRAS)[0]) => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       const res = await fetch(`/api/vehicles/${vehicleId}/extras`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           name: defaultExtra.name,
           priceType: defaultExtra.priceType,
           price: defaultExtra.defaultPrice,
           available: true,
-          quantity: 1
-        })
-      })
+          quantity: 1,
+        }),
+      });
 
       if (res.ok) {
-        const data = await res.json()
-        setExtras([...extras, data.extra])
+        const data = await res.json();
+        setExtras([...extras, data.extra]);
       }
     } catch (error) {
-      console.error('Error adding extra:', error)
+      console.error('Error adding extra:', error);
     }
-  }
+  };
 
   const handleAddCustomExtra = async () => {
-    if (!customExtra.name || customExtra.price <= 0) return
+    if (!customExtra.name || customExtra.price <= 0) return;
 
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       const res = await fetch(`/api/vehicles/${vehicleId}/extras`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           ...customExtra,
-          available: true
-        })
-      })
+          available: true,
+        }),
+      });
 
       if (res.ok) {
-        const data = await res.json()
-        setExtras([...extras, data.extra])
+        const data = await res.json();
+        setExtras([...extras, data.extra]);
         setCustomExtra({
           name: '',
           description: '',
           priceType: 'PER_DAY',
           price: 0,
-          quantity: 1
-        })
-        setShowAddCustom(false)
+          quantity: 1,
+        });
+        setShowAddCustom(false);
       }
     } catch (error) {
-      console.error('Error adding custom extra:', error)
+      console.error('Error adding custom extra:', error);
     }
-  }
+  };
 
   const handleToggleAvailability = async (extraId: string, available: boolean) => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       const res = await fetch(`/api/vehicles/${vehicleId}/extras/${extraId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ available })
-      })
+        body: JSON.stringify({ available }),
+      });
 
       if (res.ok) {
-        setExtras(extras.map(e => 
-          e.id === extraId ? { ...e, available } : e
-        ))
+        setExtras(extras.map(e => (e.id === extraId ? { ...e, available } : e)));
       }
     } catch (error) {
-      console.error('Error updating extra:', error)
+      console.error('Error updating extra:', error);
     }
-  }
+  };
 
   const handleUpdatePrice = async (extraId: string, price: number) => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       const res = await fetch(`/api/vehicles/${vehicleId}/extras/${extraId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ price })
-      })
+        body: JSON.stringify({ price }),
+      });
 
       if (res.ok) {
-        setExtras(extras.map(e => 
-          e.id === extraId ? { ...e, price } : e
-        ))
+        setExtras(extras.map(e => (e.id === extraId ? { ...e, price } : e)));
       }
     } catch (error) {
-      console.error('Error updating price:', error)
+      console.error('Error updating price:', error);
     }
-  }
+  };
 
   const handleDeleteExtra = async (extraId: string) => {
-    if (!confirm('Are you sure you want to remove this extra?')) return
+    if (!confirm('Are you sure you want to remove this extra?')) return;
 
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       const res = await fetch(`/api/vehicles/${vehicleId}/extras/${extraId}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      })
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (res.ok) {
-        setExtras(extras.filter(e => e.id !== extraId))
+        setExtras(extras.filter(e => e.id !== extraId));
       }
     } catch (error) {
-      console.error('Error deleting extra:', error)
+      console.error('Error deleting extra:', error);
     }
-  }
+  };
 
   const getPriceLabel = (priceType: string) => {
     switch (priceType) {
-      case 'PER_DAY': return 'per day'
-      case 'FLAT_FEE': return 'flat fee'
-      case 'PER_KM': return 'per km'
-      default: return ''
+      case 'PER_DAY':
+        return 'per day';
+      case 'FLAT_FEE':
+        return 'flat fee';
+      case 'PER_KM':
+        return 'per km';
+      default:
+        return '';
     }
-  }
+  };
 
   const formatCurrency = (amount: number) => {
-    return `ZMW ${amount.toFixed(2)}`
-  }
+    return `ZMW ${amount.toFixed(2)}`;
+  };
 
-  const availableDefaults = DEFAULT_EXTRAS.filter(
-    def => !extras.some(ex => ex.name === def.name)
-  )
+  const availableDefaults = DEFAULT_EXTRAS.filter(def => !extras.some(ex => ex.name === def.name));
 
   if (loading) {
     return (
@@ -241,7 +233,7 @@ export default function VehicleExtrasPage() {
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -249,10 +241,7 @@ export default function VehicleExtrasPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <button
-            onClick={() => router.back()}
-            className="text-blue-600 hover:text-blue-700 mb-4"
-          >
+          <button onClick={() => router.back()} className="text-blue-600 hover:text-blue-700 mb-4">
             ← Back
           </button>
           <h1 className="text-3xl font-bold text-gray-900">Extras & Add-ons</h1>
@@ -277,7 +266,7 @@ export default function VehicleExtrasPage() {
                 </div>
                 <div className="p-6">
                   <div className="space-y-4">
-                    {extras.map((extra) => (
+                    {extras.map(extra => (
                       <div
                         key={extra.id}
                         className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
@@ -294,7 +283,9 @@ export default function VehicleExtrasPage() {
                             <input
                               type="number"
                               value={extra.price}
-                              onChange={(e) => handleUpdatePrice(extra.id, parseFloat(e.target.value) || 0)}
+                              onChange={e =>
+                                handleUpdatePrice(extra.id, parseFloat(e.target.value) || 0)
+                              }
                               className="w-32 px-3 py-1 border border-gray-300 rounded text-sm"
                             />
                             <span className="text-sm text-gray-600">
@@ -338,7 +329,7 @@ export default function VehicleExtrasPage() {
                 </div>
                 <div className="p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {availableDefaults.map((defaultExtra) => (
+                    {availableDefaults.map(defaultExtra => (
                       <button
                         key={defaultExtra.name}
                         onClick={() => handleAddDefaultExtra(defaultExtra)}
@@ -347,7 +338,8 @@ export default function VehicleExtrasPage() {
                         <div>
                           <p className="font-medium text-gray-900">{defaultExtra.name}</p>
                           <p className="text-sm text-gray-600">
-                            {formatCurrency(defaultExtra.defaultPrice)} {getPriceLabel(defaultExtra.priceType)}
+                            {formatCurrency(defaultExtra.defaultPrice)}{' '}
+                            {getPriceLabel(defaultExtra.priceType)}
                           </p>
                         </div>
                         <Plus className="h-5 w-5 text-gray-400" />
@@ -375,13 +367,11 @@ export default function VehicleExtrasPage() {
                 ) : (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Name *
-                      </label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
                       <input
                         type="text"
                         value={customExtra.name}
-                        onChange={(e) => setCustomExtra({ ...customExtra, name: e.target.value })}
+                        onChange={e => setCustomExtra({ ...customExtra, name: e.target.value })}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="e.g., Ski Rack"
                       />
@@ -393,7 +383,9 @@ export default function VehicleExtrasPage() {
                       </label>
                       <textarea
                         value={customExtra.description}
-                        onChange={(e) => setCustomExtra({ ...customExtra, description: e.target.value })}
+                        onChange={e =>
+                          setCustomExtra({ ...customExtra, description: e.target.value })
+                        }
                         rows={3}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Optional description..."
@@ -408,7 +400,12 @@ export default function VehicleExtrasPage() {
                         <input
                           type="number"
                           value={customExtra.price || ''}
-                          onChange={(e) => setCustomExtra({ ...customExtra, price: parseFloat(e.target.value) || 0 })}
+                          onChange={e =>
+                            setCustomExtra({
+                              ...customExtra,
+                              price: parseFloat(e.target.value) || 0,
+                            })
+                          }
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           min="0"
                           step="0.01"
@@ -421,7 +418,9 @@ export default function VehicleExtrasPage() {
                         </label>
                         <select
                           value={customExtra.priceType}
-                          onChange={(e) => setCustomExtra({ ...customExtra, priceType: e.target.value as any })}
+                          onChange={e =>
+                            setCustomExtra({ ...customExtra, priceType: e.target.value as any })
+                          }
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
                           <option value="PER_DAY">Per Day</option>
@@ -508,5 +507,5 @@ export default function VehicleExtrasPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

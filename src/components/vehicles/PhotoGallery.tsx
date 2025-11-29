@@ -27,11 +27,11 @@ export function PhotoGallery({ photos, vehicleName }: PhotoGalleryProps) {
   }
 
   const goToPrevious = () => {
-    setSelectedIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
+    setSelectedIndex(prev => (prev === 0 ? photos.length - 1 : prev - 1));
   };
 
   const goToNext = () => {
-    setSelectedIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
+    setSelectedIndex(prev => (prev === photos.length - 1 ? 0 : prev + 1));
   };
 
   return (
@@ -39,7 +39,10 @@ export function PhotoGallery({ photos, vehicleName }: PhotoGalleryProps) {
       {/* Main Gallery Layout */}
       <div className="grid grid-cols-4 gap-2 h-[500px] rounded-xl overflow-hidden">
         {/* Large main photo - 70% width (3 columns) */}
-        <div className="col-span-3 relative group cursor-pointer" onClick={() => setIsFullscreen(true)}>
+        <div
+          className="col-span-3 relative group cursor-pointer"
+          onClick={() => setIsFullscreen(true)}
+        >
           <Image
             src={photos[0]?.photoUrl || '/placeholder-vehicle.jpg'}
             alt={`${vehicleName} - Main photo`}
@@ -51,7 +54,7 @@ export function PhotoGallery({ photos, vehicleName }: PhotoGalleryProps) {
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
           <button
             className="absolute bottom-4 right-4 bg-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation();
               setIsFullscreen(true);
             }}

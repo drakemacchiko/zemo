@@ -1,57 +1,46 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken, extractTokenFromRequest } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { 
-  bookingUpdateSchema,
-  type BookingUpdateInput 
-} from '@/lib/validations';
-import { 
-  calculateBookingPrice 
-} from '@/lib/utils';
+import { bookingUpdateSchema, type BookingUpdateInput } from '@/lib/validations';
+import { calculateBookingPrice } from '@/lib/utils';
 
 /**
  * Verify authentication token and return user info
  */
 async function verifyAuthToken(request: NextRequest) {
   const token = extractTokenFromRequest(request);
-  
+
   if (!token) {
     return { success: false, userId: null };
   }
-  
+
   const payload = verifyAccessToken(token);
   if (!payload) {
     return { success: false, userId: null };
   }
-  
+
   // Verify user exists
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { id: true }
+    select: { id: true },
   });
-  
+
   if (!user) {
     return { success: false, userId: null };
   }
-  
+
   return { success: true, userId: user.id };
 }
 
 /**
  * GET /api/bookings/[id] - Get a specific booking
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Verify authentication
     const authResult = await verifyAuthToken(request);
     if (!authResult.success || !authResult.userId) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = params;
@@ -74,9 +63,9 @@ export async function GET(
             photos: {
               where: { isPrimary: true },
               select: { photoUrl: true },
-              take: 1
-            }
-          }
+              take: 1,
+            },
+          },
         },
         user: {
           select: {
@@ -85,73 +74,57 @@ export async function GET(
             profile: {
               select: {
                 firstName: true,
-                lastName: true
-              }
-            }
-          }
-        }
-      }
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!booking) {
-      return NextResponse.json(
-        { success: false, error: 'Booking not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Booking not found' }, { status: 404 });
     }
 
     // Check if user has access (either the renter or the host)
     if (booking.userId !== userId && booking.vehicle.hostId !== userId) {
-      return NextResponse.json(
-        { success: false, error: 'Access denied' },
-        { status: 403 }
-      );
+      return NextResponse.json({ success: false, error: 'Access denied' }, { status: 403 });
     }
 
     return NextResponse.json({
       success: true,
-      data: booking
+      data: booking,
     });
-
   } catch (error) {
     console.error('Get booking error:', error);
-    
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch booking' },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ success: false, error: 'Failed to fetch booking' }, { status: 500 });
   }
 }
 
 /**
  * PUT /api/bookings/[id] - Update a booking
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Verify authentication
     const authResult = await verifyAuthToken(request);
     if (!authResult.success || !authResult.userId) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const { id } = params;
     const userId = authResult.userId;
     const body = await request.json();
-    
+
     // Validate request body
     const validationResult = bookingUpdateSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Validation failed',
-          details: validationResult.error.flatten().fieldErrors
+          details: validationResult.error.flatten().fieldErrors,
         },
         { status: 400 }
       );
@@ -172,10 +145,10 @@ export async function PUT(
               dailyRate: true,
               isActive: true,
               availabilityStatus: true,
-              verificationStatus: true
-            }
-          }
-        }
+              verificationStatus: true,
+            },
+          },
+        },
       });
 
       if (!existingBooking) {
@@ -196,7 +169,7 @@ export async function PUT(
         if (['CONFIRMED', 'REJECTED'].includes(updateData.status) && !isHost) {
           throw new Error('Only hosts can confirm or reject bookings');
         }
-        
+
         // Only renters can cancel their own bookings
         if (updateData.status === 'CANCELLED' && !isRenter) {
           throw new Error('Only renters can cancel their bookings');
@@ -210,8 +183,12 @@ export async function PUT(
 
       // If dates are being changed, check availability
       if (updateData.startDate || updateData.endDate) {
-        const newStartDate = updateData.startDate ? new Date(updateData.startDate) : existingBooking.startDate;
-        const newEndDate = updateData.endDate ? new Date(updateData.endDate) : existingBooking.endDate;
+        const newStartDate = updateData.startDate
+          ? new Date(updateData.startDate)
+          : existingBooking.startDate;
+        const newEndDate = updateData.endDate
+          ? new Date(updateData.endDate)
+          : existingBooking.endDate;
 
         // Check for overlapping bookings (excluding current booking)
         const overlappingBookings = await (tx as any).booking.findMany({
@@ -219,29 +196,20 @@ export async function PUT(
             vehicleId: existingBooking.vehicleId,
             id: { not: id },
             status: {
-              in: ['PENDING', 'CONFIRMED', 'ACTIVE']
+              in: ['PENDING', 'CONFIRMED', 'ACTIVE'],
             },
             OR: [
               {
-                AND: [
-                  { startDate: { lte: newStartDate } },
-                  { endDate: { gt: newStartDate } }
-                ]
+                AND: [{ startDate: { lte: newStartDate } }, { endDate: { gt: newStartDate } }],
               },
               {
-                AND: [
-                  { startDate: { lt: newEndDate } },
-                  { endDate: { gte: newEndDate } }
-                ]
+                AND: [{ startDate: { lt: newEndDate } }, { endDate: { gte: newEndDate } }],
               },
               {
-                AND: [
-                  { startDate: { gte: newStartDate } },
-                  { endDate: { lte: newEndDate } }
-                ]
-              }
-            ]
-          }
+                AND: [{ startDate: { gte: newStartDate } }, { endDate: { lte: newEndDate } }],
+              },
+            ],
+          },
         });
 
         if (overlappingBookings.length > 0) {
@@ -290,8 +258,8 @@ export async function PUT(
               year: true,
               plateNumber: true,
               dailyRate: true,
-              locationAddress: true
-            }
+              locationAddress: true,
+            },
           },
           user: {
             select: {
@@ -300,12 +268,12 @@ export async function PUT(
               profile: {
                 select: {
                   firstName: true,
-                  lastName: true
-                }
-              }
-            }
-          }
-        }
+                  lastName: true,
+                },
+              },
+            },
+          },
+        },
       });
 
       return updatedBooking;
@@ -313,17 +281,13 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      data: result
+      data: result,
     });
-
   } catch (error) {
     console.error('Update booking error:', error);
-    
+
     const errorMessage = error instanceof Error ? error.message : 'Failed to update booking';
-    
-    return NextResponse.json(
-      { success: false, error: errorMessage },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
   }
 }

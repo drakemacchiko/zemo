@@ -42,14 +42,11 @@ export default function ConversationList({
   // Fetch conversations
   const fetchConversations = useCallback(async () => {
     try {
-      const response = await fetch(
-        `/api/messages/conversations?filter=${filter}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      );
+      const response = await fetch(`/api/messages/conversations?filter=${filter}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
 
       if (!response.ok) throw new Error('Failed to fetch conversations');
 
@@ -75,7 +72,7 @@ export default function ConversationList({
     return () => clearInterval(interval);
   }, [filter, fetchConversations]);
 
-  const filteredConversations = conversations.filter((conv) => {
+  const filteredConversations = conversations.filter(conv => {
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       return (
@@ -126,13 +123,13 @@ export default function ConversationList({
       {/* Header */}
       <div className="p-4 border-b border-gray-200">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Messages</h2>
-        
+
         {/* Search */}
         <input
           type="text"
           placeholder="Search conversations..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={e => setSearchQuery(e.target.value)}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
         />
 
@@ -179,13 +176,11 @@ export default function ConversationList({
               />
             </svg>
             <p className="text-gray-500">No conversations yet</p>
-            <p className="text-sm text-gray-400 mt-2">
-              Start a conversation by messaging a host
-            </p>
+            <p className="text-sm text-gray-400 mt-2">Start a conversation by messaging a host</p>
           </div>
         ) : (
           <div>
-            {filteredConversations.map((conversation) => {
+            {filteredConversations.map(conversation => {
               const isSelected = conversation.id === selectedConversationId;
               const hasUnread = conversation.unreadCount > 0;
 
@@ -229,23 +224,17 @@ export default function ConversationList({
                       </div>
 
                       {conversation.vehicle && (
-                        <p className="text-xs text-gray-500 mb-1">
-                          {conversation.vehicle.name}
-                        </p>
+                        <p className="text-xs text-gray-500 mb-1">{conversation.vehicle.name}</p>
                       )}
 
                       <div className="flex items-center justify-between">
                         {conversation.lastMessage && (
                           <p
                             className={`text-sm ${
-                              hasUnread
-                                ? 'text-gray-900 font-medium'
-                                : 'text-gray-500'
+                              hasUnread ? 'text-gray-900 font-medium' : 'text-gray-500'
                             }`}
                           >
-                            {conversation.lastMessage.senderId === currentUserId
-                              ? 'You: '
-                              : ''}
+                            {conversation.lastMessage.senderId === currentUserId ? 'You: ' : ''}
                             {truncateMessage(conversation.lastMessage.content)}
                           </p>
                         )}

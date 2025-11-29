@@ -17,10 +17,7 @@ async function handleSubscribe(request: AuthenticatedRequest) {
     const { subscription } = body as { subscription: PushSubscriptionData };
 
     if (!subscription || !subscription.endpoint) {
-      return NextResponse.json(
-        { error: 'Invalid subscription data' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid subscription data' }, { status: 400 });
     }
 
     const userId = request.user!.id;

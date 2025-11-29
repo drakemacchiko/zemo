@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { verifyAccessToken } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyAccessToken } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 
 // Simple authentication helper
 async function authenticateRequest(request: NextRequest) {
@@ -17,7 +17,7 @@ async function authenticateRequest(request: NextRequest) {
 
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { id: true, email: true }
+    select: { id: true, email: true },
   });
 
   if (!user) {
@@ -39,17 +39,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const searchParams = request.nextUrl.searchParams
-    const status = searchParams.get('status')
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
+    const searchParams = request.nextUrl.searchParams;
+    const status = searchParams.get('status');
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
 
     const where: any = {
       userId: authResult.user.id,
-    }
+    };
 
     if (status) {
-      where.status = status
+      where.status = status;
     }
 
     const [policies, total] = await Promise.all([
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
         },
       }),
       prisma.insurancePolicy.count({ where }),
-    ])
+    ]);
 
     return NextResponse.json({
       success: true,
@@ -95,12 +95,12 @@ export async function GET(request: NextRequest) {
         limit,
         totalPages: Math.ceil(total / limit),
       },
-    })
+    });
   } catch (error) {
-    console.error('Error fetching insurance policies:', error)
+    console.error('Error fetching insurance policies:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch insurance policies' },
       { status: 500 }
-    )
+    );
   }
 }

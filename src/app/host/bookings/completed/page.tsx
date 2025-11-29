@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   Calendar,
   DollarSign,
@@ -12,151 +12,149 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
-  Clock
-} from 'lucide-react'
+  Clock,
+} from 'lucide-react';
 
 interface CompletedBooking {
-  id: string
+  id: string;
   vehicle: {
-    id: string
-    name: string
-    plateNumber: string
-    photo?: string
-  }
+    id: string;
+    name: string;
+    plateNumber: string;
+    photo?: string;
+  };
   renter: {
-    id: string
-    name: string
-    email: string
-    profilePicture?: string
-  }
-  startDate: string
-  endDate: string
-  totalAmount: number
-  hostEarnings: number
-  platformFee: number
-  status: string
-  rating?: number
-  review?: string
-  reviewDate?: string
-  canReportIssue: boolean
-  issueDeadlineHours: number
-  createdAt: string
+    id: string;
+    name: string;
+    email: string;
+    profilePicture?: string;
+  };
+  startDate: string;
+  endDate: string;
+  totalAmount: number;
+  hostEarnings: number;
+  platformFee: number;
+  status: string;
+  rating?: number;
+  review?: string;
+  reviewDate?: string;
+  canReportIssue: boolean;
+  issueDeadlineHours: number;
+  createdAt: string;
 }
 
 export default function CompletedBookingsPage() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(true)
-  const [filteredBookings, setFilteredBookings] = useState<CompletedBooking[]>([])
-  
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [filteredBookings, setFilteredBookings] = useState<CompletedBooking[]>([]);
+
   // Pagination
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [total, setTotal] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   // Filters
   const [filters, setFilters] = useState({
     vehicleId: '',
     startDate: '',
     endDate: '',
-    minRating: 0
-  })
-  const [showFilters, setShowFilters] = useState(false)
+    minRating: 0,
+  });
+  const [showFilters, setShowFilters] = useState(false);
 
   const fetchBookings = useCallback(async () => {
     try {
-      setLoading(true)
-      const token = localStorage.getItem('accessToken')
+      setLoading(true);
+      const token = localStorage.getItem('accessToken');
       if (!token) {
-        router.push('/login')
-        return
+        router.push('/login');
+        return;
       }
 
       const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: '10'
-      })
+        limit: '10',
+      });
 
-      if (filters.vehicleId) params.append('vehicleId', filters.vehicleId)
-      if (filters.startDate) params.append('startDate', filters.startDate)
-      if (filters.endDate) params.append('endDate', filters.endDate)
+      if (filters.vehicleId) params.append('vehicleId', filters.vehicleId);
+      if (filters.startDate) params.append('startDate', filters.startDate);
+      if (filters.endDate) params.append('endDate', filters.endDate);
 
       const response = await fetch(`/api/host/bookings/completed?${params}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (response.ok) {
-        const data = await response.json()
-        setTotal(data.pagination.total)
-        setTotalPages(data.pagination.totalPages)
-        
+        const data = await response.json();
+        setTotal(data.pagination.total);
+        setTotalPages(data.pagination.totalPages);
+
         // Apply rating filter client-side
         if (filters.minRating > 0) {
           setFilteredBookings(
-            data.bookings.filter((b: CompletedBooking) => 
-              b.rating && b.rating >= filters.minRating
-            )
-          )
+            data.bookings.filter((b: CompletedBooking) => b.rating && b.rating >= filters.minRating)
+          );
         } else {
-          setFilteredBookings(data.bookings)
+          setFilteredBookings(data.bookings);
         }
       } else {
-        console.error('Failed to fetch completed bookings')
+        console.error('Failed to fetch completed bookings');
       }
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Error:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [currentPage, filters, router])
+  }, [currentPage, filters, router]);
 
   useEffect(() => {
-    fetchBookings()
-  }, [fetchBookings])
+    fetchBookings();
+  }, [fetchBookings]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-ZM', {
       style: 'currency',
-      currency: 'ZMW'
-    }).format(amount)
-  }
+      currency: 'ZMW',
+    }).format(amount);
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
-    })
-  }
+      year: 'numeric',
+    });
+  };
 
   const calculateDays = (start: string, end: string) => {
-    const diff = new Date(end).getTime() - new Date(start).getTime()
-    return Math.ceil(diff / (1000 * 60 * 60 * 24))
-  }
+    const diff = new Date(end).getTime() - new Date(start).getTime();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  };
 
   const downloadReceipt = (_bookingId: string) => {
     // TODO: Implement receipt generation and download
-    alert('Receipt download will be implemented')
-  }
+    alert('Receipt download will be implemented');
+  };
 
   const reportIssue = (bookingId: string) => {
     // TODO: Navigate to issue reporting page
-    router.push(`/host/bookings/${bookingId}/report-issue`)
-  }
+    router.push(`/host/bookings/${bookingId}/report-issue`);
+  };
 
   const applyFilters = () => {
-    fetchBookings()
-    setShowFilters(false)
-  }
+    fetchBookings();
+    setShowFilters(false);
+  };
 
   const clearFilters = () => {
     setFilters({
       vehicleId: '',
       startDate: '',
       endDate: '',
-      minRating: 0
-    })
-    setCurrentPage(1)
-  }
+      minRating: 0,
+    });
+    setCurrentPage(1);
+  };
 
   if (loading) {
     return (
@@ -166,7 +164,7 @@ export default function CompletedBookingsPage() {
           <p className="mt-4 text-gray-600">Loading completed trips...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -193,24 +191,20 @@ export default function CompletedBookingsPage() {
             <h3 className="text-lg font-semibold mb-4">Filter Trips</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Start Date
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
                 <input
                   type="date"
                   value={filters.startDate}
-                  onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+                  onChange={e => setFilters({ ...filters, startDate: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  End Date
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
                 <input
                   type="date"
                   value={filters.endDate}
-                  onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+                  onChange={e => setFilters({ ...filters, endDate: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -220,7 +214,7 @@ export default function CompletedBookingsPage() {
                 </label>
                 <select
                   value={filters.minRating}
-                  onChange={(e) => setFilters({ ...filters, minRating: parseInt(e.target.value) })}
+                  onChange={e => setFilters({ ...filters, minRating: parseInt(e.target.value) })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="0">All Ratings</option>
@@ -263,9 +257,7 @@ export default function CompletedBookingsPage() {
               <div>
                 <p className="text-sm text-gray-600">Total Earnings</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(
-                    filteredBookings.reduce((sum, b) => sum + b.hostEarnings, 0)
-                  )}
+                  {formatCurrency(filteredBookings.reduce((sum, b) => sum + b.hostEarnings, 0))}
                 </p>
               </div>
               <DollarSign className="h-10 w-10 text-green-600" />
@@ -295,12 +287,8 @@ export default function CompletedBookingsPage() {
         {filteredBookings.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <Calendar className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No Completed Trips
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Your completed trips will appear here
-            </p>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Completed Trips</h3>
+            <p className="text-gray-600 mb-6">Your completed trips will appear here</p>
             <Link
               href="/host/vehicles"
               className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -310,7 +298,7 @@ export default function CompletedBookingsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredBookings.map((booking) => (
+            {filteredBookings.map(booking => (
               <div
                 key={booking.id}
                 className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
@@ -467,5 +455,5 @@ export default function CompletedBookingsPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

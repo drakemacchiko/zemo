@@ -6,10 +6,7 @@ import { extractTokenFromRequest, verifyAccessToken } from '@/lib/auth';
  * GET /api/bookings/[id]/reviews
  * Get reviews for a booking (both renter and host reviews)
  */
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const bookingId = params.id;
 
@@ -62,10 +59,7 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error fetching booking reviews:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch reviews' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Failed to fetch reviews' }, { status: 500 });
   }
 }
 
@@ -73,10 +67,7 @@ export async function GET(
  * POST /api/bookings/[id]/reviews
  * Submit a review for a booking
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Auth check
     const token = extractTokenFromRequest(request);
@@ -112,10 +103,7 @@ export async function POST(
     });
 
     if (!booking) {
-      return NextResponse.json(
-        { success: false, error: 'Booking not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'Booking not found' }, { status: 404 });
     }
 
     // Check if user is part of this booking
@@ -255,10 +243,7 @@ export async function POST(
     });
   } catch (error) {
     console.error('Error submitting review:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to submit review' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Failed to submit review' }, { status: 500 });
   }
 }
 

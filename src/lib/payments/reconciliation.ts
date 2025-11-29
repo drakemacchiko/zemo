@@ -20,25 +20,21 @@ export class PaymentReconciliationService {
       processed: 0,
       updated: 0,
       failed: 0,
-      errors: []
+      errors: [],
     };
 
     try {
       const cutoffTime = new Date(Date.now() - hoursBack * 60 * 60 * 1000);
-      
+
       // Find payments that need reconciliation
       const paymentsToReconcile = await prisma.payment?.findMany({
         where: {
-          OR: [
-            { status: 'PENDING' },
-            { status: 'PROCESSING' },
-            { status: 'HELD' }
-          ],
+          OR: [{ status: 'PENDING' }, { status: 'PROCESSING' }, { status: 'HELD' }],
           providerTransactionId: { not: null },
-          updatedAt: { gte: cutoffTime }
+          updatedAt: { gte: cutoffTime },
         },
         take: batchSize,
-        orderBy: { updatedAt: 'asc' }
+        orderBy: { updatedAt: 'asc' },
       });
 
       if (!paymentsToReconcile || paymentsToReconcile.length === 0) {
@@ -63,14 +59,14 @@ export class PaymentReconciliationService {
               status: statusResponse.status as any,
               processedAt: statusResponse.processedAt || new Date(),
             };
-            
+
             if (statusResponse.failureReason) {
               updateData.failureReason = statusResponse.failureReason;
             }
 
             await prisma.payment?.update({
               where: { id: payment.id },
-              data: updateData
+              data: updateData,
             });
 
             result.updated++;
@@ -84,13 +80,12 @@ export class PaymentReconciliationService {
 
             // Payment status updated
           }
-
         } catch (error) {
           result.failed++;
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           result.errors.push({
             paymentId: payment.id,
-            error: errorMessage
+            error: errorMessage,
           });
 
           console.error(`Failed to reconcile payment ${payment.id}:`, errorMessage);
@@ -102,7 +97,6 @@ export class PaymentReconciliationService {
 
       // Reconciliation completed
       return result;
-
     } catch (error) {
       console.error('Reconciliation process failed:', error);
       throw error;
@@ -114,18 +108,18 @@ export class PaymentReconciliationService {
       const updateData: any = {
         status: status as any,
       };
-      
+
       if (status === 'CONFIRMED') {
         updateData.confirmedAt = new Date();
       }
-      
+
       if (status === 'CANCELLED') {
         updateData.cancelledAt = new Date();
       }
 
       await prisma.booking?.update({
         where: { id: bookingId },
-        data: updateData
+        data: updateData,
       });
     } catch (error) {
       console.error(`Failed to update booking ${bookingId} status:`, error);
@@ -137,19 +131,19 @@ export class PaymentReconciliationService {
       processed: 0,
       updated: 0,
       failed: 0,
-      errors: []
+      errors: [],
     };
 
     try {
       const cutoffTime = new Date(Date.now() - daysOld * 24 * 60 * 60 * 1000);
-      
+
       // Find old holds that should be released
       const staleHolds = await prisma.payment?.findMany({
         where: {
           status: 'HELD',
           intent: 'HOLD',
-          createdAt: { lte: cutoffTime }
-        }
+          createdAt: { lte: cutoffTime },
+        },
       });
 
       if (!staleHolds || staleHolds.length === 0) {
@@ -172,7 +166,7 @@ export class PaymentReconciliationService {
               data: {
                 status: 'RELEASED',
                 processedAt: new Date(),
-              }
+              },
             });
 
             result.updated++;
@@ -181,16 +175,15 @@ export class PaymentReconciliationService {
             result.failed++;
             result.errors.push({
               paymentId: hold.id,
-              error: releaseResult.error || 'Release failed'
+              error: releaseResult.error || 'Release failed',
             });
           }
-
         } catch (error) {
           result.failed++;
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           result.errors.push({
             paymentId: hold.id,
-            error: errorMessage
+            error: errorMessage,
           });
 
           console.error(`Failed to release stale hold ${hold.id}:`, errorMessage);
@@ -199,7 +192,6 @@ export class PaymentReconciliationService {
 
       // Stale hold cleanup completed
       return result;
-
     } catch (error) {
       console.error('Stale hold cleanup failed:', error);
       throw error;
@@ -213,19 +205,23 @@ export class PaymentReconciliationService {
     failedPayments: number;
     heldPayments: number;
     totalAmount: number;
-    providerBreakdown: Record<string, {
-      count: number;
-      amount: number;
-      successRate: number;
-    }>;
+    providerBreakdown: Record<
+      string,
+      {
+        count: number;
+        amount: number;
+        successRate: number;
+      }
+    >;
   }> {
     const cutoffTime = new Date(Date.now() - hoursBack * 60 * 60 * 1000);
 
-    const payments = await prisma.payment?.findMany({
-      where: {
-        createdAt: { gte: cutoffTime }
-      }
-    }) || [];
+    const payments =
+      (await prisma.payment?.findMany({
+        where: {
+          createdAt: { gte: cutoffTime },
+        },
+      })) || [];
 
     const totalPayments = payments.length;
     const pendingPayments = payments.filter((p: any) => p.status === 'PENDING').length;
@@ -235,7 +231,10 @@ export class PaymentReconciliationService {
     const totalAmount = payments.reduce((sum: number, p: any) => sum + p.amount, 0);
 
     // Provider breakdown
-    const providerBreakdown: Record<string, { count: number; amount: number; successRate: number }> = {};
+    const providerBreakdown: Record<
+      string,
+      { count: number; amount: number; successRate: number }
+    > = {};
 
     for (const payment of payments) {
       if (!providerBreakdown[payment.provider]) {
@@ -249,8 +248,10 @@ export class PaymentReconciliationService {
     // Calculate success rates
     for (const provider in providerBreakdown) {
       const providerPayments = payments.filter((p: any) => p.provider === provider);
-      const successfulPayments = providerPayments.filter((p: any) => p.status === 'COMPLETED').length;
-      providerBreakdown[provider]!.successRate = 
+      const successfulPayments = providerPayments.filter(
+        (p: any) => p.status === 'COMPLETED'
+      ).length;
+      providerBreakdown[provider]!.successRate =
         providerPayments.length > 0 ? (successfulPayments / providerPayments.length) * 100 : 0;
     }
 
@@ -261,7 +262,7 @@ export class PaymentReconciliationService {
       failedPayments,
       heldPayments,
       totalAmount,
-      providerBreakdown
+      providerBreakdown,
     };
   }
 }

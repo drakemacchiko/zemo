@@ -44,7 +44,7 @@ export default function ReviewCard({ review }: ReviewCardProps) {
   const renderStars = (rating: number) => {
     return (
       <div className="flex">
-        {[1, 2, 3, 4, 5].map((star) => (
+        {[1, 2, 3, 4, 5].map(star => (
           <svg
             key={star}
             className={`w-5 h-5 ${
@@ -60,9 +60,7 @@ export default function ReviewCard({ review }: ReviewCardProps) {
   };
 
   const shouldTruncate = review.comment.length > 300;
-  const displayComment = showFullReview
-    ? review.comment
-    : review.comment.substring(0, 300);
+  const displayComment = showFullReview ? review.comment : review.comment.substring(0, 300);
 
   return (
     <div className="border-b border-gray-200 py-6 last:border-b-0">
@@ -78,10 +76,7 @@ export default function ReviewCard({ review }: ReviewCardProps) {
             />
           ) : (
             <div className="w-12 h-12 rounded-full bg-yellow-500 flex items-center justify-center text-white font-semibold">
-              {getInitials(
-                review.reviewer.profile.firstName,
-                review.reviewer.profile.lastName
-              )}
+              {getInitials(review.reviewer.profile.firstName, review.reviewer.profile.lastName)}
             </div>
           )}
         </div>
@@ -94,18 +89,13 @@ export default function ReviewCard({ review }: ReviewCardProps) {
           </div>
           <div className="flex items-center gap-2">
             {renderStars(review.rating)}
-            <span className="text-sm font-medium text-gray-700">
-              {review.rating.toFixed(1)}
-            </span>
+            <span className="text-sm font-medium text-gray-700">{review.rating.toFixed(1)}</span>
           </div>
         </div>
       </div>
 
       {/* Category ratings (if available) */}
-      {(review.cleanliness ||
-        review.communication ||
-        review.convenience ||
-        review.accuracy) && (
+      {(review.cleanliness || review.communication || review.convenience || review.accuracy) && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
           {review.cleanliness && (
             <div>
@@ -155,9 +145,7 @@ export default function ReviewCard({ review }: ReviewCardProps) {
       )}
 
       {/* Review title */}
-      {review.title && (
-        <h4 className="font-semibold text-gray-900 mb-2">{review.title}</h4>
-      )}
+      {review.title && <h4 className="font-semibold text-gray-900 mb-2">{review.title}</h4>}
 
       {/* Review comment */}
       <p className="text-gray-700 whitespace-pre-wrap">
@@ -179,14 +167,10 @@ export default function ReviewCard({ review }: ReviewCardProps) {
       {review.response && (
         <div className="mt-4 pl-16 border-l-2 border-gray-200">
           <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-sm font-semibold text-gray-900 mb-2">
-              Response from host:
-            </p>
+            <p className="text-sm font-semibold text-gray-900 mb-2">Response from host:</p>
             <p className="text-sm text-gray-700">{review.response}</p>
             {review.respondedAt && (
-              <p className="text-xs text-gray-500 mt-2">
-                {formatDate(review.respondedAt)}
-              </p>
+              <p className="text-xs text-gray-500 mt-2">{formatDate(review.respondedAt)}</p>
             )}
           </div>
         </div>

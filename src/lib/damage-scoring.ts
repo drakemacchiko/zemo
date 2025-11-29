@@ -22,7 +22,7 @@ export function calculateDamageScore(
       totalScore: 0,
       totalRepairCost: 0,
       adjustedScore: 0,
-      riskLevel: 'low'
+      riskLevel: 'low',
     };
   }
 
@@ -86,6 +86,6 @@ export function calculateDamageScore(
     totalScore,
     totalRepairCost,
     adjustedScore: Math.round(adjustedScore * 10) / 10,
-    riskLevel
+    riskLevel,
   };
 }

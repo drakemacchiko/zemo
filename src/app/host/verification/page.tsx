@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Upload,
   CheckCircle,
@@ -13,20 +13,20 @@ import {
   Shield,
   Building,
   AlertCircle,
-  Eye
-} from 'lucide-react'
+  Eye,
+} from 'lucide-react';
 
 interface Document {
-  id: string
-  documentType: string
-  fileName: string
-  fileSize: number
-  fileType: string
-  url: string
-  uploadedAt: string
-  verified: boolean
-  verificationStatus: 'pending' | 'approved' | 'rejected'
-  rejectionReason?: string
+  id: string;
+  documentType: string;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  url: string;
+  uploadedAt: string;
+  verified: boolean;
+  verificationStatus: 'pending' | 'approved' | 'rejected';
+  rejectionReason?: string;
 }
 
 const HOST_DOCUMENT_TYPES = [
@@ -35,158 +35,158 @@ const HOST_DOCUMENT_TYPES = [
     label: 'National ID',
     icon: CreditCard,
     description: 'Government-issued ID or passport',
-    required: true
+    required: true,
   },
   {
     type: 'drivers_license',
     label: "Driver's License",
     icon: CreditCard,
     description: 'Valid driving license (front and back)',
-    required: true
+    required: true,
   },
   {
     type: 'vehicle_registration',
     label: 'Vehicle Registration',
     icon: Car,
     description: 'Registration certificate for each vehicle',
-    required: true
+    required: true,
   },
   {
     type: 'insurance_policy',
     label: 'Insurance Policy',
     icon: Shield,
     description: 'Valid vehicle insurance documents',
-    required: true
+    required: true,
   },
   {
     type: 'proof_of_ownership',
     label: 'Proof of Ownership',
     icon: FileText,
     description: 'Vehicle title or ownership documents',
-    required: true
+    required: true,
   },
   {
     type: 'bank_details',
     label: 'Bank Account Details',
     icon: Building,
     description: 'For receiving payments',
-    required: false
-  }
-]
+    required: false,
+  },
+];
 
 export default function HostVerificationPage() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(true)
-  const [uploading, setUploading] = useState(false)
-  const [documents, setDocuments] = useState<Document[]>([])
-  const [selectedType, setSelectedType] = useState<string>('')
-  const [uploadProgress, setUploadProgress] = useState(0)
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [selectedType, setSelectedType] = useState<string>('');
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const fetchDocuments = useCallback(async () => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       if (!token) {
-        router.push('/login')
-        return
+        router.push('/login');
+        return;
       }
 
       const response = await fetch('/api/documents/upload?category=host', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (response.ok) {
-        const data = await response.json()
-        setDocuments(data.documents)
+        const data = await response.json();
+        setDocuments(data.documents);
       }
     } catch (error) {
-      console.error('Error fetching documents:', error)
+      console.error('Error fetching documents:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [router])
+  }, [router]);
 
   useEffect(() => {
-    fetchDocuments()
-  }, [fetchDocuments])
+    fetchDocuments();
+  }, [fetchDocuments]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>, docType: string) => {
-    const file = event.target.files?.[0]
+    const file = event.target.files?.[0];
     if (file) {
-      setSelectedType(docType)
-      handleUpload(file, docType)
+      setSelectedType(docType);
+      handleUpload(file, docType);
     }
-  }
+  };
 
   const handleUpload = async (file: File, docType: string) => {
     try {
-      setUploading(true)
-      setUploadProgress(0)
+      setUploading(true);
+      setUploadProgress(0);
 
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       if (!token) {
-        router.push('/login')
-        return
+        router.push('/login');
+        return;
       }
 
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('documentType', docType)
-      formData.append('category', 'host')
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('documentType', docType);
+      formData.append('category', 'host');
 
       // Simulate upload progress
       const progressInterval = setInterval(() => {
-        setUploadProgress(prev => Math.min(prev + 10, 90))
-      }, 200)
+        setUploadProgress(prev => Math.min(prev + 10, 90));
+      }, 200);
 
       const response = await fetch('/api/documents/upload', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
-        body: formData
-      })
+        body: formData,
+      });
 
-      clearInterval(progressInterval)
-      setUploadProgress(100)
+      clearInterval(progressInterval);
+      setUploadProgress(100);
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await response.json();
         // Add the new document to the list
-        setDocuments(prev => [...prev, data.document])
-        setSelectedType('')
-        setTimeout(() => setUploadProgress(0), 1000)
+        setDocuments(prev => [...prev, data.document]);
+        setSelectedType('');
+        setTimeout(() => setUploadProgress(0), 1000);
       } else {
-        const error = await response.json()
-        alert(error.error || 'Failed to upload document')
+        const error = await response.json();
+        alert(error.error || 'Failed to upload document');
       }
     } catch (error) {
-      console.error('Error uploading document:', error)
-      alert('Failed to upload document')
+      console.error('Error uploading document:', error);
+      alert('Failed to upload document');
     } finally {
-      setUploading(false)
+      setUploading(false);
     }
-  }
+  };
 
   const getDocumentForType = (type: string) => {
-    return documents.find(doc => doc.documentType === type)
-  }
+    return documents.find(doc => doc.documentType === type);
+  };
 
   const getVerificationStatus = () => {
-    const requiredTypes = HOST_DOCUMENT_TYPES.filter(dt => dt.required).map(dt => dt.type)
-    const uploadedRequiredDocs = requiredTypes.filter(type => 
+    const requiredTypes = HOST_DOCUMENT_TYPES.filter(dt => dt.required).map(dt => dt.type);
+    const uploadedRequiredDocs = requiredTypes.filter(type =>
       documents.some(doc => doc.documentType === type)
-    )
+    );
     const verifiedRequiredDocs = requiredTypes.filter(type =>
       documents.some(doc => doc.documentType === type && doc.verified)
-    )
+    );
 
     return {
       total: requiredTypes.length,
       uploaded: uploadedRequiredDocs.length,
       verified: verifiedRequiredDocs.length,
-      percentage: Math.round((verifiedRequiredDocs.length / requiredTypes.length) * 100)
-    }
-  }
+      percentage: Math.round((verifiedRequiredDocs.length / requiredTypes.length) * 100),
+    };
+  };
 
-  const status = getVerificationStatus()
+  const status = getVerificationStatus();
 
   if (loading) {
     return (
@@ -196,7 +196,7 @@ export default function HostVerificationPage() {
           <p className="mt-4 text-gray-600">Loading verification status...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -216,7 +216,7 @@ export default function HostVerificationPage() {
             <h2 className="text-xl font-semibold text-gray-900">Verification Progress</h2>
             <span className="text-2xl font-bold text-blue-600">{status.percentage}%</span>
           </div>
-          
+
           <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
             <div
               className="bg-blue-600 h-3 rounded-full transition-all duration-500"
@@ -254,9 +254,9 @@ export default function HostVerificationPage() {
 
         {/* Document Upload Cards */}
         <div className="space-y-4">
-          {HOST_DOCUMENT_TYPES.map((docType) => {
-            const doc = getDocumentForType(docType.type)
-            const Icon = docType.icon
+          {HOST_DOCUMENT_TYPES.map(docType => {
+            const doc = getDocumentForType(docType.type);
+            const Icon = docType.icon;
 
             return (
               <div
@@ -265,27 +265,25 @@ export default function HostVerificationPage() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start space-x-4 flex-1">
-                    <div className={`p-3 rounded-lg ${
-                      doc?.verified 
-                        ? 'bg-green-100' 
-                        : doc 
-                        ? 'bg-yellow-100' 
-                        : 'bg-gray-100'
-                    }`}>
-                      <Icon className={`h-6 w-6 ${
-                        doc?.verified 
-                          ? 'text-green-600' 
-                          : doc 
-                          ? 'text-yellow-600' 
-                          : 'text-gray-600'
-                      }`} />
+                    <div
+                      className={`p-3 rounded-lg ${
+                        doc?.verified ? 'bg-green-100' : doc ? 'bg-yellow-100' : 'bg-gray-100'
+                      }`}
+                    >
+                      <Icon
+                        className={`h-6 w-6 ${
+                          doc?.verified
+                            ? 'text-green-600'
+                            : doc
+                              ? 'text-yellow-600'
+                              : 'text-gray-600'
+                        }`}
+                      />
                     </div>
-                    
+
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {docType.label}
-                        </h3>
+                        <h3 className="text-lg font-semibold text-gray-900">{docType.label}</h3>
                         {docType.required && (
                           <span className="px-2 py-0.5 bg-red-100 text-red-800 text-xs font-medium rounded">
                             Required
@@ -316,7 +314,7 @@ export default function HostVerificationPage() {
                               </>
                             )}
                           </div>
-                          
+
                           <div className="flex items-center space-x-2 text-sm text-gray-600">
                             <FileText className="h-4 w-4" />
                             <span>{doc.fileName}</span>
@@ -353,14 +351,14 @@ export default function HostVerificationPage() {
                         <Eye className="h-5 w-5" />
                       </a>
                     )}
-                    
+
                     <label
                       className={`flex items-center space-x-2 px-4 py-2 rounded-lg cursor-pointer transition-colors ${
                         uploading && selectedType === docType.type
                           ? 'bg-gray-300 cursor-not-allowed'
                           : doc
-                          ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          : 'bg-blue-600 text-white hover:bg-blue-700'
+                            ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            : 'bg-blue-600 text-white hover:bg-blue-700'
                       }`}
                     >
                       <Upload className="h-4 w-4" />
@@ -368,13 +366,13 @@ export default function HostVerificationPage() {
                         {uploading && selectedType === docType.type
                           ? `${uploadProgress}%`
                           : doc
-                          ? 'Replace'
-                          : 'Upload'}
+                            ? 'Replace'
+                            : 'Upload'}
                       </span>
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/jpg,application/pdf"
-                        onChange={(e) => handleFileSelect(e, docType.type)}
+                        onChange={e => handleFileSelect(e, docType.type)}
                         disabled={uploading}
                         className="hidden"
                       />
@@ -382,7 +380,7 @@ export default function HostVerificationPage() {
                   </div>
                 </div>
               </div>
-            )
+            );
           })}
         </div>
 
@@ -404,5 +402,5 @@ export default function HostVerificationPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter, useParams } from 'next/navigation'
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import {
   Camera,
   CheckCircle,
@@ -10,16 +10,16 @@ import {
   Fuel,
   Gauge,
   Car,
-  Shield
-} from 'lucide-react'
+  Shield,
+} from 'lucide-react';
 
 interface ChecklistItem {
-  id: string
-  category: string
-  item: string
-  condition: 'GOOD' | 'FAIR' | 'POOR' | 'DAMAGED' | null
-  notes: string
-  photos: string[]
+  id: string;
+  category: string;
+  item: string;
+  condition: 'GOOD' | 'FAIR' | 'POOR' | 'DAMAGED' | null;
+  notes: string;
+  photos: string[];
 }
 
 const INSPECTION_CHECKLIST = [
@@ -40,8 +40,8 @@ const INSPECTION_CHECKLIST = [
       'Taillights',
       'Wheels/Rims',
       'Tires condition',
-      'Body panels'
-    ]
+      'Body panels',
+    ],
   },
   {
     category: 'Interior',
@@ -58,8 +58,8 @@ const INSPECTION_CHECKLIST = [
       'Headliner',
       'Mirrors (rearview)',
       'Air vents',
-      'Cleanliness'
-    ]
+      'Cleanliness',
+    ],
   },
   {
     category: 'Functional',
@@ -76,8 +76,8 @@ const INSPECTION_CHECKLIST = [
       'Horn',
       'Wipers',
       'All lights working',
-      'Warning lights'
-    ]
+      'Warning lights',
+    ],
   },
   {
     category: 'Safety & Equipment',
@@ -89,34 +89,36 @@ const INSPECTION_CHECKLIST = [
       'Warning triangle',
       'Registration documents',
       'Insurance documents',
-      'Owner\'s manual'
-    ]
-  }
-]
+      "Owner's manual",
+    ],
+  },
+];
 
 export default function PreTripInspectionPage() {
-  const router = useRouter()
-  const params = useParams()
-  const bookingId = params?.id as string
+  const router = useRouter();
+  const params = useParams();
+  const bookingId = params?.id as string;
 
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [userRole] = useState<'HOST' | 'RENTER'>('RENTER')
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [userRole] = useState<'HOST' | 'RENTER'>('RENTER');
 
   // Inspection data
-  const [checklist, setChecklist] = useState<ChecklistItem[]>([])
-  const [fuelLevel, setFuelLevel] = useState(50)
-  const [odometerReading, setOdometerReading] = useState('')
-  const [overallCondition, setOverallCondition] = useState<'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR'>('GOOD')
-  const [damageNotes, setDamageNotes] = useState('')
-  const [vehiclePhotos, setVehiclePhotos] = useState<string[]>([])
+  const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
+  const [fuelLevel, setFuelLevel] = useState(50);
+  const [odometerReading, setOdometerReading] = useState('');
+  const [overallCondition, setOverallCondition] = useState<'EXCELLENT' | 'GOOD' | 'FAIR' | 'POOR'>(
+    'GOOD'
+  );
+  const [damageNotes, setDamageNotes] = useState('');
+  const [vehiclePhotos, setVehiclePhotos] = useState<string[]>([]);
 
   const fetchBookingAndInspection = useCallback(async () => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       if (!token) {
-        router.push('/login')
-        return
+        router.push('/login');
+        return;
       }
 
       // Fetch booking details
@@ -131,40 +133,39 @@ export default function PreTripInspectionPage() {
       // TODO: Get current user ID from token decode or context
 
       // Fetch existing inspection
-      const inspectionRes = await fetch(
-        `/api/bookings/${bookingId}/inspection?type=PRE_TRIP`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+      const inspectionRes = await fetch(`/api/bookings/${bookingId}/inspection?type=PRE_TRIP`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (inspectionRes.ok) {
-        const data = await inspectionRes.json()
+        const data = await inspectionRes.json();
         if (data.inspections && data.inspections.length > 0) {
-          const inspection = data.inspections[0]
+          const inspection = data.inspections[0];
           // Load existing data
           if (inspection.checklistItems) {
-            setChecklist(JSON.parse(inspection.checklistItems))
+            setChecklist(JSON.parse(inspection.checklistItems));
           }
           if (inspection.fuelLevel) {
-            setFuelLevel(inspection.fuelLevel)
+            setFuelLevel(inspection.fuelLevel);
           }
           if (inspection.odometerReading) {
-            setOdometerReading(inspection.odometerReading.toString())
+            setOdometerReading(inspection.odometerReading.toString());
           }
           if (inspection.overallCondition) {
-            setOverallCondition(inspection.overallCondition)
+            setOverallCondition(inspection.overallCondition);
           }
           if (inspection.damageNotes) {
-            setDamageNotes(inspection.damageNotes)
+            setDamageNotes(inspection.damageNotes);
           }
           if (inspection.photos) {
-            setVehiclePhotos(JSON.parse(inspection.photos))
+            setVehiclePhotos(JSON.parse(inspection.photos));
           }
         }
       }
 
       // Initialize checklist if empty
       if (checklist.length === 0) {
-        const initialChecklist: ChecklistItem[] = []
+        const initialChecklist: ChecklistItem[] = [];
         INSPECTION_CHECKLIST.forEach(category => {
           category.items.forEach(item => {
             initialChecklist.push({
@@ -173,70 +174,66 @@ export default function PreTripInspectionPage() {
               item,
               condition: null,
               notes: '',
-              photos: []
-            })
-          })
-        })
-        setChecklist(initialChecklist)
+              photos: [],
+            });
+          });
+        });
+        setChecklist(initialChecklist);
       }
     } catch (error) {
-      console.error('Error fetching data:', error)
+      console.error('Error fetching data:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [bookingId, checklist.length, router])
+  }, [bookingId, checklist.length, router]);
 
   useEffect(() => {
-    fetchBookingAndInspection()
-  }, [fetchBookingAndInspection])
+    fetchBookingAndInspection();
+  }, [fetchBookingAndInspection]);
 
   const updateChecklistItem = (id: string, field: string, value: any) => {
-    setChecklist(prev =>
-      prev.map(item =>
-        item.id === id ? { ...item, [field]: value } : item
-      )
-    )
-  }
+    setChecklist(prev => prev.map(item => (item.id === id ? { ...item, [field]: value } : item)));
+  };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>, itemId?: string) => {
-    const files = e.target.files
-    if (!files || files.length === 0) return
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     // TODO: Upload to Supabase Storage
     // For now, use base64 encoding for demo
-    const file = files[0]
-    if (!file) return
-    
-    const reader = new FileReader()
-    
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string
-      
+    const file = files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = event => {
+      const base64 = event.target?.result as string;
+
       if (itemId) {
         // Add photo to specific checklist item
         updateChecklistItem(itemId, 'photos', [
-          ...checklist.find(item => item.id === itemId)?.photos || [],
-          base64
-        ])
+          ...(checklist.find(item => item.id === itemId)?.photos || []),
+          base64,
+        ]);
       } else {
         // Add to general vehicle photos
-        setVehiclePhotos(prev => [...prev, base64])
+        setVehiclePhotos(prev => [...prev, base64]);
       }
-    }
-    
-    reader.readAsDataURL(file)
-  }
+    };
+
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = async () => {
     try {
-      setSubmitting(true)
-      const token = localStorage.getItem('accessToken')
+      setSubmitting(true);
+      const token = localStorage.getItem('accessToken');
 
       const response = await fetch(`/api/bookings/${bookingId}/inspection`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           inspectionType: 'PRE_TRIP',
@@ -246,29 +243,29 @@ export default function PreTripInspectionPage() {
           fuelLevel,
           odometerReading: parseInt(odometerReading),
           damageNotes,
-          overallCondition
-        })
-      })
+          overallCondition,
+        }),
+      });
 
       if (response.ok) {
-        alert('Pre-trip inspection saved successfully!')
-        router.push(`/host/bookings/${bookingId}`)
+        alert('Pre-trip inspection saved successfully!');
+        router.push(`/host/bookings/${bookingId}`);
       } else {
-        alert('Failed to save inspection')
+        alert('Failed to save inspection');
       }
     } catch (error) {
-      console.error('Error submitting inspection:', error)
-      alert('Failed to save inspection')
+      console.error('Error submitting inspection:', error);
+      alert('Failed to save inspection');
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   const getCompletionPercentage = () => {
-    const totalItems = checklist.length
-    const completedItems = checklist.filter(item => item.condition !== null).length
-    return Math.round((completedItems / totalItems) * 100)
-  }
+    const totalItems = checklist.length;
+    const completedItems = checklist.filter(item => item.condition !== null).length;
+    return Math.round((completedItems / totalItems) * 100);
+  };
 
   if (loading) {
     return (
@@ -278,10 +275,10 @@ export default function PreTripInspectionPage() {
           <p className="mt-4 text-gray-600">Loading inspection form...</p>
         </div>
       </div>
-    )
+    );
   }
 
-  const completionPercentage = getCompletionPercentage()
+  const completionPercentage = getCompletionPercentage();
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20 lg:pb-8">
@@ -291,9 +288,7 @@ export default function PreTripInspectionPage() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Pre-Trip Inspection</h1>
-              <p className="text-gray-600 mt-1">
-                Document vehicle condition before trip starts
-              </p>
+              <p className="text-gray-600 mt-1">Document vehicle condition before trip starts</p>
             </div>
             <div className="text-right">
               <div className="text-3xl font-bold text-blue-600">{completionPercentage}%</div>
@@ -321,7 +316,7 @@ export default function PreTripInspectionPage() {
               min="0"
               max="100"
               value={fuelLevel}
-              onChange={(e) => setFuelLevel(parseInt(e.target.value))}
+              onChange={e => setFuelLevel(parseInt(e.target.value))}
               className="w-full"
             />
             <div className="flex justify-between text-sm text-gray-600 mt-2">
@@ -339,7 +334,7 @@ export default function PreTripInspectionPage() {
             <input
               type="number"
               value={odometerReading}
-              onChange={(e) => setOdometerReading(e.target.value)}
+              onChange={e => setOdometerReading(e.target.value)}
               placeholder="Enter reading"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             />
@@ -353,7 +348,7 @@ export default function PreTripInspectionPage() {
             </div>
             <select
               value={overallCondition}
-              onChange={(e) => setOverallCondition(e.target.value as any)}
+              onChange={e => setOverallCondition(e.target.value as any)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
               <option value="EXCELLENT">Excellent</option>
@@ -370,12 +365,19 @@ export default function PreTripInspectionPage() {
           <p className="text-sm text-gray-600 mb-4">
             Take photos of all angles: front, rear, both sides, interior, dashboard
           </p>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             {vehiclePhotos.map((photo, index) => (
-              <div key={index} className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden">
+              <div
+                key={index}
+                className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden"
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo} alt={`Vehicle ${index + 1}`} className="w-full h-full object-cover" />
+                <img
+                  src={photo}
+                  alt={`Vehicle ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
               </div>
             ))}
           </div>
@@ -387,14 +389,14 @@ export default function PreTripInspectionPage() {
               type="file"
               accept="image/*"
               multiple
-              onChange={(e) => handlePhotoUpload(e)}
+              onChange={e => handlePhotoUpload(e)}
               className="hidden"
             />
           </label>
         </div>
 
         {/* Inspection Checklist */}
-        {INSPECTION_CHECKLIST.map((section) => (
+        {INSPECTION_CHECKLIST.map(section => (
           <div key={section.category} className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center space-x-2">
               <Car className="h-6 w-6 text-blue-600" />
@@ -402,11 +404,11 @@ export default function PreTripInspectionPage() {
             </h3>
 
             <div className="space-y-4">
-              {section.items.map((item) => {
+              {section.items.map(item => {
                 const checklistItem = checklist.find(
                   ci => ci.category === section.category && ci.item === item
-                )
-                if (!checklistItem) return null
+                );
+                if (!checklistItem) return null;
 
                 return (
                   <div key={checklistItem.id} className="border border-gray-200 rounded-lg p-4">
@@ -436,7 +438,9 @@ export default function PreTripInspectionPage() {
                           <AlertTriangle className="h-5 w-5" />
                         </button>
                         <button
-                          onClick={() => updateChecklistItem(checklistItem.id, 'condition', 'DAMAGED')}
+                          onClick={() =>
+                            updateChecklistItem(checklistItem.id, 'condition', 'DAMAGED')
+                          }
                           className={`p-2 rounded-lg ${
                             checklistItem.condition === 'DAMAGED'
                               ? 'bg-red-100 text-red-600'
@@ -454,7 +458,7 @@ export default function PreTripInspectionPage() {
                         <input
                           type="text"
                           value={checklistItem.notes}
-                          onChange={(e) =>
+                          onChange={e =>
                             updateChecklistItem(checklistItem.id, 'notes', e.target.value)
                           }
                           placeholder="Describe the issue or damage..."
@@ -466,16 +470,23 @@ export default function PreTripInspectionPage() {
                           <input
                             type="file"
                             accept="image/*"
-                            onChange={(e) => handlePhotoUpload(e, checklistItem.id)}
+                            onChange={e => handlePhotoUpload(e, checklistItem.id)}
                             className="hidden"
                           />
                         </label>
                         {checklistItem.photos.length > 0 && (
                           <div className="flex space-x-2">
                             {checklistItem.photos.map((photo, idx) => (
-                              <div key={idx} className="w-16 h-16 bg-gray-100 rounded overflow-hidden">
+                              <div
+                                key={idx}
+                                className="w-16 h-16 bg-gray-100 rounded overflow-hidden"
+                              >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={photo} alt={`Damage ${idx + 1}`} className="w-full h-full object-cover" />
+                                <img
+                                  src={photo}
+                                  alt={`Damage ${idx + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
                               </div>
                             ))}
                           </div>
@@ -483,7 +494,7 @@ export default function PreTripInspectionPage() {
                       </div>
                     )}
                   </div>
-                )
+                );
               })}
             </div>
           </div>
@@ -494,7 +505,7 @@ export default function PreTripInspectionPage() {
           <h3 className="text-xl font-semibold text-gray-900 mb-4">Additional Notes</h3>
           <textarea
             value={damageNotes}
-            onChange={(e) => setDamageNotes(e.target.value)}
+            onChange={e => setDamageNotes(e.target.value)}
             placeholder="Any additional observations or concerns..."
             rows={4}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -529,5 +540,5 @@ export default function PreTripInspectionPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -106,7 +106,7 @@ describe('Booking API Tests', () => {
       };
 
       // Mock transaction
-      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+      (prisma.$transaction as jest.Mock).mockImplementation(async callback => {
         const tx = {
           vehicle: {
             findUnique: jest.fn().mockResolvedValue(mockVehicle),
@@ -125,7 +125,7 @@ describe('Booking API Tests', () => {
       const request = new NextRequest('http://localhost:3000/api/bookings', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(bookingData),
@@ -155,7 +155,7 @@ describe('Booking API Tests', () => {
       };
 
       // Mock transaction - vehicle not found
-      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+      (prisma.$transaction as jest.Mock).mockImplementation(async callback => {
         const tx = {
           vehicle: {
             findUnique: jest.fn().mockResolvedValue(null),
@@ -169,7 +169,7 @@ describe('Booking API Tests', () => {
       const request = new NextRequest('http://localhost:3000/api/bookings', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(bookingData),
@@ -198,7 +198,7 @@ describe('Booking API Tests', () => {
       };
 
       // Mock transaction - with overlapping booking
-      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+      (prisma.$transaction as jest.Mock).mockImplementation(async callback => {
         const tx = {
           vehicle: {
             findUnique: jest.fn().mockResolvedValue(mockVehicle),
@@ -222,7 +222,7 @@ describe('Booking API Tests', () => {
       const request = new NextRequest('http://localhost:3000/api/bookings', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(bookingData),
@@ -252,7 +252,7 @@ describe('Booking API Tests', () => {
 
       const ownVehicle = { ...mockVehicle, hostId: mockUser.id };
 
-      (prisma.$transaction as jest.Mock).mockImplementation(async (callback) => {
+      (prisma.$transaction as jest.Mock).mockImplementation(async callback => {
         const tx = {
           vehicle: {
             findUnique: jest.fn().mockResolvedValue(ownVehicle),
@@ -266,7 +266,7 @@ describe('Booking API Tests', () => {
       const request = new NextRequest('http://localhost:3000/api/bookings', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(bookingData),
@@ -322,7 +322,7 @@ describe('Booking API Tests', () => {
       const request = new NextRequest('http://localhost:3000/api/bookings', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(bookingData),
@@ -349,7 +349,7 @@ describe('Booking API Tests', () => {
       const request = new NextRequest('http://localhost:3000/api/bookings?page=1&limit=20', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
@@ -374,7 +374,7 @@ describe('Booking API Tests', () => {
       const request = new NextRequest('http://localhost:3000/api/bookings?status=PENDING', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 

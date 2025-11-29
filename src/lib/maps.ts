@@ -33,10 +33,10 @@ export function loadGoogleMapsScript(apiKey: string): Promise<void> {
     (window as any).initGoogleMaps = () => {
       isLoaded = true;
       isLoading = false;
-      
+
       // Call original resolve
       resolve();
-      
+
       // Call all queued callbacks
       callbacks.forEach(callback => callback());
       callbacks.length = 0;
@@ -70,7 +70,7 @@ export async function geocodeAddress(address: string): Promise<{
 
   const geocoder = new (window as any).google.maps.Geocoder();
 
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     geocoder.geocode({ address }, (results: any, status: any) => {
       if (status === 'OK' && results[0]) {
         const location = results[0].geometry.location;
@@ -97,29 +97,21 @@ export async function reverseGeocode(lat: number, lng: number): Promise<string |
 
   const geocoder = new (window as any).google.maps.Geocoder();
 
-  return new Promise((resolve) => {
-    geocoder.geocode(
-      { location: { lat, lng } },
-      (results: any, status: any) => {
-        if (status === 'OK' && results[0]) {
-          resolve(results[0].formatted_address);
-        } else {
-          resolve(null);
-        }
+  return new Promise(resolve => {
+    geocoder.geocode({ location: { lat, lng } }, (results: any, status: any) => {
+      if (status === 'OK' && results[0]) {
+        resolve(results[0].formatted_address);
+      } else {
+        resolve(null);
       }
-    );
+    });
   });
 }
 
 /**
  * Calculate distance between two points using Haversine formula
  */
-export function calculateDistance(
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number
-): number {
+export function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371; // Radius of the Earth in km
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLng = ((lng2 - lng1) * Math.PI) / 180;

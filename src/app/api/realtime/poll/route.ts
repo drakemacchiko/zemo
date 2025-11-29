@@ -15,7 +15,7 @@ async function pollUpdates(_request: AuthenticatedRequest) {
   try {
     // const { searchParams } = new URL(request.url);
     // const query = pollingQuerySchema.parse(Object.fromEntries(searchParams.entries()));
-    
+
     // const userId = request.user!.id; // Will be used for user filtering
     // const lastMessageTime = query.lastMessageTimestamp ? new Date(query.lastMessageTimestamp) : new Date(0); // Will be used for timestamp filtering
     // const lastNotificationTime = query.lastNotificationTimestamp ? new Date(query.lastNotificationTimestamp) : new Date(0); // Will be used for timestamp filtering
@@ -28,12 +28,11 @@ async function pollUpdates(_request: AuthenticatedRequest) {
       newNotifications: [],
       conversationUpdates: [],
       timestamp: new Date().toISOString(),
-      hasUpdates: false
+      hasUpdates: false,
     });
-
   } catch (error) {
     console.error('Error polling for updates:', error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid query parameters', details: error.issues },
@@ -41,10 +40,7 @@ async function pollUpdates(_request: AuthenticatedRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to poll for updates' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to poll for updates' }, { status: 500 });
   }
 }
 
@@ -53,7 +49,7 @@ async function heartbeat(request: AuthenticatedRequest) {
   return NextResponse.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    userId: request.user!.id
+    userId: request.user!.id,
   });
 }
 

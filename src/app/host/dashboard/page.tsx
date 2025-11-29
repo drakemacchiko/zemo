@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   Car,
   Calendar,
@@ -13,146 +13,146 @@ import {
   MessageSquare,
   Bell,
   Eye,
-  Plus
-} from 'lucide-react'
+  Plus,
+} from 'lucide-react';
 
 interface DashboardStats {
   activeBookings: {
-    count: number
-    trend: number // percentage change
-  }
+    count: number;
+    trend: number; // percentage change
+  };
   monthlyEarnings: {
-    amount: number
-    trend: number
-  }
+    amount: number;
+    trend: number;
+  };
   totalVehicles: {
-    active: number
-    total: number
-  }
+    active: number;
+    total: number;
+  };
   averageRating: {
-    rating: number
-    reviewCount: number
-  }
+    rating: number;
+    reviewCount: number;
+  };
 }
 
 interface UpcomingBooking {
-  id: string
+  id: string;
   vehicle: {
-    make: string
-    model: string
-    year: number
-  }
+    make: string;
+    model: string;
+    year: number;
+  };
   renter: {
-    name: string
-    profilePicture?: string
-  }
-  startDate: string
-  endDate: string
-  status: string
+    name: string;
+    profilePicture?: string;
+  };
+  startDate: string;
+  endDate: string;
+  status: string;
 }
 
 interface Activity {
-  id: string
-  type: 'booking_request' | 'booking_completed' | 'review' | 'message' | 'payout'
-  title: string
-  description: string
-  timestamp: string
-  icon: string
+  id: string;
+  type: 'booking_request' | 'booking_completed' | 'review' | 'message' | 'payout';
+  title: string;
+  description: string;
+  timestamp: string;
+  icon: string;
 }
 
 interface VehiclePerformance {
-  vehicleName: string
-  trips: number
-  earnings: number
-  utilization: number
+  vehicleName: string;
+  trips: number;
+  earnings: number;
+  utilization: number;
 }
 
 export default function HostDashboardPage() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(true)
-  const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [upcomingBookings, setUpcomingBookings] = useState<UpcomingBooking[]>([])
-  const [recentActivity, setRecentActivity] = useState<Activity[]>([])
-  const [vehiclePerformance, setVehiclePerformance] = useState<VehiclePerformance[]>([])
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [upcomingBookings, setUpcomingBookings] = useState<UpcomingBooking[]>([]);
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
+  const [vehiclePerformance, setVehiclePerformance] = useState<VehiclePerformance[]>([]);
 
   const fetchDashboardData = useCallback(async () => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       if (!token) {
-        router.push('/login')
-        return
+        router.push('/login');
+        return;
       }
 
       // Fetch all dashboard data in parallel
       const [statsRes, bookingsRes, activityRes, performanceRes] = await Promise.all([
         fetch('/api/host/dashboard/stats', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }),
         fetch('/api/host/dashboard/upcoming-bookings?limit=5', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }),
         fetch('/api/host/dashboard/activity?limit=10', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         }),
         fetch('/api/host/dashboard/vehicle-performance', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-      ])
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
 
       if (statsRes.ok) {
-        const data = await statsRes.json()
-        setStats(data)
+        const data = await statsRes.json();
+        setStats(data);
       }
 
       if (bookingsRes.ok) {
-        const data = await bookingsRes.json()
-        setUpcomingBookings(data.bookings)
+        const data = await bookingsRes.json();
+        setUpcomingBookings(data.bookings);
       }
 
       if (activityRes.ok) {
-        const data = await activityRes.json()
-        setRecentActivity(data.activities)
+        const data = await activityRes.json();
+        setRecentActivity(data.activities);
       }
 
       if (performanceRes.ok) {
-        const data = await performanceRes.json()
-        setVehiclePerformance(data.vehicles)
+        const data = await performanceRes.json();
+        setVehiclePerformance(data.vehicles);
       }
     } catch (error) {
-      console.error('Error fetching dashboard data:', error)
+      console.error('Error fetching dashboard data:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [router])
+  }, [router]);
 
   useEffect(() => {
-    fetchDashboardData()
-  }, [fetchDashboardData])
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-ZM', {
       style: 'currency',
-      currency: 'ZMW'
-    }).format(amount)
-  }
+      currency: 'ZMW',
+    }).format(amount);
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
-      day: 'numeric'
-    })
-  }
+      day: 'numeric',
+    });
+  };
 
   const getTimeAgo = (timestamp: string) => {
-    const now = new Date()
-    const past = new Date(timestamp)
-    const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000)
+    const now = new Date();
+    const past = new Date(timestamp);
+    const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
 
-    if (diffInSeconds < 60) return 'Just now'
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`
-    return `${Math.floor(diffInSeconds / 86400)} days ago`
-  }
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+    return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  };
 
   if (loading) {
     return (
@@ -162,7 +162,7 @@ export default function HostDashboardPage() {
           <p className="mt-4 text-gray-600">Loading dashboard...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -171,7 +171,9 @@ export default function HostDashboardPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Host Dashboard</h1>
-          <p className="mt-2 text-gray-600">Welcome back! Here's what's happening with your vehicles.</p>
+          <p className="mt-2 text-gray-600">
+            Welcome back! Here's what's happening with your vehicles.
+          </p>
         </div>
 
         {/* Stats Cards */}
@@ -191,9 +193,7 @@ export default function HostDashboardPage() {
               {stats?.activeBookings.trend && stats.activeBookings.trend > 0 ? (
                 <>
                   <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
-                  <span className="text-green-600 font-medium">
-                    +{stats.activeBookings.trend}%
-                  </span>
+                  <span className="text-green-600 font-medium">+{stats.activeBookings.trend}%</span>
                 </>
               ) : (
                 <>
@@ -205,7 +205,10 @@ export default function HostDashboardPage() {
               )}
               <span className="text-gray-600 ml-2">vs last month</span>
             </div>
-            <Link href="/host/bookings" className="mt-4 text-blue-600 text-sm font-medium hover:text-blue-700 inline-block">
+            <Link
+              href="/host/bookings"
+              className="mt-4 text-blue-600 text-sm font-medium hover:text-blue-700 inline-block"
+            >
               View all →
             </Link>
           </div>
@@ -239,7 +242,10 @@ export default function HostDashboardPage() {
               )}
               <span className="text-gray-600 ml-2">vs last month</span>
             </div>
-            <Link href="/host/earnings" className="mt-4 text-green-600 text-sm font-medium hover:text-green-700 inline-block">
+            <Link
+              href="/host/earnings"
+              className="mt-4 text-green-600 text-sm font-medium hover:text-green-700 inline-block"
+            >
               View details →
             </Link>
           </div>
@@ -258,7 +264,10 @@ export default function HostDashboardPage() {
               </div>
               <Car className="h-12 w-12 text-purple-600 opacity-80" />
             </div>
-            <Link href="/host/vehicles" className="mt-6 text-purple-600 text-sm font-medium hover:text-purple-700 inline-block">
+            <Link
+              href="/host/vehicles"
+              className="mt-6 text-purple-600 text-sm font-medium hover:text-purple-700 inline-block"
+            >
               Manage vehicles →
             </Link>
           </div>
@@ -279,7 +288,10 @@ export default function HostDashboardPage() {
                 </p>
               </div>
             </div>
-            <Link href="/host/reviews" className="mt-6 text-yellow-600 text-sm font-medium hover:text-yellow-700 inline-block">
+            <Link
+              href="/host/reviews"
+              className="mt-6 text-yellow-600 text-sm font-medium hover:text-yellow-700 inline-block"
+            >
               View reviews →
             </Link>
           </div>
@@ -297,8 +309,11 @@ export default function HostDashboardPage() {
               <div className="p-6">
                 {upcomingBookings.length > 0 ? (
                   <div className="space-y-4">
-                    {upcomingBookings.map((booking) => (
-                      <div key={booking.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-500 transition-colors">
+                    {upcomingBookings.map(booking => (
+                      <div
+                        key={booking.id}
+                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-blue-500 transition-colors"
+                      >
                         <div className="flex items-center space-x-4">
                           <div className="h-12 w-12 bg-gray-200 rounded-full flex items-center justify-center">
                             {booking.renter.profilePicture ? (
@@ -318,9 +333,7 @@ export default function HostDashboardPage() {
                             <p className="font-medium text-gray-900">
                               {booking.vehicle.year} {booking.vehicle.make} {booking.vehicle.model}
                             </p>
-                            <p className="text-sm text-gray-600">
-                              {booking.renter.name}
-                            </p>
+                            <p className="text-sm text-gray-600">{booking.renter.name}</p>
                             <p className="text-sm text-gray-500">
                               {formatDate(booking.startDate)} - {formatDate(booking.endDate)}
                             </p>
@@ -330,7 +343,10 @@ export default function HostDashboardPage() {
                           <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg">
                             <MessageSquare className="h-5 w-5" />
                           </button>
-                          <Link href={`/host/bookings/${booking.id}`} className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+                          <Link
+                            href={`/host/bookings/${booking.id}`}
+                            className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg"
+                          >
                             <Eye className="h-5 w-5" />
                           </Link>
                         </div>
@@ -344,7 +360,10 @@ export default function HostDashboardPage() {
                   </div>
                 )}
                 {upcomingBookings.length > 0 && (
-                  <Link href="/host/bookings" className="mt-6 block text-center text-blue-600 font-medium hover:text-blue-700">
+                  <Link
+                    href="/host/bookings"
+                    className="mt-6 block text-center text-blue-600 font-medium hover:text-blue-700"
+                  >
                     See all bookings →
                   </Link>
                 )}
@@ -437,21 +456,33 @@ export default function HostDashboardPage() {
               <div className="p-6">
                 {recentActivity.length > 0 ? (
                   <div className="space-y-4">
-                    {recentActivity.map((activity) => (
+                    {recentActivity.map(activity => (
                       <div key={activity.id} className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
                           <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                            {activity.type === 'booking_request' && <Bell className="h-4 w-4 text-blue-600" />}
-                            {activity.type === 'booking_completed' && <Calendar className="h-4 w-4 text-green-600" />}
-                            {activity.type === 'review' && <Star className="h-4 w-4 text-yellow-600" />}
-                            {activity.type === 'message' && <MessageSquare className="h-4 w-4 text-purple-600" />}
-                            {activity.type === 'payout' && <DollarSign className="h-4 w-4 text-green-600" />}
+                            {activity.type === 'booking_request' && (
+                              <Bell className="h-4 w-4 text-blue-600" />
+                            )}
+                            {activity.type === 'booking_completed' && (
+                              <Calendar className="h-4 w-4 text-green-600" />
+                            )}
+                            {activity.type === 'review' && (
+                              <Star className="h-4 w-4 text-yellow-600" />
+                            )}
+                            {activity.type === 'message' && (
+                              <MessageSquare className="h-4 w-4 text-purple-600" />
+                            )}
+                            {activity.type === 'payout' && (
+                              <DollarSign className="h-4 w-4 text-green-600" />
+                            )}
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900">{activity.title}</p>
                           <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
-                          <p className="text-xs text-gray-500 mt-1">{getTimeAgo(activity.timestamp)}</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {getTimeAgo(activity.timestamp)}
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -474,7 +505,10 @@ export default function HostDashboardPage() {
                 <li>• Add professional photos for 30% more views</li>
                 <li>• Enable instant booking for verified renters</li>
               </ul>
-              <Link href="/host/guide" className="mt-4 inline-block bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+              <Link
+                href="/host/guide"
+                className="mt-4 inline-block bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+              >
                 View Host Guide →
               </Link>
             </div>
@@ -482,5 +516,5 @@ export default function HostDashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

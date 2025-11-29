@@ -136,7 +136,7 @@ export class MTNMoMoService extends MobileMoneyService {
     await new Promise(resolve => setTimeout(resolve, 1200 + Math.random() * 2000));
 
     const paymentId = PaymentUtils.generateTransactionId('MTN');
-    
+
     // Simulate 88% success rate (slightly different from Airtel)
     const isSuccess = Math.random() > 0.12;
 
@@ -163,7 +163,7 @@ export class MTNMoMoService extends MobileMoneyService {
     await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1200));
 
     const refundId = PaymentUtils.generateTransactionId('MTNR');
-    
+
     // Simulate 93% success rate for refunds
     const isSuccess = Math.random() > 0.07;
 
@@ -180,7 +180,7 @@ export class MTNMoMoService extends MobileMoneyService {
     await new Promise(resolve => setTimeout(resolve, 900 + Math.random() * 1500));
 
     const holdId = PaymentUtils.generateTransactionId('MTNH');
-    
+
     // Simulate 82% success rate for holds
     const isSuccess = Math.random() > 0.18;
 
@@ -228,7 +228,7 @@ export class MTNMoMoService extends MobileMoneyService {
     await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
 
     const transactionId = PaymentUtils.generateTransactionId('MTN');
-    
+
     // Simulate success rate based on phone number patterns
     const normalizedPhone = PaymentUtils.normalizePhoneNumber(request.phoneNumber);
     const isSuccess = !normalizedPhone.includes('1111'); // Fail if phone contains 1111
@@ -238,7 +238,7 @@ export class MTNMoMoService extends MobileMoneyService {
       transactionId,
       providerReference: `MTN-${Date.now()}`,
       status: isSuccess ? PaymentStatus.COMPLETED : PaymentStatus.FAILED,
-      message: isSuccess 
+      message: isSuccess
         ? 'MTN Mobile Money payment initiated. Customer will receive USSD notification.'
         : 'Payment request failed. Verify phone number and account status.',
     };

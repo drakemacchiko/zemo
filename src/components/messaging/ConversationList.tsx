@@ -37,7 +37,10 @@ interface ConversationListProps {
   selectedConversationId?: string;
 }
 
-export function ConversationList({ onSelectConversation, selectedConversationId }: ConversationListProps) {
+export function ConversationList({
+  onSelectConversation,
+  selectedConversationId,
+}: ConversationListProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,8 +54,8 @@ export function ConversationList({ onSelectConversation, selectedConversationId 
       setLoading(true);
       const response = await fetch('/api/conversations', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        },
       });
 
       if (!response.ok) {
@@ -76,7 +79,7 @@ export function ConversationList({ onSelectConversation, selectedConversationId 
         </div>
         <div className="p-4">
           <div className="animate-pulse space-y-4">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3].map(i => (
               <div key={i} className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-gray-200 rounded-full" />
                 <div className="flex-1 space-y-2">
@@ -115,25 +118,37 @@ export function ConversationList({ onSelectConversation, selectedConversationId 
       <div className="p-4 border-b">
         <h2 className="text-lg font-bold text-gray-900">Conversations</h2>
       </div>
-      
+
       <div className="divide-y divide-gray-100">
         {conversations.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <div className="mb-4">
-              <svg className="w-12 h-12 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.959 8.959 0 01-4.906-1.455L3 21l2.455-5.094A8.959 8.959 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
+              <svg
+                className="w-12 h-12 mx-auto text-gray-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.959 8.959 0 01-4.906-1.455L3 21l2.455-5.094A8.959 8.959 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z"
+                />
               </svg>
             </div>
             <p>No conversations yet</p>
             <p className="text-sm">Start a conversation with a host or renter</p>
           </div>
         ) : (
-          conversations.map((conversation) => (
+          conversations.map(conversation => (
             <div
               key={conversation.id}
               onClick={() => onSelectConversation(conversation.id)}
               className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                selectedConversationId === conversation.id ? 'bg-yellow-50 border-r-2 border-yellow-400' : ''
+                selectedConversationId === conversation.id
+                  ? 'bg-yellow-50 border-r-2 border-yellow-400'
+                  : ''
               }`}
             >
               <div className="flex items-center space-x-3">
@@ -149,7 +164,9 @@ export function ConversationList({ onSelectConversation, selectedConversationId 
                     />
                   ) : (
                     <span>
-                      {conversation.participant.profile?.firstName?.[0] || conversation.participant.email?.[0]?.toUpperCase() || 'U'}
+                      {conversation.participant.profile?.firstName?.[0] ||
+                        conversation.participant.email?.[0]?.toUpperCase() ||
+                        'U'}
                     </span>
                   )}
                 </div>
@@ -172,7 +189,8 @@ export function ConversationList({ onSelectConversation, selectedConversationId 
                   {/* Vehicle info */}
                   {conversation.vehicle && (
                     <p className="text-xs text-gray-500 truncate">
-                      {conversation.vehicle.year} {conversation.vehicle.make} {conversation.vehicle.model}
+                      {conversation.vehicle.year} {conversation.vehicle.make}{' '}
+                      {conversation.vehicle.model}
                       {conversation.booking && ` • ${conversation.booking.confirmationNumber}`}
                     </p>
                   )}

@@ -179,10 +179,10 @@ export function OfflineQueueStatus() {
       const tx = db.transaction(['queuedBookings', 'queuedPayments'], 'readonly');
       const bookingsStore = tx.objectStore('queuedBookings');
       const paymentsStore = tx.objectStore('queuedPayments');
-      
+
       const bookingsRequest = bookingsStore.count();
       const paymentsRequest = paymentsStore.count();
-      
+
       bookingsRequest.onsuccess = () => {
         paymentsRequest.onsuccess = () => {
           setQueueCount(bookingsRequest.result + paymentsRequest.result);

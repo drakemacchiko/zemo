@@ -15,7 +15,7 @@ export function useOnlineStatus() {
   useEffect(() => {
     setIsOnline(onlineStatus.getStatus());
 
-    const unsubscribe = onlineStatus.subscribe((status) => {
+    const unsubscribe = onlineStatus.subscribe(status => {
       setIsOnline(status);
     });
 
@@ -83,7 +83,7 @@ export function usePushNotifications() {
       setPermission(Notification.permission);
 
       // Check if already subscribed
-      pushNotifications.getSubscription().then((subscription) => {
+      pushNotifications.getSubscription().then(subscription => {
         setIsSubscribed(!!subscription);
       });
     }
@@ -99,11 +99,7 @@ export function usePushNotifications() {
     const subscription = await pushNotifications.subscribe();
 
     if (subscription) {
-      const success = await pushNotifications.sendSubscriptionToServer(
-        subscription,
-        userId,
-        token
-      );
+      const success = await pushNotifications.sendSubscriptionToServer(subscription, userId, token);
 
       if (success) {
         setIsSubscribed(true);
@@ -225,7 +221,7 @@ export function useServiceWorker() {
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then((reg) => {
+      navigator.serviceWorker.ready.then(reg => {
         setRegistration(reg);
 
         reg.addEventListener('updatefound', () => {

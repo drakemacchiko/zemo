@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   Calendar,
   Clock,
@@ -12,88 +12,88 @@ import {
   MessageSquare,
   AlertTriangle,
   CheckCircle,
-  Car
-} from 'lucide-react'
+  Car,
+} from 'lucide-react';
 
 interface ActiveBooking {
-  id: string
+  id: string;
   vehicle: {
-    make: string
-    model: string
-    year: number
-    photo: string
-    licensePlate: string
-  }
+    make: string;
+    model: string;
+    year: number;
+    photo: string;
+    licensePlate: string;
+  };
   renter: {
-    name: string
-    profilePicture?: string
-    phone: string
-  }
-  startDate: string
-  endDate: string
-  currentLocation?: string
-  daysRemaining: number
-  hasIssues: boolean
+    name: string;
+    profilePicture?: string;
+    phone: string;
+  };
+  startDate: string;
+  endDate: string;
+  currentLocation?: string;
+  daysRemaining: number;
+  hasIssues: boolean;
 }
 
 export default function ActiveBookingsPage() {
-  const router = useRouter()
-  const [bookings, setBookings] = useState<ActiveBooking[]>([])
-  const [loading, setLoading] = useState(true)
+  const router = useRouter();
+  const [bookings, setBookings] = useState<ActiveBooking[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchActiveBookings()
-  }, [])
+    fetchActiveBookings();
+  }, []);
 
   const fetchActiveBookings = async () => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       const res = await fetch('/api/host/bookings/active', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (res.ok) {
-        const data = await res.json()
-        setBookings(data.bookings)
+        const data = await res.json();
+        setBookings(data.bookings);
       }
     } catch (error) {
-      console.error('Error fetching active bookings:', error)
+      console.error('Error fetching active bookings:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleEndTrip = async (bookingId: string) => {
-    if (!confirm('End this trip? The renter should have returned the vehicle.')) return
+    if (!confirm('End this trip? The renter should have returned the vehicle.')) return;
 
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       const res = await fetch(`/api/host/bookings/${bookingId}/end-trip`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        }
-      })
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (res.ok) {
-        router.push(`/bookings/${bookingId}/post-trip-inspection`)
+        router.push(`/bookings/${bookingId}/post-trip-inspection`);
       } else {
-        alert('Failed to end trip')
+        alert('Failed to end trip');
       }
     } catch (error) {
-      console.error('Error ending trip:', error)
-      alert('Failed to end trip')
+      console.error('Error ending trip:', error);
+      alert('Failed to end trip');
     }
-  }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
-    })
-  }
+      year: 'numeric',
+    });
+  };
 
   if (loading) {
     return (
@@ -103,7 +103,7 @@ export default function ActiveBookingsPage() {
           <p className="mt-4 text-gray-600">Loading active bookings...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -111,21 +111,21 @@ export default function ActiveBookingsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Active Trips</h1>
-          <p className="mt-2 text-gray-600">
-            Monitor your vehicles currently out on trips
-          </p>
+          <p className="mt-2 text-gray-600">Monitor your vehicles currently out on trips</p>
         </div>
 
         {bookings.length > 0 ? (
           <div className="space-y-6">
-            {bookings.map((booking) => (
+            {bookings.map(booking => (
               <div key={booking.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
                 {/* Status Banner */}
-                <div className={`px-6 py-3 ${
-                  booking.hasIssues 
-                    ? 'bg-red-50 border-b border-red-200' 
-                    : 'bg-green-50 border-b border-green-200'
-                }`}>
+                <div
+                  className={`px-6 py-3 ${
+                    booking.hasIssues
+                      ? 'bg-red-50 border-b border-red-200'
+                      : 'bg-green-50 border-b border-green-200'
+                  }`}
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {booking.hasIssues ? (
@@ -137,7 +137,8 @@ export default function ActiveBookingsPage() {
                         <>
                           <CheckCircle className="h-5 w-5 text-green-600" />
                           <span className="font-medium text-green-800">
-                            {booking.daysRemaining} day{booking.daysRemaining !== 1 ? 's' : ''} remaining
+                            {booking.daysRemaining} day{booking.daysRemaining !== 1 ? 's' : ''}{' '}
+                            remaining
                           </span>
                         </>
                       )}
@@ -189,7 +190,9 @@ export default function ActiveBookingsPage() {
                           <Clock className="h-5 w-5 text-gray-400" />
                           <div>
                             <div className="text-sm text-gray-600">Started</div>
-                            <div className="font-medium text-gray-900">{formatDate(booking.startDate)}</div>
+                            <div className="font-medium text-gray-900">
+                              {formatDate(booking.startDate)}
+                            </div>
                           </div>
                         </div>
 
@@ -197,7 +200,9 @@ export default function ActiveBookingsPage() {
                           <Clock className="h-5 w-5 text-gray-400" />
                           <div>
                             <div className="text-sm text-gray-600">Expected return</div>
-                            <div className="font-medium text-gray-900">{formatDate(booking.endDate)}</div>
+                            <div className="font-medium text-gray-900">
+                              {formatDate(booking.endDate)}
+                            </div>
                           </div>
                         </div>
 
@@ -206,7 +211,9 @@ export default function ActiveBookingsPage() {
                             <MapPin className="h-5 w-5 text-gray-400" />
                             <div>
                               <div className="text-sm text-gray-600">Last known location</div>
-                              <div className="font-medium text-gray-900">{booking.currentLocation}</div>
+                              <div className="font-medium text-gray-900">
+                                {booking.currentLocation}
+                              </div>
                             </div>
                           </div>
                         )}
@@ -287,12 +294,10 @@ export default function ActiveBookingsPage() {
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <Car className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">No active trips</h3>
-            <p className="text-gray-600">
-              Your vehicles currently out on trips will appear here.
-            </p>
+            <p className="text-gray-600">Your vehicles currently out on trips will appear here.</p>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }

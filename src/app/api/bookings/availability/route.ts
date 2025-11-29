@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { 
-  availabilityCheckSchema,
-  type AvailabilityCheckInput 
-} from '@/lib/validations';
+import { availabilityCheckSchema, type AvailabilityCheckInput } from '@/lib/validations';
 
 /**
  * POST /api/bookings/availability - Check vehicle availability for given dates
@@ -11,15 +8,15 @@ import {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
+
     // Validate request body
     const validationResult = availabilityCheckSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Validation failed',
-          details: validationResult.error.flatten().fieldErrors
+          details: validationResult.error.flatten().fieldErrors,
         },
         { status: 400 }
       );
@@ -29,11 +26,11 @@ export async function POST(request: NextRequest) {
 
     // Check if vehicle exists and is available
     const vehicle = await prisma.vehicle.findUnique({
-      where: { 
+      where: {
         id: checkData.vehicleId,
         isActive: true,
         availabilityStatus: 'AVAILABLE',
-        verificationStatus: 'VERIFIED'
+        verificationStatus: 'VERIFIED',
       },
       select: {
         id: true,
@@ -43,8 +40,8 @@ export async function POST(request: NextRequest) {
         dailyRate: true,
         isActive: true,
         availabilityStatus: true,
-        verificationStatus: true
-      }
+        verificationStatus: true,
+      },
     });
 
     if (!vehicle) {
@@ -53,8 +50,8 @@ export async function POST(request: NextRequest) {
         data: {
           available: false,
           reason: 'Vehicle not found or not available',
-          conflicts: []
-        }
+          conflicts: [],
+        },
       });
     }
 
@@ -63,36 +60,36 @@ export async function POST(request: NextRequest) {
       where: {
         vehicleId: checkData.vehicleId,
         status: {
-          in: ['PENDING', 'CONFIRMED', 'ACTIVE']
+          in: ['PENDING', 'CONFIRMED', 'ACTIVE'],
         },
         OR: [
           {
             AND: [
               { startDate: { lte: new Date(checkData.startDate) } },
-              { endDate: { gt: new Date(checkData.startDate) } }
-            ]
+              { endDate: { gt: new Date(checkData.startDate) } },
+            ],
           },
           {
             AND: [
               { startDate: { lt: new Date(checkData.endDate) } },
-              { endDate: { gte: new Date(checkData.endDate) } }
-            ]
+              { endDate: { gte: new Date(checkData.endDate) } },
+            ],
           },
           {
             AND: [
               { startDate: { gte: new Date(checkData.startDate) } },
-              { endDate: { lte: new Date(checkData.endDate) } }
-            ]
-          }
-        ]
+              { endDate: { lte: new Date(checkData.endDate) } },
+            ],
+          },
+        ],
       },
       select: {
         id: true,
         startDate: true,
         endDate: true,
         status: true,
-        confirmationNumber: true
-      }
+        confirmationNumber: true,
+      },
     });
 
     const isAvailable = overlappingBookings.length === 0;
@@ -108,14 +105,13 @@ export async function POST(request: NextRequest) {
           make: vehicle.make,
           model: vehicle.model,
           year: vehicle.year,
-          dailyRate: vehicle.dailyRate
-        }
-      }
+          dailyRate: vehicle.dailyRate,
+        },
+      },
     });
-
   } catch (error) {
     console.error('Availability check error:', error);
-    
+
     return NextResponse.json(
       { success: false, error: 'Failed to check availability' },
       { status: 500 }

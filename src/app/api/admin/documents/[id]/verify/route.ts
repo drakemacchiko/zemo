@@ -3,10 +3,7 @@ import { extractTokenFromRequest, verifyAccessToken } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { UserDocumentType } from '@prisma/client';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const token = extractTokenFromRequest(request);
     if (!token) {
@@ -26,10 +23,7 @@ export async function POST(
     }
 
     if (action === 'REJECT' && !reason) {
-      return NextResponse.json(
-        { error: 'Rejection reason is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Rejection reason is required' }, { status: 400 });
     }
 
     // Update document status
@@ -89,9 +83,6 @@ export async function POST(
     });
   } catch (error) {
     console.error('Error verifying document:', error);
-    return NextResponse.json(
-      { error: 'Failed to verify document' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to verify document' }, { status: 500 });
   }
 }

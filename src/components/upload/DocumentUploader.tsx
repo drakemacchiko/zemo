@@ -1,15 +1,15 @@
-'use client'
+'use client';
 
-import { useState, useRef } from 'react'
-import { Upload, X, FileText, CheckCircle } from 'lucide-react'
+import { useState, useRef } from 'react';
+import { Upload, X, FileText, CheckCircle } from 'lucide-react';
 
 interface DocumentUploaderProps {
-  documentType: 'DRIVING_LICENSE' | 'NATIONAL_ID' | 'VEHICLE_DOCUMENT' | 'PROFILE_PICTURE'
-  onUploadComplete?: (document: any) => void
-  label?: string
-  description?: string
-  accept?: string
-  maxSizeMB?: number
+  documentType: 'DRIVING_LICENSE' | 'NATIONAL_ID' | 'VEHICLE_DOCUMENT' | 'PROFILE_PICTURE';
+  onUploadComplete?: (document: any) => void;
+  label?: string;
+  description?: string;
+  accept?: string;
+  maxSizeMB?: number;
 }
 
 export default function DocumentUploader({
@@ -20,64 +20,64 @@ export default function DocumentUploader({
   accept = '.pdf,.jpg,.jpeg,.png',
   maxSizeMB = 15,
 }: DocumentUploaderProps) {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [uploading, setUploading] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const [error, setError] = useState('')
-  const [uploaded, setUploaded] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState('');
+  const [uploaded, setUploaded] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = (file: File): string | null => {
-    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png']
-    
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+
     if (!allowedTypes.includes(file.type)) {
-      return 'Invalid file type. Please use PDF, JPEG, or PNG.'
+      return 'Invalid file type. Please use PDF, JPEG, or PNG.';
     }
-    
+
     if (file.size > maxSizeMB * 1024 * 1024) {
-      return `File too large (max ${maxSizeMB}MB).`
+      return `File too large (max ${maxSizeMB}MB).`;
     }
-    
-    return null
-  }
+
+    return null;
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    const validationError = validateFile(file)
+    const validationError = validateFile(file);
     if (validationError) {
-      setError(validationError)
-      return
+      setError(validationError);
+      return;
     }
 
-    setSelectedFile(file)
-    setError('')
-    setUploaded(false)
-  }
+    setSelectedFile(file);
+    setError('');
+    setUploaded(false);
+  };
 
   const uploadDocument = async () => {
-    if (!selectedFile) return
+    if (!selectedFile) return;
 
-    setUploading(true)
-    setUploadProgress(0)
-    setError('')
+    setUploading(true);
+    setUploadProgress(0);
+    setError('');
 
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       if (!token) {
-        setError('Please sign in to upload documents')
-        return
+        setError('Please sign in to upload documents');
+        return;
       }
 
-      const formData = new FormData()
-      formData.append('document', selectedFile)
-      formData.append('documentType', documentType)
+      const formData = new FormData();
+      formData.append('document', selectedFile);
+      formData.append('documentType', documentType);
 
       // Simulate progress
       const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => Math.min(prev + 10, 90))
-      }, 200)
+        setUploadProgress(prev => Math.min(prev + 10, 90));
+      }, 200);
 
       const response = await fetch('/api/upload/documents', {
         method: 'POST',
@@ -85,79 +85,79 @@ export default function DocumentUploader({
           Authorization: `Bearer ${token}`,
         },
         body: formData,
-      })
+      });
 
-      clearInterval(progressInterval)
-      setUploadProgress(100)
+      clearInterval(progressInterval);
+      setUploadProgress(100);
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
-        setUploaded(true)
-        
+        setUploaded(true);
+
         if (onUploadComplete) {
-          onUploadComplete(data.document)
+          onUploadComplete(data.document);
         }
 
         // Reset after success
         setTimeout(() => {
-          setSelectedFile(null)
+          setSelectedFile(null);
           if (fileInputRef.current) {
-            fileInputRef.current.value = ''
+            fileInputRef.current.value = '';
           }
-        }, 2000)
+        }, 2000);
       } else {
-        setError(data.error || 'Failed to upload document')
+        setError(data.error || 'Failed to upload document');
       }
     } catch (error) {
-      console.error('Upload error:', error)
-      setError('Failed to upload document. Please try again.')
+      console.error('Upload error:', error);
+      setError('Failed to upload document. Please try again.');
     } finally {
-      setUploading(false)
-      setTimeout(() => setUploadProgress(0), 1000)
+      setUploading(false);
+      setTimeout(() => setUploadProgress(0), 1000);
     }
-  }
+  };
 
   const clearSelection = () => {
-    setSelectedFile(null)
-    setError('')
-    setUploaded(false)
+    setSelectedFile(null);
+    setError('');
+    setUploaded(false);
     if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+      fileInputRef.current.value = '';
     }
-  }
+  };
 
   const getDocumentLabel = () => {
-    if (label) return label
+    if (label) return label;
 
     switch (documentType) {
       case 'DRIVING_LICENSE':
-        return 'Driving License'
+        return 'Driving License';
       case 'NATIONAL_ID':
-        return 'National ID'
+        return 'National ID';
       case 'VEHICLE_DOCUMENT':
-        return 'Vehicle Document'
+        return 'Vehicle Document';
       case 'PROFILE_PICTURE':
-        return 'Profile Picture'
+        return 'Profile Picture';
       default:
-        return 'Document'
+        return 'Document';
     }
-  }
+  };
 
   const getDocumentDescription = () => {
-    if (description) return description
+    if (description) return description;
 
     switch (documentType) {
       case 'DRIVING_LICENSE':
-        return 'Upload a clear photo or scan of your driving license (front and back)'
+        return 'Upload a clear photo or scan of your driving license (front and back)';
       case 'NATIONAL_ID':
-        return 'Upload a clear photo or scan of your national ID or passport'
+        return 'Upload a clear photo or scan of your national ID or passport';
       case 'VEHICLE_DOCUMENT':
-        return 'Upload vehicle registration, insurance, or inspection certificate'
+        return 'Upload vehicle registration, insurance, or inspection certificate';
       default:
-        return 'Upload a PDF, JPEG, or PNG file'
+        return 'Upload a PDF, JPEG, or PNG file';
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -187,19 +187,15 @@ export default function DocumentUploader({
             onChange={handleFileSelect}
             className="hidden"
           />
-          
+
           <div className="flex flex-col items-center">
             <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
               <FileText className="w-6 h-6 text-gray-600" />
             </div>
-            
-            <p className="text-sm font-medium text-gray-900 mb-1">
-              Click to upload
-            </p>
-            
-            <p className="text-xs text-gray-500">
-              PDF, JPEG, PNG (max {maxSizeMB}MB)
-            </p>
+
+            <p className="text-sm font-medium text-gray-900 mb-1">Click to upload</p>
+
+            <p className="text-xs text-gray-500">PDF, JPEG, PNG (max {maxSizeMB}MB)</p>
           </div>
         </div>
       ) : (
@@ -216,15 +212,13 @@ export default function DocumentUploader({
                 </div>
               )}
             </div>
-            
+
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {selectedFile.name}
-              </p>
+              <p className="text-sm font-medium text-gray-900 truncate">{selectedFile.name}</p>
               <p className="text-xs text-gray-500">
                 {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
               </p>
-              
+
               {uploading && (
                 <div className="mt-2 space-y-1">
                   <div className="flex items-center justify-between text-xs">
@@ -239,14 +233,12 @@ export default function DocumentUploader({
                   </div>
                 </div>
               )}
-              
+
               {uploaded && (
-                <p className="text-xs text-green-600 mt-1 font-medium">
-                  ✓ Uploaded successfully
-                </p>
+                <p className="text-xs text-green-600 mt-1 font-medium">✓ Uploaded successfully</p>
               )}
             </div>
-            
+
             {!uploading && !uploaded && (
               <button
                 onClick={clearSelection}
@@ -256,7 +248,7 @@ export default function DocumentUploader({
               </button>
             )}
           </div>
-          
+
           {!uploading && !uploaded && (
             <button
               onClick={uploadDocument}
@@ -273,5 +265,5 @@ export default function DocumentUploader({
         Your document will be reviewed by our team for verification.
       </p>
     </div>
-  )
+  );
 }

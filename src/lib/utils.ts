@@ -197,10 +197,10 @@ export function capitalizeWords(str: string): string {
 export function calculateDays(startDate: Date | string, endDate: Date | string): number {
   const start = typeof startDate === 'string' ? new Date(startDate) : startDate;
   const end = typeof endDate === 'string' ? new Date(endDate) : endDate;
-  
+
   const diffTime = Math.abs(end.getTime() - start.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   return diffDays;
 }
 
@@ -224,17 +224,17 @@ export function isWeekend(date: Date | string): boolean {
 export function countWeekendDays(startDate: Date | string, endDate: Date | string): number {
   const start = typeof startDate === 'string' ? new Date(startDate) : startDate;
   const end = typeof endDate === 'string' ? new Date(endDate) : endDate;
-  
+
   let weekendDays = 0;
   const currentDate = new Date(start);
-  
+
   while (currentDate < end) {
     if (isWeekend(currentDate)) {
       weekendDays++;
     }
     currentDate.setDate(currentDate.getDate() + 1);
   }
-  
+
   return weekendDays;
 }
 
@@ -256,11 +256,7 @@ export function calculateBookingPrice(
     taxRate?: number; // Default 0.16 (16% VAT)
   } = {}
 ) {
-  const {
-    weekendMultiplier = 1.2,
-    serviceFeeRate = 0.1,
-    taxRate = 0.16,
-  } = options;
+  const { weekendMultiplier = 1.2, serviceFeeRate = 0.1, taxRate = 0.16 } = options;
 
   const totalDays = calculateDays(startDate, endDate);
   const weekendDays = countWeekendDays(startDate, endDate);
@@ -303,7 +299,7 @@ export function generateConfirmationNumber(): string {
   const now = new Date();
   const datePart = now.toISOString().slice(0, 10).replace(/-/g, '');
   const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
-  
+
   return `ZEM-${datePart}-${randomPart}`;
 }
 
@@ -325,6 +321,6 @@ export function dateRangesOverlap(
   const e1 = typeof end1 === 'string' ? new Date(end1) : end1;
   const s2 = typeof start2 === 'string' ? new Date(start2) : start2;
   const e2 = typeof end2 === 'string' ? new Date(end2) : end2;
-  
+
   return s1 < e2 && s2 < e1;
 }

@@ -110,10 +110,7 @@ export async function captureHeldPayment(paymentIntentId: string, amount?: numbe
     }
 
     const client = getStripeClient();
-    const paymentIntent = await client.paymentIntents.capture(
-      paymentIntentId,
-      captureData
-    );
+    const paymentIntent = await client.paymentIntents.capture(paymentIntentId, captureData);
 
     return {
       success: true,
@@ -157,7 +154,7 @@ export async function processRefund(paymentIntentId: string, amount?: number) {
     const refundData: any = {
       payment_intent: paymentIntentId,
     };
-    
+
     if (amount) {
       refundData.amount = Math.round(amount * 100);
     }

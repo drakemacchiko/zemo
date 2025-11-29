@@ -18,10 +18,7 @@ export async function GET(request: NextRequest) {
 
     const payload = verifyAccessToken(token);
     if (!payload) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
     }
 
     const userId = payload.userId;
@@ -113,7 +110,7 @@ export async function GET(request: NextRequest) {
 
     // Calculate unread count for each conversation
     const conversationsWithUnread = await Promise.all(
-      conversations.map(async (conversation) => {
+      conversations.map(async conversation => {
         const unreadCount = await prisma.message.count({
           where: {
             conversationId: conversation.id,
@@ -124,10 +121,7 @@ export async function GET(request: NextRequest) {
         });
 
         // Determine the other party
-        const otherParty =
-          conversation.hostId === userId
-            ? conversation.renter
-            : conversation.host;
+        const otherParty = conversation.hostId === userId ? conversation.renter : conversation.host;
 
         return {
           id: conversation.id,
@@ -158,9 +152,7 @@ export async function GET(request: NextRequest) {
     let filteredConversations = conversationsWithUnread;
 
     if (filter === 'unread') {
-      filteredConversations = conversationsWithUnread.filter(
-        (c) => c.unreadCount > 0
-      );
+      filteredConversations = conversationsWithUnread.filter(c => c.unreadCount > 0);
     }
 
     // Get total count for pagination
@@ -207,10 +199,7 @@ export async function POST(request: NextRequest) {
 
     const payload = verifyAccessToken(token);
     if (!payload) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
     }
 
     const userId = payload.userId;

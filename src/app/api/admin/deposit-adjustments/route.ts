@@ -8,31 +8,31 @@ import { z } from 'zod';
  */
 async function verifyAuthToken(request: NextRequest) {
   const token = extractTokenFromRequest(request);
-  
+
   if (!token) {
     return null;
   }
-  
+
   const payload = verifyAccessToken(token);
   if (!payload) {
     return null;
   }
-  
+
   // Verify user exists
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { 
-      id: true, 
+    select: {
+      id: true,
       email: true,
       profile: {
         select: {
           firstName: true,
           lastName: true,
-        }
-      }
-    }
+        },
+      },
+    },
   });
-  
+
   return user;
 }
 
@@ -68,8 +68,11 @@ export async function GET(request: NextRequest) {
 
     // Build query filters
     const where: any = {};
-    
-    if (status && ['PENDING', 'CALCULATED', 'APPROVED', 'PROCESSED', 'DISPUTED', 'RESOLVED'].includes(status)) {
+
+    if (
+      status &&
+      ['PENDING', 'CALCULATED', 'APPROVED', 'PROCESSED', 'DISPUTED', 'RESOLVED'].includes(status)
+    ) {
       where.status = status;
     }
 
@@ -124,12 +127,14 @@ export async function GET(request: NextRequest) {
         hasPrev: page > 1,
       },
     });
-
   } catch (error) {
     console.error('Admin deposit adjustments list error:', error);
-    return NextResponse.json({
-      error: 'Failed to retrieve deposit adjustments',
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to retrieve deposit adjustments',
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -171,9 +176,12 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (existingAdjustment.status !== 'PENDING') {
-      return NextResponse.json({ 
-        error: 'Can only modify pending adjustments' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Can only modify pending adjustments',
+        },
+        { status: 400 }
+      );
     }
 
     // Update the adjustment
@@ -204,7 +212,7 @@ export async function PATCH(request: NextRequest) {
     // If approved or processed, handle the actual deposit adjustment
     if (validatedData.status === 'APPROVED' || validatedData.status === 'PROCESSED') {
       const finalAmount = validatedData.adjustedAmount || existingAdjustment.adjustmentAmount;
-      
+
       // Update the booking's deposit status
       await prisma.booking.update({
         where: { id: existingAdjustment.bookingId },
@@ -232,19 +240,24 @@ export async function PATCH(request: NextRequest) {
       message: 'Deposit adjustment processed successfully',
       adjustment: updatedAdjustment,
     });
-
   } catch (error) {
     console.error('Admin deposit adjustment update error:', error);
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json({
-        error: 'Validation failed',
-        details: error.issues,
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Validation failed',
+          details: error.issues,
+        },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({
-      error: 'Failed to update deposit adjustment',
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to update deposit adjustment',
+      },
+      { status: 500 }
+    );
   }
 }

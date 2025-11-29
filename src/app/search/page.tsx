@@ -1,20 +1,20 @@
-'use client'
+'use client';
 
-import { useState, useEffect, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
-import { SearchBar } from '@/components/search/SearchBar'
-import { SearchFilters, FilterState } from '@/components/search/SearchFilters'
-import { VehicleCard, Vehicle } from '@/components/search/VehicleCard'
-import { Grid, List, Map } from 'lucide-react'
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { SearchBar } from '@/components/search/SearchBar';
+import { SearchFilters, FilterState } from '@/components/search/SearchFilters';
+import { VehicleCard, Vehicle } from '@/components/search/VehicleCard';
+import { Grid, List, Map } from 'lucide-react';
 
 function SearchResults() {
-  const searchParams = useSearchParams()
-  const [vehicles, setVehicles] = useState<Vehicle[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid')
-  const [sortBy, setSortBy] = useState('recommended')
-  
+  const searchParams = useSearchParams();
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
+  const [sortBy, setSortBy] = useState('recommended');
+
   // Search filters
   const [filters, setFilters] = useState<FilterState>({
     priceRange: [0, 5000],
@@ -27,62 +27,64 @@ function SearchResults() {
     hasDelivery: false,
     seats: [],
     fuelTypes: [],
-    transmission: []
-  })
-  
-  const location = searchParams.get('location') || ''
-  const startDate = searchParams.get('startDate') || ''
-  const endDate = searchParams.get('endDate') || ''
-  const startTime = searchParams.get('startTime') || '10:00'
-  const endTime = searchParams.get('endTime') || '10:00'
+    transmission: [],
+  });
+
+  const location = searchParams.get('location') || '';
+  const startDate = searchParams.get('startDate') || '';
+  const endDate = searchParams.get('endDate') || '';
+  const startTime = searchParams.get('startTime') || '10:00';
+  const endTime = searchParams.get('endTime') || '10:00';
 
   useEffect(() => {
-    searchVehicles()
-  }, [filters, sortBy]) // eslint-disable-line react-hooks/exhaustive-deps
+    searchVehicles();
+  }, [filters, sortBy]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const searchVehicles = async () => {
-    setLoading(true)
-    setError('')
+    setLoading(true);
+    setError('');
 
     try {
-      const params = new URLSearchParams()
-      if (location) params.append('location', location)
-      if (startDate) params.append('startDate', startDate)
-      if (endDate) params.append('endDate', endDate)
-      if (startTime) params.append('startTime', startTime)
-      if (endTime) params.append('endTime', endTime)
-      
-      // Apply filters
-      if (filters.priceRange[0] > 0) params.append('minPrice', filters.priceRange[0].toString())
-      if (filters.priceRange[1] < 5000) params.append('maxPrice', filters.priceRange[1].toString())
-      if (filters.vehicleTypes.length > 0) params.append('vehicleTypes', filters.vehicleTypes.join(','))
-      if (filters.makes.length > 0) params.append('makes', filters.makes.join(','))
-      if (filters.yearRange[0] > 2000) params.append('minYear', filters.yearRange[0].toString())
-      if (filters.yearRange[1] < 2024) params.append('maxYear', filters.yearRange[1].toString())
-      if (filters.features.length > 0) params.append('features', filters.features.join(','))
-      if (filters.instantBook) params.append('instantBook', 'true')
-      if (filters.minRating > 0) params.append('minRating', filters.minRating.toString())
-      if (filters.hasDelivery) params.append('hasDelivery', 'true')
-      if (filters.seats.length > 0) params.append('seats', filters.seats.join(','))
-      if (filters.fuelTypes.length > 0) params.append('fuelTypes', filters.fuelTypes.join(','))
-      if (filters.transmission.length > 0) params.append('transmission', filters.transmission.join(','))
-      if (sortBy) params.append('sortBy', sortBy)
+      const params = new URLSearchParams();
+      if (location) params.append('location', location);
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      if (startTime) params.append('startTime', startTime);
+      if (endTime) params.append('endTime', endTime);
 
-      const response = await fetch(`/api/vehicles/search?${params.toString()}`)
-      
+      // Apply filters
+      if (filters.priceRange[0] > 0) params.append('minPrice', filters.priceRange[0].toString());
+      if (filters.priceRange[1] < 5000) params.append('maxPrice', filters.priceRange[1].toString());
+      if (filters.vehicleTypes.length > 0)
+        params.append('vehicleTypes', filters.vehicleTypes.join(','));
+      if (filters.makes.length > 0) params.append('makes', filters.makes.join(','));
+      if (filters.yearRange[0] > 2000) params.append('minYear', filters.yearRange[0].toString());
+      if (filters.yearRange[1] < 2024) params.append('maxYear', filters.yearRange[1].toString());
+      if (filters.features.length > 0) params.append('features', filters.features.join(','));
+      if (filters.instantBook) params.append('instantBook', 'true');
+      if (filters.minRating > 0) params.append('minRating', filters.minRating.toString());
+      if (filters.hasDelivery) params.append('hasDelivery', 'true');
+      if (filters.seats.length > 0) params.append('seats', filters.seats.join(','));
+      if (filters.fuelTypes.length > 0) params.append('fuelTypes', filters.fuelTypes.join(','));
+      if (filters.transmission.length > 0)
+        params.append('transmission', filters.transmission.join(','));
+      if (sortBy) params.append('sortBy', sortBy);
+
+      const response = await fetch(`/api/vehicles/search?${params.toString()}`);
+
       if (!response.ok) {
-        throw new Error('Search failed')
+        throw new Error('Search failed');
       }
 
-      const data = await response.json()
-      setVehicles(data.vehicles || [])
+      const data = await response.json();
+      setVehicles(data.vehicles || []);
     } catch (err) {
-      setError('Failed to search vehicles. Please try again.')
-      console.error('Search error:', err)
+      setError('Failed to search vehicles. Please try again.');
+      console.error('Search error:', err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -121,7 +123,16 @@ function SearchResults() {
                   </h2>
                   {location && startDate && endDate && (
                     <p className="text-sm text-gray-600 mt-1">
-                      {location} • {new Date(startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      {location} •{' '}
+                      {new Date(startDate).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}{' '}
+                      -{' '}
+                      {new Date(endDate).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}
                     </p>
                   )}
                 </div>
@@ -155,7 +166,7 @@ function SearchResults() {
                   {/* Sort Dropdown */}
                   <select
                     value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
+                    onChange={e => setSortBy(e.target.value)}
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-zemo-yellow focus:border-transparent"
                   >
                     <option value="recommended">Recommended</option>
@@ -188,22 +199,32 @@ function SearchResults() {
               </div>
             ) : vehicles.length === 0 ? (
               <div className="text-center py-16">
-                <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="w-16 h-16 text-gray-400 mx-auto mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <h3 className="text-xl font-bold text-gray-800 mb-2">No vehicles found</h3>
                 <p className="text-gray-600">Try adjusting your search filters</p>
               </div>
             ) : (
-              <div className={viewMode === 'grid' 
-                ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'
-                : 'space-y-4'
-              }>
-                {vehicles.map((vehicle) => (
-                  <VehicleCard
-                    key={vehicle.id}
-                    vehicle={vehicle}
-                  />
+              <div
+                className={
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6'
+                    : 'space-y-4'
+                }
+              >
+                {vehicles.map(vehicle => (
+                  <VehicleCard key={vehicle.id} vehicle={vehicle} />
                 ))}
               </div>
             )}
@@ -211,20 +232,22 @@ function SearchResults() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zemo-yellow mx-auto" />
-          <p className="mt-4 text-gray-600">Loading search results...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zemo-yellow mx-auto" />
+            <p className="mt-4 text-gray-600">Loading search results...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <SearchResults />
     </Suspense>
-  )
+  );
 }

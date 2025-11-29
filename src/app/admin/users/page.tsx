@@ -1,57 +1,57 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { UserCheck, UserX, Shield, Mail, Phone } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react';
+import { UserCheck, UserX, Shield, Mail, Phone } from 'lucide-react';
 
 interface User {
-  id: string
-  name: string
-  email: string
-  phoneNumber?: string
-  role: string
-  isVerified: boolean
-  createdAt: string
+  id: string;
+  name: string;
+  email: string;
+  phoneNumber?: string;
+  role: string;
+  isVerified: boolean;
+  createdAt: string;
   _count?: {
-    vehiclesOwned: number
-    bookings: number
-  }
+    vehiclesOwned: number;
+    bookings: number;
+  };
 }
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState('all')
-  const [roleFilter, setRoleFilter] = useState('all')
-  const [searchTerm, setSearchTerm] = useState('')
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchUsers = useCallback(async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const params = new URLSearchParams()
-      if (filter === 'verified') params.append('verified', 'true')
-      if (filter === 'unverified') params.append('verified', 'false')
-      if (roleFilter !== 'all') params.append('role', roleFilter)
-      if (searchTerm) params.append('search', searchTerm)
+      const params = new URLSearchParams();
+      if (filter === 'verified') params.append('verified', 'true');
+      if (filter === 'unverified') params.append('verified', 'false');
+      if (roleFilter !== 'all') params.append('role', roleFilter);
+      if (searchTerm) params.append('search', searchTerm);
 
-      const response = await fetch(`/api/admin/users?${params}`)
+      const response = await fetch(`/api/admin/users?${params}`);
       if (response.ok) {
-        const data = await response.json()
-        setUsers(data.users || [])
+        const data = await response.json();
+        setUsers(data.users || []);
       }
     } catch (error) {
-      console.error('Failed to fetch users:', error)
+      console.error('Failed to fetch users:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [filter, roleFilter, searchTerm])
+  }, [filter, roleFilter, searchTerm]);
 
   useEffect(() => {
-    fetchUsers()
-  }, [fetchUsers])
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleSearch = () => {
-    fetchUsers()
-  }
+    fetchUsers();
+  };
 
   const handleUpdateRole = async (userId: string, newRole: string) => {
     try {
@@ -59,44 +59,44 @@ export default function AdminUsersPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: newRole }),
-      })
+      });
 
       if (response.ok) {
-        fetchUsers()
+        fetchUsers();
       }
     } catch (error) {
-      console.error('Failed to update user role:', error)
+      console.error('Failed to update user role:', error);
     }
-  }
+  };
 
   const handleVerifyUser = async (userId: string) => {
     try {
       const response = await fetch(`/api/admin/users/${userId}/verify`, {
         method: 'POST',
-      })
+      });
 
       if (response.ok) {
-        fetchUsers()
+        fetchUsers();
       }
     } catch (error) {
-      console.error('Failed to verify user:', error)
+      console.error('Failed to verify user:', error);
     }
-  }
+  };
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'SUPER_ADMIN':
-        return 'bg-purple-100 text-purple-800'
+        return 'bg-purple-100 text-purple-800';
       case 'ADMIN':
-        return 'bg-red-100 text-red-800'
+        return 'bg-red-100 text-red-800';
       case 'HOST':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-blue-100 text-blue-800';
       case 'USER':
-        return 'bg-green-100 text-green-800'
+        return 'bg-green-100 text-green-800';
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-gray-800';
     }
-  }
+  };
 
   const stats = [
     {
@@ -107,30 +107,30 @@ export default function AdminUsersPage() {
     },
     {
       name: 'Verified Users',
-      value: users.filter((u) => u.isVerified).length,
+      value: users.filter(u => u.isVerified).length,
       icon: Shield,
       color: 'text-green-600',
     },
     {
       name: 'Hosts',
-      value: users.filter((u) => u.role === 'HOST' || u.role === 'ADMIN').length,
+      value: users.filter(u => u.role === 'HOST' || u.role === 'ADMIN').length,
       icon: UserCheck,
       color: 'text-purple-600',
     },
     {
       name: 'Unverified',
-      value: users.filter((u) => !u.isVerified).length,
+      value: users.filter(u => !u.isVerified).length,
       icon: UserX,
       color: 'text-red-600',
     },
-  ]
+  ];
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-gray-500">Loading users...</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -142,7 +142,7 @@ export default function AdminUsersPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {stats.map((stat) => (
+        {stats.map(stat => (
           <div key={stat.name} className="bg-white p-6 rounded-lg shadow">
             <div className="flex items-center justify-between">
               <div>
@@ -164,7 +164,7 @@ export default function AdminUsersPage() {
             </label>
             <select
               value={filter}
-              onChange={(e) => setFilter(e.target.value)}
+              onChange={e => setFilter(e.target.value)}
               className="w-full border border-gray-300 rounded-md px-3 py-2"
             >
               <option value="all">All Users</option>
@@ -174,12 +174,10 @@ export default function AdminUsersPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Role Filter
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Role Filter</label>
             <select
               value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
+              onChange={e => setRoleFilter(e.target.value)}
               className="w-full border border-gray-300 rounded-md px-3 py-2"
             >
               <option value="all">All Roles</option>
@@ -191,14 +189,12 @@ export default function AdminUsersPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Search
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              onChange={e => setSearchTerm(e.target.value)}
+              onKeyPress={e => e.key === 'Enter' && handleSearch()}
               placeholder="Name or email..."
               className="w-full border border-gray-300 rounded-md px-3 py-2"
             />
@@ -252,7 +248,7 @@ export default function AdminUsersPage() {
                   </td>
                 </tr>
               ) : (
-                users.map((user) => (
+                users.map(user => (
                   <tr key={user.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -350,5 +346,5 @@ export default function AdminUsersPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

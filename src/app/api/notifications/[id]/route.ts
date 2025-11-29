@@ -6,10 +6,7 @@ import { extractTokenFromRequest, verifyAccessToken } from '@/lib/auth';
  * PATCH /api/notifications/[id]/read
  * Mark a single notification as read
  */
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const token = extractTokenFromRequest(request);
     if (!token) {
@@ -21,10 +18,7 @@ export async function PATCH(
 
     const payload = verifyAccessToken(token);
     if (!payload) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
     }
 
     const userId = payload.userId;
@@ -78,10 +72,7 @@ export async function PATCH(
  * DELETE /api/notifications/[id]
  * Delete a notification
  */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const token = extractTokenFromRequest(request);
     if (!token) {
@@ -93,10 +84,7 @@ export async function DELETE(
 
     const payload = verifyAccessToken(token);
     if (!payload) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: 'Invalid token' }, { status: 401 });
     }
 
     const userId = payload.userId;

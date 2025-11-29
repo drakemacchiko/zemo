@@ -17,9 +17,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
 
-    const where = status && status !== 'ALL' 
-      ? { status: status as any }
-      : {};
+    const where = status && status !== 'ALL' ? { status: status as any } : {};
 
     const documents = await prisma.document.findMany({
       where,
@@ -45,9 +43,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ documents });
   } catch (error) {
     console.error('Error fetching documents:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch documents' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch documents' }, { status: 500 });
   }
 }

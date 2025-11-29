@@ -17,7 +17,8 @@ export default function InsurancePage() {
           <h2 className="text-2xl font-bold">You're Protected</h2>
         </div>
         <p className="text-blue-100 mb-4">
-          All ZEMO rentals include comprehensive insurance coverage to protect both you and your renters.
+          All ZEMO rentals include comprehensive insurance coverage to protect both you and your
+          renters.
         </p>
         <button className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 font-semibold">
           View Full Policy Details
@@ -50,7 +51,9 @@ export default function InsurancePage() {
           <div className="bg-white rounded-lg shadow-sm border-2 border-yellow-400 p-6">
             <div className="flex items-center justify-between mb-2">
               <h3 className="font-semibold text-gray-900">Standard Protection</h3>
-              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded">Popular</span>
+              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded">
+                Popular
+              </span>
             </div>
             <p className="text-sm text-gray-600 mb-4">+ZMW 50 per day</p>
             <ul className="space-y-2 text-sm text-gray-700">
@@ -144,7 +147,8 @@ export default function InsurancePage() {
             <div>
               <h3 className="font-semibold text-gray-900 mb-1">Document the Damage</h3>
               <p className="text-sm text-gray-600">
-                Take photos and videos of any damage immediately. Complete the post-trip inspection thoroughly.
+                Take photos and videos of any damage immediately. Complete the post-trip inspection
+                thoroughly.
               </p>
             </div>
           </div>
@@ -155,7 +159,8 @@ export default function InsurancePage() {
             <div>
               <h3 className="font-semibold text-gray-900 mb-1">File a Claim</h3>
               <p className="text-sm text-gray-600">
-                Report the incident within 24 hours through your booking dashboard or contact support.
+                Report the incident within 24 hours through your booking dashboard or contact
+                support.
               </p>
             </div>
           </div>
@@ -166,7 +171,8 @@ export default function InsurancePage() {
             <div>
               <h3 className="font-semibold text-gray-900 mb-1">Get an Estimate</h3>
               <p className="text-sm text-gray-600">
-                Obtain repair estimates from authorized repair shops. We'll review and approve claims within 48 hours.
+                Obtain repair estimates from authorized repair shops. We'll review and approve
+                claims within 48 hours.
               </p>
             </div>
           </div>

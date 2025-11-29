@@ -5,29 +5,29 @@
 /* ZEMO Design System CSS Variables */
 :root {
   /* Brand Colors */
-  --zemo-yellow: #FFD400;
-  --zemo-black: #0A0A0A;
-  --zemo-yellow-light: #FFF266;
-  --zemo-yellow-dark: #E6BF00;
-  --zemo-black-light: #1A1A1A;
-  
+  --zemo-yellow: #ffd400;
+  --zemo-black: #0a0a0a;
+  --zemo-yellow-light: #fff266;
+  --zemo-yellow-dark: #e6bf00;
+  --zemo-black-light: #1a1a1a;
+
   /* Typography */
   --zemo-heading-weight: 900;
   --zemo-body-weight: 500;
   --zemo-light-weight: 400;
-  
+
   /* Spacing Scale */
-  --zemo-space-xs: 0.25rem;  /* 4px */
-  --zemo-space-sm: 0.5rem;   /* 8px */
-  --zemo-space-md: 1rem;     /* 16px */
-  --zemo-space-lg: 1.5rem;   /* 24px */
-  --zemo-space-xl: 2rem;     /* 32px */
-  
+  --zemo-space-xs: 0.25rem; /* 4px */
+  --zemo-space-sm: 0.5rem; /* 8px */
+  --zemo-space-md: 1rem; /* 16px */
+  --zemo-space-lg: 1.5rem; /* 24px */
+  --zemo-space-xl: 2rem; /* 32px */
+
   /* Border Radius */
   --zemo-radius: 8px;
   --zemo-radius-sm: 4px;
   --zemo-radius-lg: 12px;
-  
+
   /* Shadows */
   --zemo-shadow-sm: 0 1px 2px 0 rgba(10, 10, 10, 0.05);
   --zemo-shadow: 0 4px 6px -1px rgba(10, 10, 10, 0.1), 0 2px 4px -1px rgba(10, 10, 10, 0.06);
@@ -41,41 +41,43 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  
+
   body {
     @apply bg-white text-gray-950;
-    font-feature-settings: 'rlig' 1, 'calt' 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
   }
-  
+
   /* Typography Hierarchy */
   h1 {
     @apply text-3xl md:text-4xl font-black text-gray-950;
     font-weight: var(--zemo-heading-weight);
   }
-  
+
   h2 {
     @apply text-2xl md:text-3xl font-black text-gray-950;
     font-weight: var(--zemo-heading-weight);
   }
-  
+
   h3 {
     @apply text-xl md:text-2xl font-bold text-gray-950;
   }
-  
+
   h4 {
     @apply text-lg md:text-xl font-bold text-gray-950;
   }
-  
+
   p {
     @apply text-base text-gray-950 leading-relaxed;
     font-weight: var(--zemo-body-weight);
   }
-  
+
   /* Focus styles for accessibility */
   *:focus {
     @apply outline-none ring-2 ring-yellow-500 ring-offset-2;
   }
-  
+
   /* Selection styles */
   ::selection {
     @apply bg-yellow-500 text-gray-950;
@@ -94,7 +96,7 @@
     @apply active:transform active:scale-95;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
   }
-  
+
   .btn-secondary {
     @apply inline-flex items-center justify-center px-6 py-3 text-base font-bold;
     @apply bg-transparent text-gray-950 border-2 border-gray-950;
@@ -104,7 +106,7 @@
     @apply active:transform active:scale-95;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
   }
-  
+
   .btn-ghost {
     @apply inline-flex items-center justify-center px-4 py-2 text-base;
     @apply bg-transparent text-gray-950 border-none;
@@ -113,26 +115,26 @@
     @apply focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2;
     @apply active:transform active:scale-95;
   }
-  
+
   /* Card Styles */
   .card {
     @apply bg-white rounded-xl border border-gray-200;
     @apply shadow-md transition-shadow duration-200;
     @apply hover:shadow-lg;
   }
-  
+
   .card-header {
     @apply p-6 border-b border-gray-200;
   }
-  
+
   .card-body {
     @apply p-6;
   }
-  
+
   .card-footer {
     @apply p-6 pt-0;
   }
-  
+
   /* Input Styles */
   .input {
     @apply w-full px-4 py-3 text-base;
@@ -142,12 +144,12 @@
     @apply focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2;
     @apply disabled:bg-gray-50 disabled:cursor-not-allowed;
   }
-  
+
   .input-error {
     @apply border-error-500 text-error-500;
     @apply focus:border-error-500 focus:ring-error-500;
   }
-  
+
   /* Navigation Styles */
   .nav-link {
     @apply inline-flex items-center px-4 py-2 text-base;
@@ -155,7 +157,7 @@
     @apply hover:text-yellow-600;
     @apply focus:outline-none focus:ring-2 focus:ring-yellow-500;
   }
-  
+
   .nav-link-active {
     @apply text-yellow-600 font-bold;
   }
@@ -167,44 +169,44 @@
   .container-mobile {
     @apply max-w-sm mx-auto px-4;
   }
-  
+
   .container-tablet {
     @apply max-w-2xl mx-auto px-6;
   }
-  
+
   .container-desktop {
     @apply max-w-7xl mx-auto px-8;
   }
-  
+
   /* Text utilities */
   .text-heading {
     font-weight: var(--zemo-heading-weight);
   }
-  
+
   .text-body {
     font-weight: var(--zemo-body-weight);
   }
-  
+
   /* Animation utilities */
   .animate-fade-in {
     animation: fadeIn 0.5s ease-in-out;
   }
-  
+
   .animate-slide-up {
     animation: slideUp 0.3s ease-out;
   }
-  
+
   /* Touch-friendly utilities */
   .touch-target {
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   /* Loading states */
   .loading-skeleton {
     @apply bg-gray-200 animate-pulse rounded;
   }
-  
+
   /* Accessibility utilities */
   .sr-only {
     position: absolute;
@@ -225,7 +227,7 @@
   .btn-secondary {
     @apply px-8 py-4 text-lg;
   }
-  
+
   .input {
     @apply px-4 py-4 text-lg;
   }
@@ -243,7 +245,7 @@
   .btn-primary {
     @apply border-4;
   }
-  
+
   .btn-secondary {
     @apply border-4;
   }

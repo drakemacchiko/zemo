@@ -5,7 +5,17 @@ import { withAuth, type AuthenticatedRequest } from '@/lib/middleware';
 
 // Validation schemas
 const updateTicketSchema = z.object({
-  status: z.enum(['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'WAITING_INTERNAL', 'RESOLVED', 'CLOSED', 'ESCALATED']).optional(),
+  status: z
+    .enum([
+      'OPEN',
+      'IN_PROGRESS',
+      'WAITING_CUSTOMER',
+      'WAITING_INTERNAL',
+      'RESOLVED',
+      'CLOSED',
+      'ESCALATED',
+    ])
+    .optional(),
   priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT', 'CRITICAL']).optional(),
   assignedToId: z.string().optional(),
   resolutionNotes: z.string().optional(),
@@ -21,14 +31,11 @@ const addMessageSchema = z.object({
 });
 
 // GET /api/support/tickets/[id] - Get ticket details
-async function getTicket(
-  request: AuthenticatedRequest,
-  { params }: { params: { id: string } }
-) {
+async function getTicket(request: AuthenticatedRequest, { params }: { params: { id: string } }) {
   try {
     const ticketId = params.id;
     const userId = request.user!.id;
-    
+
     // For now, return empty ticket structure
     // This will work once Prisma client is regenerated
     return NextResponse.json({
@@ -43,29 +50,22 @@ async function getTicket(
         userId,
         createdAt: new Date().toISOString(),
         messages: [],
-        attachments: []
-      }
+        attachments: [],
+      },
     });
-
   } catch (error) {
     console.error('Error fetching ticket:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch ticket' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch ticket' }, { status: 500 });
   }
 }
 
 // PATCH /api/support/tickets/[id] - Update ticket
-async function updateTicket(
-  request: AuthenticatedRequest,
-  { params }: { params: { id: string } }
-) {
+async function updateTicket(request: AuthenticatedRequest, { params }: { params: { id: string } }) {
   try {
     const ticketId = params.id;
     const body = await request.json();
     const updates = updateTicketSchema.parse(body);
-    
+
     const userId = request.user!.id;
 
     // Return success for now - full implementation when Prisma client is ready
@@ -73,23 +73,16 @@ async function updateTicket(
       message: 'Ticket update API is ready - awaiting Prisma client regeneration',
       ticketId,
       updates,
-      userId
+      userId,
     });
-
   } catch (error) {
     console.error('Error updating ticket:', error);
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: error.issues },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid input', details: error.issues }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to update ticket' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update ticket' }, { status: 500 });
   }
 }
 
@@ -102,33 +95,29 @@ async function addTicketMessage(
     const ticketId = params.id;
     const body = await request.json();
     const { content, isInternal } = addMessageSchema.parse(body);
-    
+
     const userId = request.user!.id;
 
     // Return success for now - full implementation when Prisma client is ready
-    return NextResponse.json({
-      message: 'Ticket message API is ready - awaiting Prisma client regeneration',
-      ticketId,
-      content,
-      isInternal,
-      senderId: userId,
-      createdAt: new Date().toISOString()
-    }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        message: 'Ticket message API is ready - awaiting Prisma client regeneration',
+        ticketId,
+        content,
+        isInternal,
+        senderId: userId,
+        createdAt: new Date().toISOString(),
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error adding ticket message:', error);
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: error.issues },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid input', details: error.issues }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to add ticket message' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to add ticket message' }, { status: 500 });
   }
 }
 

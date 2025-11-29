@@ -1,34 +1,43 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
-import { extractTokenFromRequest, verifyAccessToken } from '@/lib/auth'
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+import { extractTokenFromRequest, verifyAccessToken } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
     // Verify authentication
-    const token = extractTokenFromRequest(request)
+    const token = extractTokenFromRequest(request);
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const payload = verifyAccessToken(token)
+    const payload = verifyAccessToken(token);
     if (!payload) {
-      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 })
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 
-    const userId = payload.userId
-    const body = await request.json()
+    const userId = payload.userId;
+    const body = await request.json();
 
     // Validate required fields
-    const requiredFields = ['plateNumber', 'make', 'model', 'year', 'transmission', 
-      'fuelType', 'seatingCapacity', 'color', 'currentMileage', 'vehicleType', 
-      'locationAddress', 'dailyRate', 'securityDeposit']
-    
+    const requiredFields = [
+      'plateNumber',
+      'make',
+      'model',
+      'year',
+      'transmission',
+      'fuelType',
+      'seatingCapacity',
+      'color',
+      'currentMileage',
+      'vehicleType',
+      'locationAddress',
+      'dailyRate',
+      'securityDeposit',
+    ];
+
     for (const field of requiredFields) {
       if (!body[field]) {
-        return NextResponse.json(
-          { error: `Missing required field: ${field}` },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: `Missing required field: ${field}` }, { status: 400 });
       }
     }
 
@@ -36,7 +45,7 @@ export async function POST(request: NextRequest) {
     const vehicle = await prisma.vehicle.create({
       data: {
         hostId: userId,
-        
+
         // Basic details
         vin: body.vin || null,
         plateNumber: body.plateNumber,
@@ -53,12 +62,12 @@ export async function POST(request: NextRequest) {
         seatingCapacity: parseInt(body.seatingCapacity),
         numberOfDoors: body.numberOfDoors ? parseInt(body.numberOfDoors) : null,
         currentMileage: parseInt(body.currentMileage),
-        
+
         // Category & Type
         vehicleCategory: body.vehicleCategory || null,
         vehicleType: body.vehicleType,
         features: body.features || [],
-        
+
         // Location
         locationAddress: body.locationAddress,
         locationCity: body.locationCity || null,
@@ -67,7 +76,7 @@ export async function POST(request: NextRequest) {
         locationLatitude: body.locationLatitude || 0,
         locationLongitude: body.locationLongitude || 0,
         hideExactLocation: body.hideExactLocation !== false,
-        
+
         // Delivery
         deliveryAvailable: body.deliveryAvailable || false,
         deliveryRadius: body.deliveryRadius ? parseInt(body.deliveryRadius) : null,
@@ -75,7 +84,7 @@ export async function POST(request: NextRequest) {
         airportDelivery: body.airportDelivery || false,
         airportDeliveryFee: body.airportDeliveryFee ? parseFloat(body.airportDeliveryFee) : null,
         pickupInstructions: body.pickupInstructions || null,
-        
+
         // Availability
         alwaysAvailable: body.alwaysAvailable !== false,
         advanceNoticeHours: body.advanceNoticeHours || 24,
@@ -85,7 +94,7 @@ export async function POST(request: NextRequest) {
         minRenterRating: body.minRenterRating ? parseFloat(body.minRenterRating) : null,
         minRenterTrips: body.minRenterTrips ? parseInt(body.minRenterTrips) : null,
         requireVerifiedLicense: body.requireVerifiedLicense !== false,
-        
+
         // Pricing
         dailyRate: parseFloat(body.dailyRate),
         hourlyRate: body.hourlyRate ? parseFloat(body.hourlyRate) : null,
@@ -98,11 +107,11 @@ export async function POST(request: NextRequest) {
         fuelPolicy: body.fuelPolicy || null,
         lateReturnFee: body.lateReturnFee ? parseFloat(body.lateReturnFee) : null,
         cleaningFee: body.cleaningFee ? parseFloat(body.cleaningFee) : null,
-        
+
         // Insurance
         insurancePolicyNumber: body.insurancePolicyNumber || null,
         insuranceCoverage: body.insuranceCoverage || null,
-        
+
         // Rules
         minDriverAge: body.minDriverAge || 21,
         minDrivingExperience: body.minDrivingExperience || 2,
@@ -113,16 +122,16 @@ export async function POST(request: NextRequest) {
         petFee: body.petFee ? parseFloat(body.petFee) : null,
         usageRestrictions: body.usageRestrictions || [],
         customRules: body.customRules || null,
-        
+
         // Description
         title: body.title || `${body.year} ${body.make} ${body.model}`,
         description: body.description || null,
-        
+
         // Status
         listingStatus: 'DRAFT',
         verificationStatus: 'PENDING',
         availabilityStatus: 'AVAILABLE',
-        isActive: false
+        isActive: false,
       },
       include: {
         host: {
@@ -132,83 +141,83 @@ export async function POST(request: NextRequest) {
             profile: {
               select: {
                 firstName: true,
-                lastName: true
-              }
-            }
-          }
-        }
-      }
-    })
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
-    return NextResponse.json({
-      success: true,
-      vehicle: {
-        id: vehicle.id,
-        plateNumber: vehicle.plateNumber,
-        make: vehicle.make,
-        model: vehicle.model,
-        year: vehicle.year,
-        status: vehicle.listingStatus
-      }
-    }, { status: 201 })
+    return NextResponse.json(
+      {
+        success: true,
+        vehicle: {
+          id: vehicle.id,
+          plateNumber: vehicle.plateNumber,
+          make: vehicle.make,
+          model: vehicle.model,
+          year: vehicle.year,
+          status: vehicle.listingStatus,
+        },
+      },
+      { status: 201 }
+    );
   } catch (error: any) {
-    console.error('Error creating vehicle listing:', error)
-    
+    console.error('Error creating vehicle listing:', error);
+
     if (error.code === 'P2002') {
       return NextResponse.json(
         { error: 'A vehicle with this license plate already exists' },
         { status: 409 }
-      )
+      );
     }
-    
-    return NextResponse.json(
-      { error: 'Failed to create vehicle listing' },
-      { status: 500 }
-    )
+
+    return NextResponse.json({ error: 'Failed to create vehicle listing' }, { status: 500 });
   }
 }
 
 export async function GET(request: NextRequest) {
   try {
     // Verify authentication
-    const token = extractTokenFromRequest(request)
+    const token = extractTokenFromRequest(request);
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const payload = verifyAccessToken(token)
+    const payload = verifyAccessToken(token);
     if (!payload) {
-      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 })
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 
-    const userId = payload.userId
+    const userId = payload.userId;
 
     // Get host's vehicles
     const vehicles = await prisma.vehicle.findMany({
       where: {
-        hostId: userId
+        hostId: userId,
       },
       include: {
         photos: {
           where: {
-            isPrimary: true
+            isPrimary: true,
           },
-          take: 1
+          take: 1,
         },
         _count: {
           select: {
             bookings: {
               where: {
-                status: 'COMPLETED'
-              }
-            }
-          }
-        }
+                status: 'COMPLETED',
+              },
+            },
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
-    })
+        createdAt: 'desc',
+      },
+    });
 
     return NextResponse.json({
       vehicles: vehicles.map(vehicle => ({
@@ -225,14 +234,11 @@ export async function GET(request: NextRequest) {
         totalTrips: vehicle._count.bookings,
         averageRating: vehicle.averageRating,
         monthlyEarnings: vehicle.monthlyEarnings,
-        photo: vehicle.photos[0]?.photoUrl || null
-      }))
-    })
+        photo: vehicle.photos[0]?.photoUrl || null,
+      })),
+    });
   } catch (error) {
-    console.error('Error fetching vehicles:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch vehicles' },
-      { status: 500 }
-    )
+    console.error('Error fetching vehicles:', error);
+    return NextResponse.json({ error: 'Failed to fetch vehicles' }, { status: 500 });
   }
 }

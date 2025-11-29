@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db'
+import { prisma } from '@/lib/db';
 
 // Insurance pricing service
 export class InsurancePricingService {
@@ -15,56 +15,56 @@ export class InsurancePricingService {
     // Get insurance product details
     const insurance = await prisma.insurance.findUnique({
       where: { id: insuranceId, isActive: true },
-    })
+    });
 
     if (!insurance) {
-      throw new Error('Insurance product not found or inactive')
+      throw new Error('Insurance product not found or inactive');
     }
 
     // Calculate booking duration in days
-    const durationMs = endDate.getTime() - startDate.getTime()
-    const durationDays = Math.ceil(durationMs / (1000 * 60 * 60 * 24))
+    const durationMs = endDate.getTime() - startDate.getTime();
+    const durationDays = Math.ceil(durationMs / (1000 * 60 * 60 * 24));
 
     if (durationDays <= 0) {
-      throw new Error('Invalid booking duration')
+      throw new Error('Invalid booking duration');
     }
 
     // Determine coverage amount (use provided or default to max coverage)
-    const finalCoverageAmount = coverageAmount || insurance.maxCoverageAmount
+    const finalCoverageAmount = coverageAmount || insurance.maxCoverageAmount;
 
     if (finalCoverageAmount > insurance.maxCoverageAmount) {
-      throw new Error(`Coverage amount cannot exceed ${insurance.maxCoverageAmount}`)
+      throw new Error(`Coverage amount cannot exceed ${insurance.maxCoverageAmount}`);
     }
 
     // Base daily premium from insurance product
-    let dailyPremium = insurance.dailyRate
+    let dailyPremium = insurance.dailyRate;
 
     // Apply coverage amount adjustment (higher coverage = higher premium)
-    const coverageRatio = finalCoverageAmount / insurance.maxCoverageAmount
-    dailyPremium = dailyPremium * (0.5 + 0.5 * coverageRatio) // 50% base + 50% based on coverage
+    const coverageRatio = finalCoverageAmount / insurance.maxCoverageAmount;
+    dailyPremium = dailyPremium * (0.5 + 0.5 * coverageRatio); // 50% base + 50% based on coverage
 
     // Apply vehicle value adjustment (higher value = higher premium)
     if (vehicleValue > 50000) {
-      dailyPremium *= 1.5 // 50% increase for high-value vehicles
+      dailyPremium *= 1.5; // 50% increase for high-value vehicles
     } else if (vehicleValue > 25000) {
-      dailyPremium *= 1.25 // 25% increase for mid-value vehicles
+      dailyPremium *= 1.25; // 25% increase for mid-value vehicles
     }
 
     // Apply duration discounts for longer bookings
     if (durationDays >= 30) {
-      dailyPremium *= 0.8 // 20% discount for monthly bookings
+      dailyPremium *= 0.8; // 20% discount for monthly bookings
     } else if (durationDays >= 7) {
-      dailyPremium *= 0.9 // 10% discount for weekly bookings
+      dailyPremium *= 0.9; // 10% discount for weekly bookings
     }
 
     // Calculate total premium
-    const totalPremium = dailyPremium * durationDays
+    const totalPremium = dailyPremium * durationDays;
 
     return {
       dailyPremium: Math.round(dailyPremium * 100) / 100, // Round to 2 decimal places
       totalPremium: Math.round(totalPremium * 100) / 100,
       coverageAmount: finalCoverageAmount,
-    }
+    };
   }
 
   /**
@@ -74,7 +74,7 @@ export class InsurancePricingService {
     return await prisma.insurance.findMany({
       where: { isActive: true },
       orderBy: { dailyRate: 'asc' },
-    })
+    });
   }
 
   /**
@@ -92,22 +92,22 @@ export class InsurancePricingService {
     // Check if booking already has a policy
     const existingPolicy = await prisma.insurancePolicy.findUnique({
       where: { bookingId },
-    })
+    });
 
     if (existingPolicy) {
-      throw new Error('Booking already has an insurance policy')
+      throw new Error('Booking already has an insurance policy');
     }
 
     // Generate policy number
-    const policyNumber = this.generatePolicyNumber()
+    const policyNumber = this.generatePolicyNumber();
 
     // Get insurance product details for deductible
     const insurance = await prisma.insurance.findUnique({
       where: { id: insuranceId },
-    })
+    });
 
     if (!insurance) {
-      throw new Error('Insurance product not found')
+      throw new Error('Insurance product not found');
     }
 
     // Create policy
@@ -132,7 +132,7 @@ export class InsurancePricingService {
           },
         },
       },
-    })
+    });
   }
 
   /**
@@ -145,7 +145,7 @@ export class InsurancePricingService {
         status: 'ACTIVE',
         activatedAt: new Date(),
       },
-    })
+    });
   }
 
   /**
@@ -158,16 +158,16 @@ export class InsurancePricingService {
         status: 'CANCELLED',
         cancelledAt: new Date(),
       },
-    })
+    });
   }
 
   /**
    * Generate unique policy number
    */
   private static generatePolicyNumber(): string {
-    const timestamp = Date.now().toString(36).toUpperCase()
-    const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase()
-    return `ZEMO-${timestamp}-${randomStr}`
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
+    return `ZEMO-${timestamp}-${randomStr}`;
   }
 }
 
@@ -180,39 +180,39 @@ export class ClaimService {
     policyId: string,
     userId: string,
     claimData: {
-      incidentDate: Date
-      incidentLocation: string
-      incidentDescription: string
-      claimType: string
-      estimatedDamageAmount?: number
-      policeReportNumber?: string
+      incidentDate: Date;
+      incidentLocation: string;
+      incidentDescription: string;
+      claimType: string;
+      estimatedDamageAmount?: number;
+      policeReportNumber?: string;
     }
   ) {
     // Verify policy exists and is active
     const policy = await prisma.insurancePolicy.findUnique({
       where: { id: policyId },
       include: { booking: true },
-    })
+    });
 
     if (!policy) {
-      throw new Error('Insurance policy not found')
+      throw new Error('Insurance policy not found');
     }
 
     if (policy.status !== 'ACTIVE') {
-      throw new Error('Insurance policy is not active')
+      throw new Error('Insurance policy is not active');
     }
 
     if (policy.userId !== userId) {
-      throw new Error('Unauthorized to create claim for this policy')
+      throw new Error('Unauthorized to create claim for this policy');
     }
 
     // Verify incident date is within policy period
     if (claimData.incidentDate < policy.startDate || claimData.incidentDate > policy.endDate) {
-      throw new Error('Incident date is outside the policy coverage period')
+      throw new Error('Incident date is outside the policy coverage period');
     }
 
     // Generate claim number
-    const claimNumber = this.generateClaimNumber()
+    const claimNumber = this.generateClaimNumber();
 
     // Create claim
     return await prisma.claim.create({
@@ -242,7 +242,7 @@ export class ClaimService {
           },
         },
       },
-    })
+    });
   }
 
   /**
@@ -251,26 +251,26 @@ export class ClaimService {
   static async updateClaim(
     claimId: string,
     updateData: {
-      status?: string
-      reviewNotes?: string
-      actualDamageAmount?: number
-      settlementAmount?: number
-      priority?: string
+      status?: string;
+      reviewNotes?: string;
+      actualDamageAmount?: number;
+      settlementAmount?: number;
+      priority?: string;
     },
     reviewerId?: string
   ) {
     const updatePayload: any = {
       ...updateData,
       updatedAt: new Date(),
-    }
+    };
 
     if (reviewerId) {
-      updatePayload.reviewedBy = reviewerId
-      updatePayload.reviewedAt = new Date()
+      updatePayload.reviewedBy = reviewerId;
+      updatePayload.reviewedAt = new Date();
     }
 
     if (updateData.settlementAmount !== undefined) {
-      updatePayload.settlementDate = new Date()
+      updatePayload.settlementDate = new Date();
     }
 
     return await prisma.claim.update({
@@ -289,7 +289,7 @@ export class ClaimService {
         },
         documents: true,
       },
-    })
+    });
   }
 
   /**
@@ -311,48 +311,48 @@ export class ClaimService {
         },
         documents: true,
       },
-    })
+    });
 
     if (!claim) {
-      throw new Error('Claim not found')
+      throw new Error('Claim not found');
     }
 
     // Check authorization if userId provided
     if (userId && claim.userId !== userId) {
-      throw new Error('Unauthorized to view this claim')
+      throw new Error('Unauthorized to view this claim');
     }
 
-    return claim
+    return claim;
   }
 
   /**
    * Search claims with filters
    */
   static async searchClaims(filters: {
-    status?: string
-    claimType?: string
-    priority?: string
-    userId?: string
-    policyId?: string
-    startDate?: Date
-    endDate?: Date
-    page?: number
-    limit?: number
+    status?: string;
+    claimType?: string;
+    priority?: string;
+    userId?: string;
+    policyId?: string;
+    startDate?: Date;
+    endDate?: Date;
+    page?: number;
+    limit?: number;
   }) {
-    const { page = 1, limit = 20, ...whereFilters } = filters
+    const { page = 1, limit = 20, ...whereFilters } = filters;
 
-    const where: any = {}
+    const where: any = {};
 
-    if (whereFilters.status) where.status = whereFilters.status
-    if (whereFilters.claimType) where.claimType = whereFilters.claimType
-    if (whereFilters.priority) where.priority = whereFilters.priority
-    if (whereFilters.userId) where.userId = whereFilters.userId
-    if (whereFilters.policyId) where.policyId = whereFilters.policyId
+    if (whereFilters.status) where.status = whereFilters.status;
+    if (whereFilters.claimType) where.claimType = whereFilters.claimType;
+    if (whereFilters.priority) where.priority = whereFilters.priority;
+    if (whereFilters.userId) where.userId = whereFilters.userId;
+    if (whereFilters.policyId) where.policyId = whereFilters.policyId;
 
     if (whereFilters.startDate || whereFilters.endDate) {
-      where.incidentDate = {}
-      if (whereFilters.startDate) where.incidentDate.gte = whereFilters.startDate
-      if (whereFilters.endDate) where.incidentDate.lte = whereFilters.endDate
+      where.incidentDate = {};
+      if (whereFilters.startDate) where.incidentDate.gte = whereFilters.startDate;
+      if (whereFilters.endDate) where.incidentDate.lte = whereFilters.endDate;
     }
 
     const [claims, total] = await Promise.all([
@@ -376,7 +376,7 @@ export class ClaimService {
         },
       }),
       prisma.claim.count({ where }),
-    ])
+    ]);
 
     return {
       claims,
@@ -384,15 +384,15 @@ export class ClaimService {
       page,
       limit,
       totalPages: Math.ceil(total / limit),
-    }
+    };
   }
 
   /**
    * Generate unique claim number
    */
   private static generateClaimNumber(): string {
-    const timestamp = Date.now().toString(36).toUpperCase()
-    const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase()
-    return `CLM-${timestamp}-${randomStr}`
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `CLM-${timestamp}-${randomStr}`;
   }
 }

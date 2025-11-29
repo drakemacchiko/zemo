@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { verifyAccessToken } from '@/lib/auth'
-import { prisma } from '@/lib/db'
-import { ClaimService } from '@/lib/insurance'
-import { claimSearchSchema } from '@/lib/validations'
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyAccessToken } from '@/lib/auth';
+import { prisma } from '@/lib/db';
+import { ClaimService } from '@/lib/insurance';
+import { claimSearchSchema } from '@/lib/validations';
 
 // Simple authentication helper with admin check
 async function authenticateAdmin(request: NextRequest) {
@@ -19,7 +19,7 @@ async function authenticateAdmin(request: NextRequest) {
 
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { id: true, email: true }
+    select: { id: true, email: true },
   });
 
   if (!user) {
@@ -62,10 +62,10 @@ export async function GET(request: NextRequest) {
     const validationResult = claimSearchSchema.safeParse(queryData);
     if (!validationResult.success) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: 'Invalid query parameters',
-          details: validationResult.error.issues 
+          details: validationResult.error.issues,
         },
         { status: 400 }
       );
@@ -98,7 +98,8 @@ export async function GET(request: NextRequest) {
       prisma.claim.count({ where: { priority: 'URGENT' } }),
     ];
 
-    const [submittedCount, underReviewCount, investigatingCount, urgentCount] = await Promise.all(statsPromises);
+    const [submittedCount, underReviewCount, investigatingCount, urgentCount] =
+      await Promise.all(statsPromises);
 
     return NextResponse.json({
       success: true,
@@ -112,12 +113,8 @@ export async function GET(request: NextRequest) {
         },
       },
     });
-
   } catch (error) {
     console.error('Error fetching claims for admin:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch claims' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Failed to fetch claims' }, { status: 500 });
   }
 }

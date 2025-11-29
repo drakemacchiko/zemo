@@ -27,7 +27,7 @@ export default function VehiclePerformancePage() {
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch('/api/host/vehicles/performance', {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -103,7 +103,9 @@ export default function VehiclePerformancePage() {
                     <Star className="w-4 h-4" />
                     Average Rating
                   </div>
-                  <p className="text-2xl font-bold text-gray-900">{vehicle.averageRating.toFixed(1)}★</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {vehicle.averageRating.toFixed(1)}★
+                  </p>
                 </div>
 
                 <div className="bg-gray-50 rounded-lg p-4">
@@ -128,7 +130,22 @@ export default function VehiclePerformancePage() {
                         }}
                       />
                       <span className="text-xs text-gray-600 mt-1">
-                        {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][idx]}
+                        {
+                          [
+                            'Jan',
+                            'Feb',
+                            'Mar',
+                            'Apr',
+                            'May',
+                            'Jun',
+                            'Jul',
+                            'Aug',
+                            'Sep',
+                            'Oct',
+                            'Nov',
+                            'Dec',
+                          ][idx]
+                        }
                       </span>
                     </div>
                   ))}

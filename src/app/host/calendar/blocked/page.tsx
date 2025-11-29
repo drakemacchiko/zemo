@@ -33,10 +33,10 @@ export default function BlockedDatesPage() {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      
+
       // Fetch vehicles
       const vehiclesRes = await fetch('/api/host/vehicles', {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (vehiclesRes.ok) {
         const data = await vehiclesRes.json();
@@ -45,7 +45,7 @@ export default function BlockedDatesPage() {
 
       // Fetch blocked dates
       const response = await fetch('/api/host/availability/blocked', {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -66,7 +66,7 @@ export default function BlockedDatesPage() {
       const token = localStorage.getItem('accessToken');
       const response = await fetch(`/api/host/availability/block/${blockId}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -80,9 +80,10 @@ export default function BlockedDatesPage() {
     }
   };
 
-  const filteredBlocks = filterVehicle === 'all'
-    ? blockedDates
-    : blockedDates.filter(block => block.vehicleId === filterVehicle);
+  const filteredBlocks =
+    filterVehicle === 'all'
+      ? blockedDates
+      : blockedDates.filter(block => block.vehicleId === filterVehicle);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -126,7 +127,7 @@ export default function BlockedDatesPage() {
           <label className="font-medium text-gray-700">Filter by vehicle:</label>
           <select
             value={filterVehicle}
-            onChange={(e) => setFilterVehicle(e.target.value)}
+            onChange={e => setFilterVehicle(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400"
           >
             <option value="all">All Vehicles</option>
@@ -145,7 +146,8 @@ export default function BlockedDatesPage() {
           <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">No blocked dates</h3>
           <p className="text-gray-600 mb-6">
-            You haven't blocked any dates yet. Block dates when your vehicle isn't available for rent.
+            You haven't blocked any dates yet. Block dates when your vehicle isn't available for
+            rent.
           </p>
           <button
             onClick={() => router.push('/host/calendar')}
@@ -204,7 +206,8 @@ export default function BlockedDatesPage() {
       {filteredBlocks.length > 0 && (
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm text-blue-800">
-            <strong>{filteredBlocks.length}</strong> blocked period{filteredBlocks.length > 1 ? 's' : ''} total
+            <strong>{filteredBlocks.length}</strong> blocked period
+            {filteredBlocks.length > 1 ? 's' : ''} total
           </p>
         </div>
       )}

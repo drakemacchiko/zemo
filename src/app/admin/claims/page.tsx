@@ -1,62 +1,62 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react';
+import { CheckCircle, XCircle, Clock, AlertTriangle } from 'lucide-react';
 
 interface Claim {
-  id: string
-  claimNumber: string
-  status: string
-  type: string
-  amount: number
-  description: string
-  createdAt: string
+  id: string;
+  claimNumber: string;
+  status: string;
+  type: string;
+  amount: number;
+  description: string;
+  createdAt: string;
   booking: {
-    id: string
+    id: string;
     vehicle: {
-      make: string
-      model: string
-      plateNumber: string
-    }
+      make: string;
+      model: string;
+      plateNumber: string;
+    };
     renter: {
-      name: string
-      email: string
-    }
-  }
+      name: string;
+      email: string;
+    };
+  };
 }
 
 export default function AdminClaimsPage() {
-  const [claims, setClaims] = useState<Claim[]>([])
-  const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState('all')
-  const [searchTerm, setSearchTerm] = useState('')
+  const [claims, setClaims] = useState<Claim[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchClaims = useCallback(async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const params = new URLSearchParams()
-      if (filter !== 'all') params.append('status', filter)
-      if (searchTerm) params.append('search', searchTerm)
+      const params = new URLSearchParams();
+      if (filter !== 'all') params.append('status', filter);
+      if (searchTerm) params.append('search', searchTerm);
 
-      const response = await fetch(`/api/admin/claims?${params}`)
+      const response = await fetch(`/api/admin/claims?${params}`);
       if (response.ok) {
-        const data = await response.json()
-        setClaims(data.claims || [])
+        const data = await response.json();
+        setClaims(data.claims || []);
       }
     } catch (error) {
-      console.error('Failed to fetch claims:', error)
+      console.error('Failed to fetch claims:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [filter, searchTerm])
+  }, [filter, searchTerm]);
 
   useEffect(() => {
-    fetchClaims()
-  }, [fetchClaims])
+    fetchClaims();
+  }, [fetchClaims]);
 
   const handleSearch = () => {
-    fetchClaims()
-  }
+    fetchClaims();
+  };
 
   const handleUpdateStatus = async (claimId: string, newStatus: string) => {
     try {
@@ -64,52 +64,52 @@ export default function AdminClaimsPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
-      })
+      });
 
       if (response.ok) {
-        fetchClaims()
+        fetchClaims();
       }
     } catch (error) {
-      console.error('Failed to update claim:', error)
+      console.error('Failed to update claim:', error);
     }
-  }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'APPROVED':
-        return <CheckCircle className="w-5 h-5 text-green-600" />
+        return <CheckCircle className="w-5 h-5 text-green-600" />;
       case 'REJECTED':
-        return <XCircle className="w-5 h-5 text-red-600" />
+        return <XCircle className="w-5 h-5 text-red-600" />;
       case 'PENDING':
-        return <Clock className="w-5 h-5 text-yellow-600" />
+        return <Clock className="w-5 h-5 text-yellow-600" />;
       case 'UNDER_REVIEW':
-        return <AlertTriangle className="w-5 h-5 text-orange-600" />
+        return <AlertTriangle className="w-5 h-5 text-orange-600" />;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'APPROVED':
-        return 'bg-green-100 text-green-800'
+        return 'bg-green-100 text-green-800';
       case 'REJECTED':
-        return 'bg-red-100 text-red-800'
+        return 'bg-red-100 text-red-800';
       case 'PENDING':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'bg-yellow-100 text-yellow-800';
       case 'UNDER_REVIEW':
-        return 'bg-orange-100 text-orange-800'
+        return 'bg-orange-100 text-orange-800';
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-gray-800';
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-gray-500">Loading claims...</div>
       </div>
-    )
+    );
   }
 
   return (
@@ -123,12 +123,10 @@ export default function AdminClaimsPage() {
       <div className="bg-white p-4 rounded-lg shadow">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Status Filter
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status Filter</label>
             <select
               value={filter}
-              onChange={(e) => setFilter(e.target.value)}
+              onChange={e => setFilter(e.target.value)}
               className="w-full border border-gray-300 rounded-md px-3 py-2"
             >
               <option value="all">All Claims</option>
@@ -140,14 +138,12 @@ export default function AdminClaimsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Search
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              onChange={e => setSearchTerm(e.target.value)}
+              onKeyPress={e => e.key === 'Enter' && handleSearch()}
               placeholder="Claim number, vehicle..."
               className="w-full border border-gray-300 rounded-md px-3 py-2"
             />
@@ -204,7 +200,7 @@ export default function AdminClaimsPage() {
                   </td>
                 </tr>
               ) : (
-                claims.map((claim) => (
+                claims.map(claim => (
                   <tr key={claim.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {claim.claimNumber}
@@ -219,9 +215,7 @@ export default function AdminClaimsPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {claim.booking.renter.name}
                       <br />
-                      <span className="text-xs text-gray-400">
-                        {claim.booking.renter.email}
-                      </span>
+                      <span className="text-xs text-gray-400">{claim.booking.renter.email}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {claim.type}
@@ -278,5 +272,5 @@ export default function AdminClaimsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,59 +1,59 @@
 export interface RentalAgreementData {
-  bookingId: string
-  agreementNumber: string
-  
+  bookingId: string;
+  agreementNumber: string;
+
   // Host Information
   host: {
-    name: string
-    email: string
-    phone: string
-    address: string
-    idNumber: string
-  }
-  
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    idNumber: string;
+  };
+
   // Renter Information
   renter: {
-    name: string
-    email: string
-    phone: string
-    address: string
-    licenseNumber: string
-    idNumber: string
-  }
-  
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    licenseNumber: string;
+    idNumber: string;
+  };
+
   // Vehicle Information
   vehicle: {
-    make: string
-    model: string
-    year: number
-    plateNumber: string
-    vin: string
-    color: string
-    mileage: number
-  }
-  
+    make: string;
+    model: string;
+    year: number;
+    plateNumber: string;
+    vin: string;
+    color: string;
+    mileage: number;
+  };
+
   // Rental Details
   rental: {
-    startDate: Date
-    endDate: Date
-    pickupLocation: string
-    dropoffLocation: string
-    dailyRate: number
-    totalDays: number
-    totalAmount: number
-    securityDeposit: number
-    platformFee: number
-  }
-  
+    startDate: Date;
+    endDate: Date;
+    pickupLocation: string;
+    dropoffLocation: string;
+    dailyRate: number;
+    totalDays: number;
+    totalAmount: number;
+    securityDeposit: number;
+    platformFee: number;
+  };
+
   // Terms & Conditions
   terms: {
-    mileageLimit?: number
-    fuelPolicy: string
-    lateReturnFee: number
-    smokingAllowed: boolean
-    petsAllowed: boolean
-    additionalDrivers: string[]
-  }
+    mileageLimit?: number;
+    fuelPolicy: string;
+    lateReturnFee: number;
+    smokingAllowed: boolean;
+    petsAllowed: boolean;
+    additionalDrivers: string[];
+  };
 }
 
 export const generateRentalAgreementHTML = (data: RentalAgreementData): string => {
@@ -61,16 +61,16 @@ export const generateRentalAgreementHTML = (data: RentalAgreementData): string =
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
-    })
-  }
+      day: 'numeric',
+    });
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-ZM', {
       style: 'currency',
-      currency: 'ZMW'
-    }).format(amount)
-  }
+      currency: 'ZMW',
+    }).format(amount);
+  };
 
   return `
 <!DOCTYPE html>
@@ -332,12 +332,16 @@ export const generateRentalAgreementHTML = (data: RentalAgreementData): string =
         <strong>Fuel Policy:</strong> ${data.terms.fuelPolicy}. The vehicle should be returned with the same fuel level as at pickup.
       </li>
       
-      ${data.terms.mileageLimit ? `
+      ${
+        data.terms.mileageLimit
+          ? `
       <li>
         <strong>Mileage Limit:</strong> The rental includes ${data.terms.mileageLimit} km per day. 
         Additional mileage will be charged at the rate specified in the booking.
       </li>
-      ` : ''}
+      `
+          : ''
+      }
       
       <li>
         <strong>Late Return:</strong> Late returns will incur a charge of ${formatCurrency(data.terms.lateReturnFee)} per hour.
@@ -354,12 +358,16 @@ export const generateRentalAgreementHTML = (data: RentalAgreementData): string =
         ${!data.terms.petsAllowed ? 'Violations will result in a cleaning fee of ZMW 500.' : ''}
       </li>
       
-      ${data.terms.additionalDrivers.length > 0 ? `
+      ${
+        data.terms.additionalDrivers.length > 0
+          ? `
       <li>
         <strong>Additional Drivers:</strong> The following additional drivers are authorized: 
         ${data.terms.additionalDrivers.join(', ')}. Only these individuals may drive the vehicle.
       </li>
-      ` : ''}
+      `
+          : ''
+      }
       
       <li>
         <strong>Insurance:</strong> The vehicle is covered by the Owner's insurance policy. The Renter is responsible 
@@ -427,5 +435,5 @@ export const generateRentalAgreementHTML = (data: RentalAgreementData): string =
   </div>
 </body>
 </html>
-  `
-}
+  `;
+};

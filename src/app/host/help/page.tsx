@@ -7,33 +7,66 @@ export default function HelpPage() {
     {
       category: 'Getting Started',
       questions: [
-        { q: 'How do I list my first vehicle?', a: 'Click "Add New Vehicle" in your dashboard and follow the step-by-step wizard.' },
-        { q: 'What documents do I need to verify?', a: 'You need to upload your ID, driver\'s license, vehicle registration, and insurance certificate.' },
-        { q: 'How long does verification take?', a: 'Document verification typically takes 24-48 hours.' },
+        {
+          q: 'How do I list my first vehicle?',
+          a: 'Click "Add New Vehicle" in your dashboard and follow the step-by-step wizard.',
+        },
+        {
+          q: 'What documents do I need to verify?',
+          a: "You need to upload your ID, driver's license, vehicle registration, and insurance certificate.",
+        },
+        {
+          q: 'How long does verification take?',
+          a: 'Document verification typically takes 24-48 hours.',
+        },
       ],
     },
     {
       category: 'Bookings & Earnings',
       questions: [
-        { q: 'When do I get paid?', a: 'Payouts are processed 24 hours after each completed trip.' },
-        { q: 'How much can I earn?', a: 'Earnings vary by vehicle type, location, and demand. Most hosts earn ZMW 3,000-8,000 per month per vehicle.' },
+        {
+          q: 'When do I get paid?',
+          a: 'Payouts are processed 24 hours after each completed trip.',
+        },
+        {
+          q: 'How much can I earn?',
+          a: 'Earnings vary by vehicle type, location, and demand. Most hosts earn ZMW 3,000-8,000 per month per vehicle.',
+        },
         { q: 'What fees does ZEMO charge?', a: 'ZEMO charges a 20% service fee on each booking.' },
       ],
     },
     {
       category: 'Managing Your Vehicle',
       questions: [
-        { q: 'How do I block dates?', a: 'Use the Calendar page to block dates when your vehicle isn\'t available.' },
-        { q: 'Can I change my pricing?', a: 'Yes, you can update pricing anytime from the Edit Vehicle page.' },
-        { q: 'What if my vehicle needs repairs?', a: 'Pause your listing and block dates until repairs are complete.' },
+        {
+          q: 'How do I block dates?',
+          a: "Use the Calendar page to block dates when your vehicle isn't available.",
+        },
+        {
+          q: 'Can I change my pricing?',
+          a: 'Yes, you can update pricing anytime from the Edit Vehicle page.',
+        },
+        {
+          q: 'What if my vehicle needs repairs?',
+          a: 'Pause your listing and block dates until repairs are complete.',
+        },
       ],
     },
     {
       category: 'Safety & Insurance',
       questions: [
-        { q: 'What insurance is included?', a: 'All rentals include comprehensive insurance with liability, theft, and collision coverage.' },
-        { q: 'What if there\'s damage?', a: 'Document damage during post-trip inspection and file a claim through your dashboard.' },
-        { q: 'Am I liable for renter accidents?', a: 'No, our insurance covers third-party liability up to ZMW 500,000.' },
+        {
+          q: 'What insurance is included?',
+          a: 'All rentals include comprehensive insurance with liability, theft, and collision coverage.',
+        },
+        {
+          q: "What if there's damage?",
+          a: 'Document damage during post-trip inspection and file a claim through your dashboard.',
+        },
+        {
+          q: 'Am I liable for renter accidents?',
+          a: 'No, our insurance covers third-party liability up to ZMW 500,000.',
+        },
       ],
     },
   ];
@@ -101,19 +134,29 @@ export default function HelpPage() {
         <div className="grid md:grid-cols-2 gap-6 text-gray-900">
           <div>
             <h3 className="font-semibold mb-2">📸 Great Photos</h3>
-            <p className="text-sm">Clean your vehicle and take photos in good lighting. Listings with 10+ photos get 2x more bookings.</p>
+            <p className="text-sm">
+              Clean your vehicle and take photos in good lighting. Listings with 10+ photos get 2x
+              more bookings.
+            </p>
           </div>
           <div>
             <h3 className="font-semibold mb-2">💬 Fast Responses</h3>
-            <p className="text-sm">Respond to booking requests within 1 hour. Quick responses increase your approval rate.</p>
+            <p className="text-sm">
+              Respond to booking requests within 1 hour. Quick responses increase your approval
+              rate.
+            </p>
           </div>
           <div>
             <h3 className="font-semibold mb-2">⭐ Competitive Pricing</h3>
-            <p className="text-sm">Check similar vehicles in your area. Price competitively to get more bookings.</p>
+            <p className="text-sm">
+              Check similar vehicles in your area. Price competitively to get more bookings.
+            </p>
           </div>
           <div>
             <h3 className="font-semibold mb-2">🔧 Well-Maintained</h3>
-            <p className="text-sm">Keep your vehicle clean and serviced. Good reviews lead to more bookings.</p>
+            <p className="text-sm">
+              Keep your vehicle clean and serviced. Good reviews lead to more bookings.
+            </p>
           </div>
         </div>
       </div>

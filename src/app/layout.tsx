@@ -126,9 +126,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </a>
 
           {/* Page Layout */}
-          <ConditionalLayout>
-            {children}
-          </ConditionalLayout>
+          <ConditionalLayout>{children}</ConditionalLayout>
 
           {/* PWA Install Prompt */}
           <PWAInstallPrompt />
@@ -143,7 +141,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             aria-live="polite"
           >
             <div className="flex items-center justify-between">
-              <span className="text-sm font-body">You're offline. Some features may be limited.</span>
+              <span className="text-sm font-body">
+                You're offline. Some features may be limited.
+              </span>
               <span className="text-zemo-yellow text-sm font-sub-heading cursor-pointer">
                 Dismiss
               </span>

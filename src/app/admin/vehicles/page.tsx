@@ -1,119 +1,115 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { 
-  Car, 
-  Search, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  CheckCircle,
-  XCircle,
-  Filter
-} from 'lucide-react'
+import { useEffect, useState } from 'react';
+import { Car, Search, Eye, Edit, Trash2, CheckCircle, XCircle, Filter } from 'lucide-react';
 
 interface Vehicle {
-  id: string
-  make: string
-  model: string
-  year: number
-  vehicleType: string
-  plateNumber: string
-  dailyRate: number
-  availabilityStatus: string
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  vehicleType: string;
+  plateNumber: string;
+  dailyRate: number;
+  availabilityStatus: string;
   host: {
-    id: string
+    id: string;
     profile?: {
-      firstName: string
-      lastName: string
-    }
-  }
-  locationAddress: string
-  createdAt: string
+      firstName: string;
+      lastName: string;
+    };
+  };
+  locationAddress: string;
+  createdAt: string;
 }
 
 interface Filters {
-  status: string
-  category: string
-  search: string
+  status: string;
+  category: string;
+  search: string;
 }
 
 export default function AdminVehiclesPage() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([])
-  const [loading, setLoading] = useState(true)
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<Filters>({
     status: 'all',
     category: 'all',
-    search: ''
-  })
+    search: '',
+  });
 
   useEffect(() => {
-    loadVehicles()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters])
+    loadVehicles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
 
   const loadVehicles = async () => {
     try {
-      const token = localStorage.getItem('accessToken')
-      const queryParams = new URLSearchParams()
-      
-      if (filters.status !== 'all') queryParams.append('status', filters.status)
-      if (filters.category !== 'all') queryParams.append('category', filters.category)
-      if (filters.search) queryParams.append('search', filters.search)
+      const token = localStorage.getItem('accessToken');
+      const queryParams = new URLSearchParams();
+
+      if (filters.status !== 'all') queryParams.append('status', filters.status);
+      if (filters.category !== 'all') queryParams.append('category', filters.category);
+      if (filters.search) queryParams.append('search', filters.search);
 
       const response = await fetch(`/api/admin/vehicles?${queryParams.toString()}`, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.ok) {
-        const data = await response.json()
-        setVehicles(data.vehicles || [])
+        const data = await response.json();
+        setVehicles(data.vehicles || []);
       }
     } catch (error) {
-      console.error('Failed to load vehicles:', error)
+      console.error('Failed to load vehicles:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleStatusChange = async (vehicleId: string, newStatus: string) => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       const response = await fetch(`/api/admin/vehicles/${vehicleId}`, {
         method: 'PATCH',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ availabilityStatus: newStatus })
-      })
+        body: JSON.stringify({ availabilityStatus: newStatus }),
+      });
 
       if (response.ok) {
-        loadVehicles() // Reload the list
+        loadVehicles(); // Reload the list
       }
     } catch (error) {
-      console.error('Failed to update vehicle status:', error)
+      console.error('Failed to update vehicle status:', error);
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'available': return 'text-green-600 bg-green-100'
-      case 'unavailable': return 'text-red-600 bg-red-100'
-      case 'maintenance': return 'text-yellow-600 bg-yellow-100'
-      case 'booked': return 'text-blue-600 bg-blue-100'
-      default: return 'text-gray-600 bg-gray-100'
+      case 'available':
+        return 'text-green-600 bg-green-100';
+      case 'unavailable':
+        return 'text-red-600 bg-red-100';
+      case 'maintenance':
+        return 'text-yellow-600 bg-yellow-100';
+      case 'booked':
+        return 'text-blue-600 bg-blue-100';
+      default:
+        return 'text-gray-600 bg-gray-100';
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600" />
       </div>
-    )
+    );
   }
 
   return (
@@ -133,14 +129,14 @@ export default function AdminVehiclesPage() {
               placeholder="Search vehicles..."
               className="pl-10 w-full border border-gray-300 rounded-md px-3 py-2"
               value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+              onChange={e => setFilters({ ...filters, search: e.target.value })}
             />
           </div>
-          
+
           <select
             className="border border-gray-300 rounded-md px-3 py-2"
             value={filters.status}
-            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+            onChange={e => setFilters({ ...filters, status: e.target.value })}
           >
             <option value="all">All Statuses</option>
             <option value="available">Available</option>
@@ -152,7 +148,7 @@ export default function AdminVehiclesPage() {
           <select
             className="border border-gray-300 rounded-md px-3 py-2"
             value={filters.category}
-            onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+            onChange={e => setFilters({ ...filters, category: e.target.value })}
           >
             <option value="all">All Types</option>
             <option value="SEDAN">Sedan</option>
@@ -175,11 +171,9 @@ export default function AdminVehiclesPage() {
       {/* Vehicles Table */}
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">
-            Vehicles ({vehicles.length})
-          </h2>
+          <h2 className="text-lg font-medium text-gray-900">Vehicles ({vehicles.length})</h2>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -205,7 +199,7 @@ export default function AdminVehiclesPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {vehicles.map((vehicle) => (
+              {vehicles.map(vehicle => (
                 <tr key={vehicle.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -222,16 +216,13 @@ export default function AdminVehiclesPage() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {vehicle.host.profile ? 
-                        `${vehicle.host.profile.firstName} ${vehicle.host.profile.lastName}` : 
-                        'Unknown Host'
-                      }
+                      {vehicle.host.profile
+                        ? `${vehicle.host.profile.firstName} ${vehicle.host.profile.lastName}`
+                        : 'Unknown Host'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {vehicle.locationAddress}
-                    </div>
+                    <div className="text-sm text-gray-900">{vehicle.locationAddress}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
@@ -239,7 +230,9 @@ export default function AdminVehiclesPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(vehicle.availabilityStatus)}`}>
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(vehicle.availabilityStatus)}`}
+                    >
                       {vehicle.availabilityStatus}
                     </span>
                   </td>
@@ -252,14 +245,14 @@ export default function AdminVehiclesPage() {
                         <Edit className="h-4 w-4" />
                       </button>
                       {vehicle.availabilityStatus === 'AVAILABLE' ? (
-                        <button 
+                        <button
                           onClick={() => handleStatusChange(vehicle.id, 'UNAVAILABLE')}
                           className="text-red-600 hover:text-red-900"
                         >
                           <XCircle className="h-4 w-4" />
                         </button>
                       ) : (
-                        <button 
+                        <button
                           onClick={() => handleStatusChange(vehicle.id, 'AVAILABLE')}
                           className="text-green-600 hover:text-green-900"
                         >
@@ -281,12 +274,10 @@ export default function AdminVehiclesPage() {
           <div className="text-center py-12">
             <Car className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No vehicles found</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              No vehicles match the current filters.
-            </p>
+            <p className="mt-1 text-sm text-gray-500">No vehicles match the current filters.</p>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }

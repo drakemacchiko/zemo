@@ -2,11 +2,11 @@
  * @jest-environment node
  */
 
-import { NextRequest } from 'next/server'
-import { POST as registerPost } from '@/app/api/auth/register/route'
-import { POST as loginPost } from '@/app/api/auth/login/route'
-import { POST as verifyPhonePost } from '@/app/api/auth/verify-phone/route'
-import { GET as meGet } from '@/app/api/auth/me/route'
+import { NextRequest } from 'next/server';
+import { POST as registerPost } from '@/app/api/auth/register/route';
+import { POST as loginPost } from '@/app/api/auth/login/route';
+import { POST as verifyPhonePost } from '@/app/api/auth/verify-phone/route';
+import { GET as meGet } from '@/app/api/auth/me/route';
 
 // Mock Prisma
 jest.mock('@/lib/db', () => ({
@@ -18,7 +18,7 @@ jest.mock('@/lib/db', () => ({
       update: jest.fn(),
     },
   },
-}))
+}));
 
 // Mock auth utilities
 jest.mock('@/lib/auth', () => ({
@@ -35,17 +35,17 @@ jest.mock('@/lib/auth', () => ({
   generateOTP: jest.fn().mockReturnValue('123456'),
   sendSMS: jest.fn().mockResolvedValue(true),
   checkRateLimit: jest.fn().mockReturnValue(true),
-}))
+}));
 
 // Mock environment
-Object.defineProperty(process.env, 'NODE_ENV', { value: 'test' })
+Object.defineProperty(process.env, 'NODE_ENV', { value: 'test' });
 
 describe('Auth API Integration Tests', () => {
-  const { prisma } = require('@/lib/db')
+  const { prisma } = require('@/lib/db');
 
   beforeEach(() => {
-    jest.clearAllMocks()
-  })
+    jest.clearAllMocks();
+  });
 
   describe('POST /api/auth/register', () => {
     const validRegisterData = {
@@ -54,11 +54,11 @@ describe('Auth API Integration Tests', () => {
       phoneNumber: '+260971234567',
       firstName: 'John',
       lastName: 'Doe',
-    }
+    };
 
     test('should register user successfully', async () => {
       // Mock database responses
-      prisma.user.findFirst.mockResolvedValue(null) // No existing user
+      prisma.user.findFirst.mockResolvedValue(null); // No existing user
       prisma.user.create.mockResolvedValue({
         id: 'test-user-id',
         email: 'test@example.com',
@@ -68,41 +68,41 @@ describe('Auth API Integration Tests', () => {
           firstName: 'John',
           lastName: 'Doe',
         },
-      })
+      });
 
       const request = new NextRequest('http://localhost:3000/api/auth/register', {
         method: 'POST',
         body: JSON.stringify(validRegisterData),
-      })
+      });
 
-      const response = await registerPost(request)
-      const data = await response.json()
+      const response = await registerPost(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(201)
-      expect(data.message).toContain('Registration successful')
-      expect(data.user).toBeDefined()
-      expect(data.tokens).toBeDefined()
-      expect(prisma.user.create).toHaveBeenCalled()
-    })
+      expect(response.status).toBe(201);
+      expect(data.message).toContain('Registration successful');
+      expect(data.user).toBeDefined();
+      expect(data.tokens).toBeDefined();
+      expect(prisma.user.create).toHaveBeenCalled();
+    });
 
     test('should reject existing user', async () => {
       // Mock existing user
       prisma.user.findFirst.mockResolvedValue({
         id: 'existing-user',
         email: 'test@example.com',
-      })
+      });
 
       const request = new NextRequest('http://localhost:3000/api/auth/register', {
         method: 'POST',
         body: JSON.stringify(validRegisterData),
-      })
+      });
 
-      const response = await registerPost(request)
-      const data = await response.json()
+      const response = await registerPost(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(409)
-      expect(data.error).toContain('already exists')
-    })
+      expect(response.status).toBe(409);
+      expect(data.error).toContain('already exists');
+    });
 
     test('should validate input data', async () => {
       const invalidData = {
@@ -111,26 +111,26 @@ describe('Auth API Integration Tests', () => {
         phoneNumber: 'invalid',
         firstName: '',
         lastName: '',
-      }
+      };
 
       const request = new NextRequest('http://localhost:3000/api/auth/register', {
         method: 'POST',
         body: JSON.stringify(invalidData),
-      })
+      });
 
-      const response = await registerPost(request)
-      const data = await response.json()
+      const response = await registerPost(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(400)
-      expect(data.error).toContain('Invalid input data')
-    })
-  })
+      expect(response.status).toBe(400);
+      expect(data.error).toContain('Invalid input data');
+    });
+  });
 
   describe('POST /api/auth/login', () => {
     const validLoginData = {
       email: 'test@example.com',
       password: 'Test123!@#',
-    }
+    };
 
     test('should login user successfully', async () => {
       // Mock user in database
@@ -145,44 +145,44 @@ describe('Auth API Integration Tests', () => {
           lastName: 'Doe',
         },
         drivingLicense: null,
-      })
+      });
 
       const request = new NextRequest('http://localhost:3000/api/auth/login', {
         method: 'POST',
         body: JSON.stringify(validLoginData),
-      })
+      });
 
-      const response = await loginPost(request)
-      const data = await response.json()
+      const response = await loginPost(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(200)
-      expect(data.message).toBe('Login successful')
-      expect(data.user).toBeDefined()
-      expect(data.tokens).toBeDefined()
-    })
+      expect(response.status).toBe(200);
+      expect(data.message).toBe('Login successful');
+      expect(data.user).toBeDefined();
+      expect(data.tokens).toBeDefined();
+    });
 
     test('should reject invalid credentials', async () => {
       // Mock user not found
-      prisma.user.findUnique.mockResolvedValue(null)
+      prisma.user.findUnique.mockResolvedValue(null);
 
       const request = new NextRequest('http://localhost:3000/api/auth/login', {
         method: 'POST',
         body: JSON.stringify(validLoginData),
-      })
+      });
 
-      const response = await loginPost(request)
-      const data = await response.json()
+      const response = await loginPost(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(401)
-      expect(data.error).toBe('Invalid credentials')
-    })
-  })
+      expect(response.status).toBe(401);
+      expect(data.error).toBe('Invalid credentials');
+    });
+  });
 
   describe('POST /api/auth/verify-phone', () => {
     const validOtpData = {
       phoneNumber: '+260971234567',
       otpCode: '123456',
-    }
+    };
 
     test('should verify phone successfully', async () => {
       // Mock user with valid OTP
@@ -191,19 +191,19 @@ describe('Auth API Integration Tests', () => {
         phoneVerified: false,
         otpCode: '123456',
         otpExpiry: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes from now
-      })
+      });
 
       const request = new NextRequest('http://localhost:3000/api/auth/verify-phone', {
         method: 'POST',
         body: JSON.stringify(validOtpData),
-      })
+      });
 
-      const response = await verifyPhonePost(request)
-      const data = await response.json()
+      const response = await verifyPhonePost(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(200)
-      expect(data.message).toContain('verified successfully')
-      expect(data.phoneVerified).toBe(true)
+      expect(response.status).toBe(200);
+      expect(data.message).toContain('verified successfully');
+      expect(data.phoneVerified).toBe(true);
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 'test-user-id' },
         data: {
@@ -211,8 +211,8 @@ describe('Auth API Integration Tests', () => {
           otpCode: null,
           otpExpiry: null,
         },
-      })
-    })
+      });
+    });
 
     test('should reject expired OTP', async () => {
       // Mock user with expired OTP
@@ -221,19 +221,19 @@ describe('Auth API Integration Tests', () => {
         phoneVerified: false,
         otpCode: '123456',
         otpExpiry: new Date(Date.now() - 10 * 60 * 1000), // 10 minutes ago
-      })
+      });
 
       const request = new NextRequest('http://localhost:3000/api/auth/verify-phone', {
         method: 'POST',
         body: JSON.stringify(validOtpData),
-      })
+      });
 
-      const response = await verifyPhonePost(request)
-      const data = await response.json()
+      const response = await verifyPhonePost(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(400)
-      expect(data.error).toContain('expired')
-    })
+      expect(response.status).toBe(400);
+      expect(data.error).toContain('expired');
+    });
 
     test('should reject invalid OTP', async () => {
       // Mock user with different OTP
@@ -242,20 +242,20 @@ describe('Auth API Integration Tests', () => {
         phoneVerified: false,
         otpCode: '654321',
         otpExpiry: new Date(Date.now() + 10 * 60 * 1000),
-      })
+      });
 
       const request = new NextRequest('http://localhost:3000/api/auth/verify-phone', {
         method: 'POST',
         body: JSON.stringify(validOtpData),
-      })
+      });
 
-      const response = await verifyPhonePost(request)
-      const data = await response.json()
+      const response = await verifyPhonePost(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(400)
-      expect(data.error).toContain('Invalid OTP')
-    })
-  })
+      expect(response.status).toBe(400);
+      expect(data.error).toContain('Invalid OTP');
+    });
+  });
 
   describe('GET /api/auth/me', () => {
     test('should return user data for authenticated request', async () => {
@@ -272,41 +272,41 @@ describe('Auth API Integration Tests', () => {
           kycStatus: 'PENDING',
         },
         drivingLicense: null,
-      })
+      });
 
       const request = new NextRequest('http://localhost:3000/api/auth/me', {
         method: 'GET',
         headers: {
           Authorization: 'Bearer mock-access-token',
         },
-      })
+      });
 
-      const response = await meGet(request)
-      const data = await response.json()
+      const response = await meGet(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(200)
-      expect(data.user).toBeDefined()
-      expect(data.user.email).toBe('test@example.com')
-      expect(data.user.profile).toBeDefined()
-    })
+      expect(response.status).toBe(200);
+      expect(data.user).toBeDefined();
+      expect(data.user.email).toBe('test@example.com');
+      expect(data.user.profile).toBeDefined();
+    });
 
     test('should reject unauthenticated request', async () => {
       // Mock invalid token verification
-      const { verifyAccessToken } = require('@/lib/auth')
-      verifyAccessToken.mockReturnValue(null)
+      const { verifyAccessToken } = require('@/lib/auth');
+      verifyAccessToken.mockReturnValue(null);
 
       const request = new NextRequest('http://localhost:3000/api/auth/me', {
         method: 'GET',
         headers: {
           Authorization: 'Bearer invalid-token',
         },
-      })
+      });
 
-      const response = await meGet(request)
-      const data = await response.json()
+      const response = await meGet(request);
+      const data = await response.json();
 
-      expect(response.status).toBe(401)
-      expect(data.error).toContain('Invalid or expired token')
-    })
-  })
-})
+      expect(response.status).toBe(401);
+      expect(data.error).toContain('Invalid or expired token');
+    });
+  });
+});

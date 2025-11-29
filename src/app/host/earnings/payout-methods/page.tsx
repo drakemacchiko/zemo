@@ -32,7 +32,7 @@ export default function PayoutMethodsPage() {
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch('/api/host/earnings/payout-methods', {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -53,7 +53,7 @@ export default function PayoutMethodsPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
       });
@@ -78,7 +78,7 @@ export default function PayoutMethodsPage() {
       const token = localStorage.getItem('accessToken');
       const response = await fetch(`/api/host/earnings/payout-methods/${methodId}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -99,7 +99,7 @@ export default function PayoutMethodsPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ isDefault: true }),
       });
@@ -142,9 +142,7 @@ export default function PayoutMethodsPage() {
         <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
           <CreditCard className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">No payout methods</h3>
-          <p className="text-gray-600 mb-6">
-            Add a bank account to receive your rental earnings
-          </p>
+          <p className="text-gray-600 mb-6">Add a bank account to receive your rental earnings</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -223,7 +221,7 @@ export default function PayoutMethodsPage() {
                 <input
                   type="text"
                   value={formData.bankName}
-                  onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+                  onChange={e => setFormData({ ...formData, bankName: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400"
                   placeholder="E.g., Zanaco, Stanbic Bank"
                 />
@@ -234,7 +232,7 @@ export default function PayoutMethodsPage() {
                 <input
                   type="text"
                   value={formData.accountHolderName}
-                  onChange={(e) => setFormData({ ...formData, accountHolderName: e.target.value })}
+                  onChange={e => setFormData({ ...formData, accountHolderName: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400"
                   placeholder="Full name as per bank account"
                 />
@@ -245,7 +243,7 @@ export default function PayoutMethodsPage() {
                 <input
                   type="text"
                   value={formData.accountNumber}
-                  onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
+                  onChange={e => setFormData({ ...formData, accountNumber: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400"
                   placeholder="Your account number"
                 />
@@ -256,7 +254,7 @@ export default function PayoutMethodsPage() {
                 <input
                   type="text"
                   value={formData.branchCode}
-                  onChange={(e) => setFormData({ ...formData, branchCode: e.target.value })}
+                  onChange={e => setFormData({ ...formData, branchCode: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400"
                   placeholder="Branch code"
                 />
@@ -266,7 +264,12 @@ export default function PayoutMethodsPage() {
                 <button
                   onClick={() => {
                     setShowAddModal(false);
-                    setFormData({ bankName: '', accountNumber: '', accountHolderName: '', branchCode: '' });
+                    setFormData({
+                      bankName: '',
+                      accountNumber: '',
+                      accountHolderName: '',
+                      branchCode: '',
+                    });
                   }}
                   className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
                 >
@@ -274,7 +277,12 @@ export default function PayoutMethodsPage() {
                 </button>
                 <button
                   onClick={handleAddMethod}
-                  disabled={!formData.bankName || !formData.accountNumber || !formData.accountHolderName || !formData.branchCode}
+                  disabled={
+                    !formData.bankName ||
+                    !formData.accountNumber ||
+                    !formData.accountHolderName ||
+                    !formData.branchCode
+                  }
                   className="flex-1 px-4 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-500 font-semibold disabled:opacity-50"
                 >
                   Add Method

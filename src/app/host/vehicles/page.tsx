@@ -1,137 +1,142 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import Image from 'next/image'
-import {
-  Car,
-  Plus,
-  Search,
-  Grid,
-  List,
-  Edit,
-  Eye,
-  Pause,
-  Play,
-  Star
-} from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Car, Plus, Search, Grid, List, Edit, Eye, Pause, Play, Star } from 'lucide-react';
 
 interface Vehicle {
-  id: string
-  plateNumber: string
-  make: string
-  model: string
-  year: number
-  dailyRate: number
-  status: string
-  verificationStatus: string
-  availabilityStatus: string
-  isActive: boolean
-  totalTrips: number
-  averageRating: number | null
-  monthlyEarnings: number
-  photo: string | null
+  id: string;
+  plateNumber: string;
+  make: string;
+  model: string;
+  year: number;
+  dailyRate: number;
+  status: string;
+  verificationStatus: string;
+  availabilityStatus: string;
+  isActive: boolean;
+  totalTrips: number;
+  averageRating: number | null;
+  monthlyEarnings: number;
+  photo: string | null;
 }
 
 export default function HostVehiclesPage() {
-  const router = useRouter()
-  const [vehicles, setVehicles] = useState<Vehicle[]>([])
-  const [loading, setLoading] = useState(true)
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filterStatus, setFilterStatus] = useState('all')
-  const [sortBy, setSortBy] = useState('recent')
+  const router = useRouter();
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [sortBy, setSortBy] = useState('recent');
 
   const fetchVehicles = useCallback(async () => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       if (!token) {
-        router.push('/login')
-        return
+        router.push('/login');
+        return;
       }
 
       const response = await fetch('/api/host/vehicles', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch vehicles')
+        throw new Error('Failed to fetch vehicles');
       }
 
-      const data = await response.json()
-      setVehicles(data.vehicles)
+      const data = await response.json();
+      setVehicles(data.vehicles);
     } catch (error) {
-      console.error('Error fetching vehicles:', error)
+      console.error('Error fetching vehicles:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [router])
+  }, [router]);
 
   useEffect(() => {
-    fetchVehicles()
-  }, [fetchVehicles])
+    fetchVehicles();
+  }, [fetchVehicles]);
 
   const toggleVehicleStatus = async (vehicleId: string, currentStatus: boolean) => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       const response = await fetch(`/api/host/vehicles/${vehicleId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ isActive: !currentStatus })
-      })
+        body: JSON.stringify({ isActive: !currentStatus }),
+      });
 
       if (response.ok) {
-        fetchVehicles()
+        fetchVehicles();
       }
     } catch (error) {
-      console.error('Error toggling vehicle status:', error)
+      console.error('Error toggling vehicle status:', error);
     }
-  }
+  };
 
   const filteredVehicles = vehicles.filter(vehicle => {
-    const matchesSearch = 
+    const matchesSearch =
       vehicle.make.toLowerCase().includes(searchQuery.toLowerCase()) ||
       vehicle.model.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vehicle.plateNumber.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    const matchesFilter = 
+      vehicle.plateNumber.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesFilter =
       filterStatus === 'all' ||
       (filterStatus === 'active' && vehicle.isActive) ||
       (filterStatus === 'paused' && !vehicle.isActive) ||
-      (filterStatus === 'pending' && vehicle.verificationStatus === 'PENDING')
-    
-    return matchesSearch && matchesFilter
-  })
+      (filterStatus === 'pending' && vehicle.verificationStatus === 'PENDING');
+
+    return matchesSearch && matchesFilter;
+  });
 
   const sortedVehicles = [...filteredVehicles].sort((a, b) => {
     switch (sortBy) {
       case 'recent':
-        return 0 // Already sorted by createdAt desc from API
+        return 0; // Already sorted by createdAt desc from API
       case 'popular':
-        return b.totalTrips - a.totalTrips
+        return b.totalTrips - a.totalTrips;
       case 'earnings':
-        return b.monthlyEarnings - a.monthlyEarnings
+        return b.monthlyEarnings - a.monthlyEarnings;
       default:
-        return 0
+        return 0;
     }
-  })
+  });
 
   const getStatusBadge = (vehicle: Vehicle) => {
     if (!vehicle.isActive) {
-      return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-800">Paused</span>
+      return (
+        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-800">
+          Paused
+        </span>
+      );
     }
     if (vehicle.verificationStatus === 'PENDING') {
-      return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-200 text-yellow-800">Pending Review</span>
+      return (
+        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-200 text-yellow-800">
+          Pending Review
+        </span>
+      );
     }
     if (vehicle.verificationStatus === 'VERIFIED' && vehicle.isActive) {
-      return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-200 text-green-800">Active</span>
+      return (
+        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-200 text-green-800">
+          Active
+        </span>
+      );
     }
-    return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-800">Inactive</span>
-  }
+    return (
+      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-800">
+        Inactive
+      </span>
+    );
+  };
 
   if (loading) {
     return (
@@ -141,7 +146,7 @@ export default function HostVehiclesPage() {
           <p className="mt-4 text-gray-600">Loading vehicles...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -173,7 +178,7 @@ export default function HostVehiclesPage() {
                   type="text"
                   placeholder="Search by make, model, or plate number..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={e => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -183,7 +188,7 @@ export default function HostVehiclesPage() {
             <div>
               <select
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
+                onChange={e => setFilterStatus(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">All Vehicles</option>
@@ -197,7 +202,7 @@ export default function HostVehiclesPage() {
             <div>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={e => setSortBy(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="recent">Recently Added</option>
@@ -229,12 +234,12 @@ export default function HostVehiclesPage() {
           <div className="bg-white rounded-lg shadow p-12 text-center">
             <Car className="h-16 w-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              {vehicles.length === 0 ? "No vehicles listed yet" : "No vehicles match your filters"}
+              {vehicles.length === 0 ? 'No vehicles listed yet' : 'No vehicles match your filters'}
             </h3>
             <p className="text-gray-600 mb-6">
-              {vehicles.length === 0 
-                ? "Start earning by listing your first vehicle" 
-                : "Try adjusting your search or filters"}
+              {vehicles.length === 0
+                ? 'Start earning by listing your first vehicle'
+                : 'Try adjusting your search or filters'}
             </p>
             {vehicles.length === 0 && (
               <Link
@@ -248,8 +253,11 @@ export default function HostVehiclesPage() {
           </div>
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedVehicles.map((vehicle) => (
-              <div key={vehicle.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden">
+            {sortedVehicles.map(vehicle => (
+              <div
+                key={vehicle.id}
+                className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden"
+              >
                 <div className="relative h-48 bg-gray-200">
                   {vehicle.photo ? (
                     <Image
@@ -263,9 +271,7 @@ export default function HostVehiclesPage() {
                       <Car className="h-16 w-16 text-gray-400" />
                     </div>
                   )}
-                  <div className="absolute top-2 right-2">
-                    {getStatusBadge(vehicle)}
-                  </div>
+                  <div className="absolute top-2 right-2">{getStatusBadge(vehicle)}</div>
                 </div>
 
                 <div className="p-6">
@@ -377,7 +383,9 @@ export default function HostVehiclesPage() {
                     </div>
                     <div>
                       <span className="text-gray-600">Monthly:</span>
-                      <span className="ml-2 font-semibold text-gray-900">K{vehicle.monthlyEarnings.toFixed(0)}</span>
+                      <span className="ml-2 font-semibold text-gray-900">
+                        K{vehicle.monthlyEarnings.toFixed(0)}
+                      </span>
                     </div>
                     <div>
                       <span className="text-gray-600">Daily Rate:</span>
@@ -406,7 +414,11 @@ export default function HostVehiclesPage() {
                     className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
                     title={vehicle.isActive ? 'Pause listing' : 'Activate listing'}
                   >
-                    {vehicle.isActive ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+                    {vehicle.isActive ? (
+                      <Pause className="h-5 w-5" />
+                    ) : (
+                      <Play className="h-5 w-5" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -415,5 +427,5 @@ export default function HostVehiclesPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

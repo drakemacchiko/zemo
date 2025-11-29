@@ -1,41 +1,41 @@
-import { NextResponse } from 'next/server'
-import { verifyAccessToken } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { NextResponse } from 'next/server';
+import { verifyAccessToken } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 
 export async function GET(request: Request) {
   try {
     // Verify authentication
-    const authHeader = request.headers.get('Authorization')
+    const authHeader = request.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const token = authHeader.split(' ')[1]
+    const token = authHeader.split(' ')[1];
     if (!token) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
-    }
-    
-    const decoded = verifyAccessToken(token)
-    if (!decoded) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const userId = decoded.userId
+    const decoded = verifyAccessToken(token);
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
+    const userId = decoded.userId;
 
     // Count unread notifications
     const unreadCount = await prisma.notification.count({
       where: {
         userId,
-        isRead: false
-      }
-    })
+        isRead: false,
+      },
+    });
 
-    return NextResponse.json({ count: unreadCount })
+    return NextResponse.json({ count: unreadCount });
   } catch (error) {
-    console.error('Error fetching unread notification count:', error)
+    console.error('Error fetching unread notification count:', error);
     return NextResponse.json(
       { error: 'Failed to fetch unread notification count' },
       { status: 500 }
-    )
+    );
   }
 }

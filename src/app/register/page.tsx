@@ -1,77 +1,77 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface RegisterFormData {
-  email: string
-  password: string
-  confirmPassword: string
-  phoneNumber: string
-  firstName: string
-  lastName: string
+  email: string;
+  password: string;
+  confirmPassword: string;
+  phoneNumber: string;
+  firstName: string;
+  lastName: string;
 }
 
 export default function RegisterPage() {
-  const router = useRouter()
+  const router = useRouter();
   const [formData, setFormData] = useState<RegisterFormData>({
     email: '',
     password: '',
     confirmPassword: '',
     phoneNumber: '',
     firstName: '',
-    lastName: ''
-  })
-  const [errors, setErrors] = useState<Partial<RegisterFormData & { general: string }>>({})
-  const [isLoading, setIsLoading] = useState(false)
-  const [showOtpForm, setShowOtpForm] = useState(false)
-  const [otpCode, setOtpCode] = useState('')
+    lastName: '',
+  });
+  const [errors, setErrors] = useState<Partial<RegisterFormData & { general: string }>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [showOtpForm, setShowOtpForm] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
     // Clear error when user starts typing
     if (errors[name as keyof RegisterFormData]) {
-      setErrors(prev => ({ ...prev, [name]: '' }))
+      setErrors(prev => ({ ...prev, [name]: '' }));
     }
-  }
+  };
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<RegisterFormData & { general: string }> = {}
+    const newErrors: Partial<RegisterFormData & { general: string }> = {};
 
-    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required'
-    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required'
+    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required'
+      newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format'
+      newErrors.email = 'Invalid email format';
     }
     if (!formData.password) {
-      newErrors.password = 'Password is required'
+      newErrors.password = 'Password is required';
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters'
+      newErrors.password = 'Password must be at least 8 characters';
     }
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match'
+      newErrors.confirmPassword = 'Passwords do not match';
     }
     if (!formData.phoneNumber.trim()) {
-      newErrors.phoneNumber = 'Phone number is required'
+      newErrors.phoneNumber = 'Phone number is required';
     } else if (!/^(\+260|0)[1-9]\d{8}$/.test(formData.phoneNumber)) {
-      newErrors.phoneNumber = 'Invalid Zambian phone number format'
+      newErrors.phoneNumber = 'Invalid Zambian phone number format';
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!validateForm()) return
+    e.preventDefault();
 
-    setIsLoading(true)
-    setErrors({})
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    setErrors({});
 
     try {
       const response = await fetch('/api/auth/register', {
@@ -86,39 +86,39 @@ export default function RegisterPage() {
           firstName: formData.firstName,
           lastName: formData.lastName,
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
         // Store tokens in localStorage
-        localStorage.setItem('accessToken', data.tokens.accessToken)
-        localStorage.setItem('refreshToken', data.tokens.refreshToken)
-        
+        localStorage.setItem('accessToken', data.tokens.accessToken);
+        localStorage.setItem('refreshToken', data.tokens.refreshToken);
+
         // Also set accessToken as a cookie for middleware authentication
-        document.cookie = `accessToken=${data.tokens.accessToken}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`
-        
-        setShowOtpForm(true)
+        document.cookie = `accessToken=${data.tokens.accessToken}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+
+        setShowOtpForm(true);
       } else {
-        setErrors({ general: data.error || 'Registration failed' })
+        setErrors({ general: data.error || 'Registration failed' });
       }
     } catch (error) {
-      setErrors({ general: 'Network error. Please try again.' })
+      setErrors({ general: 'Network error. Please try again.' });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!otpCode || otpCode.length !== 6) {
-      setErrors({ general: 'Please enter a valid 6-digit OTP code' })
-      return
+      setErrors({ general: 'Please enter a valid 6-digit OTP code' });
+      return;
     }
 
-    setIsLoading(true)
-    setErrors({})
+    setIsLoading(true);
+    setErrors({});
 
     try {
       const response = await fetch('/api/auth/verify-phone', {
@@ -130,21 +130,21 @@ export default function RegisterPage() {
           phoneNumber: formData.phoneNumber,
           otpCode,
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
-        router.push('/profile')
+        router.push('/profile');
       } else {
-        setErrors({ general: data.error || 'OTP verification failed' })
+        setErrors({ general: data.error || 'OTP verification failed' });
       }
     } catch (error) {
-      setErrors({ general: 'Network error. Please try again.' })
+      setErrors({ general: 'Network error. Please try again.' });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (showOtpForm) {
     return (
@@ -180,7 +180,7 @@ export default function RegisterPage() {
                     name="otpCode"
                     type="text"
                     value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value)}
+                    onChange={e => setOtpCode(e.target.value)}
                     maxLength={6}
                     placeholder="123456"
                     className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500"
@@ -201,7 +201,7 @@ export default function RegisterPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -283,9 +283,7 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500"
                 />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-                )}
+                {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
               </div>
             </div>
 
@@ -322,9 +320,7 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500"
                 />
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                )}
+                {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
               </div>
             </div>
 
@@ -360,5 +356,5 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

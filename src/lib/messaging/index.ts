@@ -23,7 +23,10 @@ export class MessageEncryption {
   /**
    * Encrypt a message with a shared secret
    */
-  static encrypt(message: string, secret: string): {
+  static encrypt(
+    message: string,
+    secret: string
+  ): {
     encrypted: string;
     iv: string;
     tag: string;
@@ -31,60 +34,71 @@ export class MessageEncryption {
     try {
       // Create a key from the secret
       const key = crypto.scryptSync(secret, 'salt', this.keyLength);
-      
+
       // Generate random IV
       const iv = crypto.randomBytes(this.ivLength);
-      
+
       // Create cipher (simplified for compatibility)
       const cipher = crypto.createCipher('aes-256-cbc', key.toString('hex'));
-      
+
       // Encrypt the message
       let encrypted = cipher.update(message, 'utf8', 'hex');
       encrypted += cipher.final('hex');
-      
+
       // Generate authentication tag (simplified)
       const tag = crypto.createHmac('sha256', key).update(encrypted).digest('hex').substring(0, 32);
-      
+
       return {
         encrypted,
         iv: iv.toString('hex'),
-        tag: tag
+        tag: tag,
       };
     } catch (error) {
-      throw new Error(`Encryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Encryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
   /**
    * Decrypt a message with a shared secret
    */
-  static decrypt(encryptedData: {
-    encrypted: string;
-    iv: string;
-    tag: string;
-  }, secret: string): string {
+  static decrypt(
+    encryptedData: {
+      encrypted: string;
+      iv: string;
+      tag: string;
+    },
+    secret: string
+  ): string {
     try {
       // Create a key from the secret
       const key = crypto.scryptSync(secret, 'salt', this.keyLength);
-      
+
       // Convert hex strings back to buffers (iv not needed for simple cipher)
-      
+
       // Create decipher (simplified for compatibility)
       const decipher = crypto.createDecipher('aes-256-cbc', key.toString('hex'));
-      
+
       // Verify tag (simplified)
-      const expectedTag = crypto.createHmac('sha256', key).update(encryptedData.encrypted).digest('hex').substring(0, 32);
+      const expectedTag = crypto
+        .createHmac('sha256', key)
+        .update(encryptedData.encrypted)
+        .digest('hex')
+        .substring(0, 32);
       if (expectedTag !== encryptedData.tag) {
         throw new Error('Authentication tag verification failed');
       }
-      
+
       // Decrypt the message
       let decrypted = decipher.update(encryptedData.encrypted, 'hex', 'utf8');
       decrypted += decipher.final('utf8');
-      
+
       return decrypted;
     } catch (error) {
-      throw new Error(`Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Decryption failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -95,7 +109,7 @@ export class MessageEncryption {
     // Create a deterministic key based on user IDs and optional booking
     const keyData = [userId1, userId2].sort().join(':');
     const fullData = bookingId ? `${keyData}:${bookingId}` : keyData;
-    
+
     return crypto.createHash('sha256').update(fullData).digest('hex');
   }
 }
@@ -104,7 +118,10 @@ export class MessageEncryption {
 export class ContentModerationService {
   private static profanityList = [
     // Basic profanity filtering - in production, use a comprehensive service
-    'spam', 'scam', 'fraud', 'fake'
+    'spam',
+    'scam',
+    'fraud',
+    'fake',
   ];
 
   private static suspiciousPatterns = [
@@ -112,7 +129,7 @@ export class ContentModerationService {
     /\b\d{3}-\d{2}-\d{4}\b/, // SSN-like patterns
     /bank\s*account/i,
     /password/i,
-    /login\s*details/i
+    /login\s*details/i,
   ];
 
   /**
@@ -151,7 +168,7 @@ export class ContentModerationService {
 
     // Determine suggested action
     let suggestedAction: 'allow' | 'review' | 'block' = 'allow';
-    
+
     if (!isAppropriate) {
       suggestedAction = 'block';
     } else if (flags.length > 0) {
@@ -162,25 +179,28 @@ export class ContentModerationService {
       isAppropriate,
       confidence,
       flags,
-      suggestedAction
+      suggestedAction,
     };
   }
 
   /**
    * Check if a user can send messages (not blocked, rate limited, etc.)
    */
-  static async canUserSendMessage(userId: string, targetUserId: string): Promise<{
+  static async canUserSendMessage(
+    userId: string,
+    targetUserId: string
+  ): Promise<{
     canSend: boolean;
     reason?: string;
   }> {
     try {
       // TODO: Implement actual blocking and rate limiting checks
       // For now, simulate basic checks
-      
+
       if (userId === targetUserId) {
         return {
           canSend: false,
-          reason: 'Cannot send messages to yourself'
+          reason: 'Cannot send messages to yourself',
         };
       }
 
@@ -194,7 +214,7 @@ export class ContentModerationService {
     } catch (error) {
       return {
         canSend: false,
-        reason: 'Unable to verify message permissions'
+        reason: 'Unable to verify message permissions',
       };
     }
   }
@@ -219,7 +239,11 @@ export class PrivacyManager {
   /**
    * Block a user
    */
-  static async blockUser(_userId: string, _targetUserId: string, _reason?: string): Promise<{
+  static async blockUser(
+    _userId: string,
+    _targetUserId: string,
+    _reason?: string
+  ): Promise<{
     success: boolean;
     error?: string;
   }> {
@@ -227,18 +251,18 @@ export class PrivacyManager {
       if (_userId === _targetUserId) {
         return {
           success: false,
-          error: 'Cannot block yourself'
+          error: 'Cannot block yourself',
         };
       }
 
       // TODO: Implement with actual database operations
       // For now, simulate success
-      
+
       return { success: true };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -246,19 +270,22 @@ export class PrivacyManager {
   /**
    * Unblock a user
    */
-  static async unblockUser(_userId: string, _targetUserId: string): Promise<{
+  static async unblockUser(
+    _userId: string,
+    _targetUserId: string
+  ): Promise<{
     success: boolean;
     error?: string;
   }> {
     try {
       // TODO: Implement with actual database operations
       // For now, simulate success
-      
+
       return { success: true };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -270,7 +297,7 @@ export class PrivacyManager {
     try {
       // TODO: Implement with actual database query
       // For now, return empty list
-      
+
       return [];
     } catch (error) {
       console.error('Error fetching blocked users:', error);
@@ -295,7 +322,7 @@ export class MessageRateLimit {
   private static limits = {
     messagesPerMinute: 10,
     messagesPerHour: 100,
-    messagesPerDay: 500
+    messagesPerDay: 500,
   };
 
   /**
@@ -310,11 +337,11 @@ export class MessageRateLimit {
     try {
       // TODO: Implement with Redis or database-based rate limiting
       // For now, simulate allowing all messages
-      
+
       return {
         allowed: true,
         remaining: this.limits.messagesPerMinute - 1,
-        resetTime: new Date(Date.now() + 60 * 1000) // Reset in 1 minute
+        resetTime: new Date(Date.now() + 60 * 1000), // Reset in 1 minute
       };
     } catch (error) {
       console.error('Error checking message rate limit:', error);
@@ -322,7 +349,7 @@ export class MessageRateLimit {
         allowed: false,
         remaining: 0,
         resetTime: new Date(Date.now() + 60 * 1000),
-        limitType: 'error'
+        limitType: 'error',
       };
     }
   }
@@ -341,7 +368,11 @@ export class MessageRateLimit {
 }
 
 // Utility functions
-export function generateConversationId(userId1: string, userId2: string, bookingId?: string): string {
+export function generateConversationId(
+  userId1: string,
+  userId2: string,
+  bookingId?: string
+): string {
   const sortedIds = [userId1, userId2].sort();
   const baseId = sortedIds.join('-');
   return bookingId ? `${baseId}-${bookingId}` : baseId;

@@ -1,115 +1,113 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface User {
-  id: string
-  email: string
-  phoneNumber: string
-  phoneVerified: boolean
-  emailVerified: boolean
+  id: string;
+  email: string;
+  phoneNumber: string;
+  phoneVerified: boolean;
+  emailVerified: boolean;
   profile: {
-    firstName: string
-    lastName: string
-    profilePictureUrl?: string
-    kycStatus: string
-    kycDocuments?: any
-  }
+    firstName: string;
+    lastName: string;
+    profilePictureUrl?: string;
+    kycStatus: string;
+    kycDocuments?: any;
+  };
   drivingLicense?: {
-    licenseNumber: string
-    verificationStatus: string
-  }
+    licenseNumber: string;
+    verificationStatus: string;
+  };
 }
 
 export default function ProfilePage() {
-  const router = useRouter()
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [uploadLoading, setUploadLoading] = useState<string | null>(null)
-  const [message, setMessage] = useState('')
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [uploadLoading, setUploadLoading] = useState<string | null>(null);
+  const [message, setMessage] = useState('');
 
   const fetchUserProfile = useCallback(async () => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       if (!token) {
-        router.push('/login')
-        return
+        router.push('/login');
+        return;
       }
 
       const response = await fetch('/api/auth/me', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
-      })
+      });
 
       if (response.ok) {
-        const data = await response.json()
-        setUser(data.user)
+        const data = await response.json();
+        setUser(data.user);
       } else {
         if (response.status === 401) {
-          localStorage.removeItem('accessToken')
-          localStorage.removeItem('refreshToken')
-          router.push('/login')
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          router.push('/login');
         }
       }
     } catch (error) {
-      console.error('Error fetching profile:', error)
+      console.error('Error fetching profile:', error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [router])
+  }, [router]);
 
   useEffect(() => {
-    fetchUserProfile()
-  }, [fetchUserProfile])
-
-
+    fetchUserProfile();
+  }, [fetchUserProfile]);
 
   const handleFileUpload = async (file: File, documentType: string) => {
-    setUploadLoading(documentType)
-    setMessage('')
+    setUploadLoading(documentType);
+    setMessage('');
 
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       if (!token) {
-        router.push('/login')
-        return
+        router.push('/login');
+        return;
       }
 
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('documentType', documentType)
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('documentType', documentType);
 
       const response = await fetch('/api/auth/upload-docs', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (response.ok) {
-        setMessage(`${documentType.replace('_', ' ')} uploaded successfully!`)
-        fetchUserProfile() // Refresh user data
+        setMessage(`${documentType.replace('_', ' ')} uploaded successfully!`);
+        fetchUserProfile(); // Refresh user data
       } else {
-        setMessage(`Upload failed: ${data.error}`)
+        setMessage(`Upload failed: ${data.error}`);
       }
     } catch (error) {
-      setMessage('Upload failed. Please try again.')
+      setMessage('Upload failed. Please try again.');
     } finally {
-      setUploadLoading(null)
+      setUploadLoading(null);
     }
-  }
+  };
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
-    router.push('/')
-  }
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    router.push('/');
+  };
 
   if (isLoading) {
     return (
@@ -119,7 +117,7 @@ export default function ProfilePage() {
           <p className="mt-4 text-gray-600">Loading your profile...</p>
         </div>
       </div>
-    )
+    );
   }
 
   if (!user) {
@@ -135,7 +133,7 @@ export default function ProfilePage() {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -155,11 +153,13 @@ export default function ProfilePage() {
         </div>
 
         {message && (
-          <div className={`mb-6 px-4 py-3 rounded ${
-            message.includes('successfully') 
-              ? 'bg-green-50 border border-green-200 text-green-600'
-              : 'bg-red-50 border border-red-200 text-red-600'
-          }`}>
+          <div
+            className={`mb-6 px-4 py-3 rounded ${
+              message.includes('successfully')
+                ? 'bg-green-50 border border-green-200 text-green-600'
+                : 'bg-red-50 border border-red-200 text-red-600'
+            }`}
+          >
             {message}
           </div>
         )}
@@ -218,15 +218,17 @@ export default function ProfilePage() {
             <div className="px-6 py-4">
               <div className="flex items-center space-x-2">
                 <span className="text-sm font-medium text-gray-700">Status:</span>
-                <span className={`text-xs px-2 py-1 rounded-full ${
-                  user.profile.kycStatus === 'APPROVED' 
-                    ? 'bg-green-100 text-green-800'
-                    : user.profile.kycStatus === 'UNDER_REVIEW'
-                    ? 'bg-blue-100 text-blue-800'
-                    : user.profile.kycStatus === 'REJECTED'
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-yellow-100 text-yellow-800'
-                }`}>
+                <span
+                  className={`text-xs px-2 py-1 rounded-full ${
+                    user.profile.kycStatus === 'APPROVED'
+                      ? 'bg-green-100 text-green-800'
+                      : user.profile.kycStatus === 'UNDER_REVIEW'
+                        ? 'bg-blue-100 text-blue-800'
+                        : user.profile.kycStatus === 'REJECTED'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                  }`}
+                >
                   {user.profile.kycStatus}
                 </span>
               </div>
@@ -259,7 +261,8 @@ export default function ProfilePage() {
                     ) : (
                       <div className="mx-auto h-20 w-20 rounded-full bg-gray-300 flex items-center justify-center">
                         <span className="text-xl font-medium text-gray-600">
-                          {user.profile.firstName[0]}{user.profile.lastName[0]}
+                          {user.profile.firstName[0]}
+                          {user.profile.lastName[0]}
                         </span>
                       </div>
                     )}
@@ -272,9 +275,9 @@ export default function ProfilePage() {
                       type="file"
                       className="sr-only"
                       accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0]
-                        if (file) handleFileUpload(file, 'PROFILE_PICTURE')
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(file, 'PROFILE_PICTURE');
                       }}
                     />
                     <span className="mt-2 inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
@@ -300,9 +303,9 @@ export default function ProfilePage() {
                       type="file"
                       className="sr-only"
                       accept="image/*,application/pdf"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0]
-                        if (file) handleFileUpload(file, 'NATIONAL_ID')
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(file, 'NATIONAL_ID');
                       }}
                     />
                     <span className="mt-2 inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
@@ -328,9 +331,9 @@ export default function ProfilePage() {
                       type="file"
                       className="sr-only"
                       accept="image/*,application/pdf"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0]
-                        if (file) handleFileUpload(file, 'DRIVING_LICENSE')
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(file, 'DRIVING_LICENSE');
                       }}
                     />
                     <span className="mt-2 inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
@@ -354,14 +357,18 @@ export default function ProfilePage() {
                   <p className="mt-1 text-sm text-gray-900">{user.drivingLicense.licenseNumber}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Verification Status</label>
-                  <span className={`inline-flex text-xs px-2 py-1 rounded-full ${
-                    user.drivingLicense.verificationStatus === 'VERIFIED' 
-                      ? 'bg-green-100 text-green-800'
-                      : user.drivingLicense.verificationStatus === 'REJECTED'
-                      ? 'bg-red-100 text-red-800'
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Verification Status
+                  </label>
+                  <span
+                    className={`inline-flex text-xs px-2 py-1 rounded-full ${
+                      user.drivingLicense.verificationStatus === 'VERIFIED'
+                        ? 'bg-green-100 text-green-800'
+                        : user.drivingLicense.verificationStatus === 'REJECTED'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                    }`}
+                  >
                     {user.drivingLicense.verificationStatus}
                   </span>
                 </div>
@@ -371,5 +378,5 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

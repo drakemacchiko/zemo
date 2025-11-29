@@ -1,5 +1,5 @@
-import VehicleListingWizard from './listing-wizard'
+import VehicleListingWizard from './listing-wizard';
 
 export default function NewVehiclePage() {
-  return <VehicleListingWizard />
+  return <VehicleListingWizard />;
 }

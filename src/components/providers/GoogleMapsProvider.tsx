@@ -20,7 +20,7 @@ export default function GoogleMapsProvider({ children }: { children: React.React
       .then(() => {
         setLoaded(true);
       })
-      .catch((err) => {
+      .catch(err => {
         console.error('Failed to load Google Maps:', err);
         setError('Failed to load map services');
         setLoaded(true); // Continue even if Maps fails

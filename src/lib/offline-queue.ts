@@ -61,7 +61,7 @@ class OfflineQueueManager {
         resolve();
       };
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
 
         // Create object stores
@@ -207,7 +207,7 @@ class OfflineQueueManager {
       const store = transaction.objectStore('cachedBookings');
       const request = store.openCursor();
 
-      request.onsuccess = (event) => {
+      request.onsuccess = event => {
         const cursor = (event.target as IDBRequest).result;
         if (cursor) {
           const booking = cursor.value as CachedBooking;

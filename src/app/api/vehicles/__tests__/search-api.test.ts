@@ -7,13 +7,13 @@ describe('Vehicle Search API', () => {
         vehicleType: 'SEDAN',
         minPrice: '100',
         maxPrice: '500',
-        limit: '10'
+        limit: '10',
       };
-      
+
       // Mock basic validation logic
       const limit = Math.min(parseInt(mockSearchParams.limit), 50);
       expect(limit).toBe(10);
-      
+
       const minPrice = parseFloat(mockSearchParams.minPrice);
       const maxPrice = parseFloat(mockSearchParams.maxPrice);
       expect(minPrice).toBe(100);
@@ -24,7 +24,7 @@ describe('Vehicle Search API', () => {
       const mockSearchParams = {
         latitude: '-15.3875',
         longitude: '28.3228',
-        radius: '25'
+        radius: '25',
       };
 
       const latitude = parseFloat(mockSearchParams.latitude);
@@ -39,7 +39,7 @@ describe('Vehicle Search API', () => {
     test('should handle date range for availability', () => {
       const mockSearchParams = {
         startDate: '2024-12-01',
-        endDate: '2024-12-07'
+        endDate: '2024-12-07',
       };
 
       const startDate = new Date(mockSearchParams.startDate);
@@ -55,12 +55,15 @@ describe('Vehicle Search API', () => {
       // Haversine formula implementation test
       function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
         const R = 6371; // Earth's radius in kilometers
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-          Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        const dLat = ((lat2 - lat1) * Math.PI) / 180;
+        const dLon = ((lon2 - lon1) * Math.PI) / 180;
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos((lat1 * Math.PI) / 180) *
+            Math.cos((lat2 * Math.PI) / 180) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
       }
 
@@ -71,7 +74,7 @@ describe('Vehicle Search API', () => {
       const airportLon = 28.4524;
 
       const distance = calculateDistance(cityLat, cityLon, airportLat, airportLon);
-      
+
       // Distance should be approximately 15-20 km
       expect(distance).toBeGreaterThan(10);
       expect(distance).toBeLessThan(25);
@@ -97,9 +100,7 @@ describe('Vehicle Search API', () => {
     });
 
     test('should handle last page pagination', () => {
-      const mockResults = [
-        { id: 'vehicle1', name: 'Toyota Corolla' },
-      ];
+      const mockResults = [{ id: 'vehicle1', name: 'Toyota Corolla' }];
 
       const limit = 2;
       const hasMore = mockResults.length > limit;

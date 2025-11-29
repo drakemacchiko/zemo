@@ -27,8 +27,8 @@ export default function LateReturnAlert({ lateReturn, userRole, onWaiveFees }: P
         isEscalated
           ? 'bg-red-50 border-red-500'
           : isReturned
-          ? 'bg-gray-50 border-gray-300'
-          : 'bg-orange-50 border-orange-400'
+            ? 'bg-gray-50 border-gray-300'
+            : 'bg-orange-50 border-orange-400'
       }`}
     >
       {/* Header */}
@@ -37,20 +37,12 @@ export default function LateReturnAlert({ lateReturn, userRole, onWaiveFees }: P
           {/* Icon */}
           <div
             className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-              isEscalated
-                ? 'bg-red-100'
-                : isReturned
-                ? 'bg-gray-200'
-                : 'bg-orange-100'
+              isEscalated ? 'bg-red-100' : isReturned ? 'bg-gray-200' : 'bg-orange-100'
             }`}
           >
             <svg
               className={`w-6 h-6 ${
-                isEscalated
-                  ? 'text-red-600'
-                  : isReturned
-                  ? 'text-gray-600'
-                  : 'text-orange-600'
+                isEscalated ? 'text-red-600' : isReturned ? 'text-gray-600' : 'text-orange-600'
               }`}
               fill="none"
               stroke="currentColor"
@@ -69,26 +61,18 @@ export default function LateReturnAlert({ lateReturn, userRole, onWaiveFees }: P
           <div>
             <h3
               className={`font-semibold text-lg ${
-                isEscalated
-                  ? 'text-red-900'
-                  : isReturned
-                  ? 'text-gray-900'
-                  : 'text-orange-900'
+                isEscalated ? 'text-red-900' : isReturned ? 'text-gray-900' : 'text-orange-900'
               }`}
             >
               {isEscalated
                 ? 'URGENT: Vehicle Severely Overdue'
                 : isReturned
-                ? 'Late Return (Resolved)'
-                : 'Late Return'}
+                  ? 'Late Return (Resolved)'
+                  : 'Late Return'}
             </h3>
             <p
               className={`text-sm ${
-                isEscalated
-                  ? 'text-red-700'
-                  : isReturned
-                  ? 'text-gray-600'
-                  : 'text-orange-700'
+                isEscalated ? 'text-red-700' : isReturned ? 'text-gray-600' : 'text-orange-700'
               }`}
             >
               {isReturned
@@ -104,8 +88,8 @@ export default function LateReturnAlert({ lateReturn, userRole, onWaiveFees }: P
             isEscalated
               ? 'bg-red-200 text-red-900'
               : isReturned
-              ? 'bg-gray-200 text-gray-800'
-              : 'bg-orange-200 text-orange-900'
+                ? 'bg-gray-200 text-gray-800'
+                : 'bg-orange-200 text-orange-900'
           }`}
         >
           {lateReturn.status}
@@ -116,7 +100,7 @@ export default function LateReturnAlert({ lateReturn, userRole, onWaiveFees }: P
       {!lateReturn.lateFeesWaived && !isReturned && (
         <div className="bg-white rounded-lg p-4 mb-4">
           <h4 className="font-medium text-gray-900 mb-3">Late Fees</h4>
-          
+
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-600">Hourly late fee:</span>
@@ -198,8 +182,8 @@ export default function LateReturnAlert({ lateReturn, userRole, onWaiveFees }: P
       {isEscalated && (
         <div className="mt-4 bg-red-100 border border-red-300 rounded-lg p-4">
           <p className="text-sm text-red-900 font-medium">
-            This matter has been escalated to our support team. If the vehicle is not returned within
-            the next few hours, we may need to involve local authorities.
+            This matter has been escalated to our support team. If the vehicle is not returned
+            within the next few hours, we may need to involve local authorities.
           </p>
         </div>
       )}

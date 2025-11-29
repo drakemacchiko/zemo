@@ -12,7 +12,7 @@ interface AvailabilityCalendarProps {
 export function AvailabilityCalendar({
   bookedDates = [],
   unavailableDates = [],
-  onDateSelect
+  onDateSelect,
 }: AvailabilityCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedStart, setSelectedStart] = useState<Date | null>(null);
@@ -24,27 +24,29 @@ export function AvailabilityCalendar({
     0
   ).getDate();
 
-  const firstDayOfMonth = new Date(
-    currentMonth.getFullYear(),
-    currentMonth.getMonth(),
-    1
-  ).getDay();
+  const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
 
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   const isDateBooked = (date: Date) => {
-    return bookedDates.some(
-      d => d.toDateString() === date.toDateString()
-    );
+    return bookedDates.some(d => d.toDateString() === date.toDateString());
   };
 
   const isDateUnavailable = (date: Date) => {
-    return unavailableDates.some(
-      d => d.toDateString() === date.toDateString()
-    );
+    return unavailableDates.some(d => d.toDateString() === date.toDateString());
   };
 
   const isPastDate = (date: Date) => {
@@ -84,7 +86,7 @@ export function AvailabilityCalendar({
 
   const renderCalendarDays = () => {
     const days = [];
-    
+
     // Empty cells for days before month starts
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push(<div key={`empty-${i}`} className="aspect-square" />);
@@ -97,10 +99,10 @@ export function AvailabilityCalendar({
       const isUnavailable = isDateUnavailable(date);
       const isPast = isPastDate(date);
       const isDisabled = isBooked || isUnavailable || isPast;
-      const isSelected = selectedStart?.toDateString() === date.toDateString() || 
-                        selectedEnd?.toDateString() === date.toDateString();
-      const isInRange = selectedStart && selectedEnd && 
-                       date > selectedStart && date < selectedEnd;
+      const isSelected =
+        selectedStart?.toDateString() === date.toDateString() ||
+        selectedEnd?.toDateString() === date.toDateString();
+      const isInRange = selectedStart && selectedEnd && date > selectedStart && date < selectedEnd;
 
       days.push(
         <button
@@ -110,28 +112,18 @@ export function AvailabilityCalendar({
           className={`
             aspect-square rounded-lg flex items-center justify-center text-sm font-medium
             transition-colors relative
-            ${isDisabled 
-              ? 'text-gray-300 cursor-not-allowed bg-gray-50' 
-              : 'text-gray-900 hover:bg-gray-100 cursor-pointer'
+            ${
+              isDisabled
+                ? 'text-gray-300 cursor-not-allowed bg-gray-50'
+                : 'text-gray-900 hover:bg-gray-100 cursor-pointer'
             }
-            ${isSelected 
-              ? 'bg-zemo-yellow text-gray-900 font-bold' 
-              : ''
-            }
-            ${isInRange 
-              ? 'bg-yellow-100' 
-              : ''
-            }
-            ${isBooked 
-              ? 'line-through' 
-              : ''
-            }
+            ${isSelected ? 'bg-zemo-yellow text-gray-900 font-bold' : ''}
+            ${isInRange ? 'bg-yellow-100' : ''}
+            ${isBooked ? 'line-through' : ''}
           `}
         >
           {day}
-          {isBooked && (
-            <div className="absolute bottom-1 w-1 h-1 bg-red-500 rounded-full" />
-          )}
+          {isBooked && <div className="absolute bottom-1 w-1 h-1 bg-red-500 rounded-full" />}
         </button>
       );
     }
@@ -145,29 +137,21 @@ export function AvailabilityCalendar({
         <Calendar className="w-6 h-6 text-zemo-yellow flex-shrink-0 mt-1" />
         <div>
           <h2 className="text-2xl font-bold mb-2">Availability</h2>
-          <p className="text-gray-600">
-            Select your trip dates to check availability
-          </p>
+          <p className="text-gray-600">Select your trip dates to check availability</p>
         </div>
       </div>
 
       {/* Calendar Navigation */}
       <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={prevMonth}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
+        <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
           <ChevronLeft className="w-5 h-5" />
         </button>
-        
+
         <h3 className="text-lg font-bold">
           {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
         </h3>
-        
-        <button
-          onClick={nextMonth}
-          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-        >
+
+        <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>
@@ -182,9 +166,7 @@ export function AvailabilityCalendar({
       </div>
 
       {/* Calendar Grid */}
-      <div className="grid grid-cols-7 gap-2">
-        {renderCalendarDays()}
-      </div>
+      <div className="grid grid-cols-7 gap-2">{renderCalendarDays()}</div>
 
       {/* Legend */}
       <div className="mt-6 pt-6 border-t border-gray-200 flex flex-wrap gap-4 text-sm">

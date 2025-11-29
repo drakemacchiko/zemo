@@ -45,7 +45,7 @@ export interface NotificationContext {
   };
 }
 
-export type NotificationType = 
+export type NotificationType =
   | 'BOOKING_CONFIRMED'
   | 'BOOKING_CANCELLED'
   | 'PAYMENT_SUCCESS'
@@ -62,7 +62,10 @@ export type NotificationChannel = 'IN_APP' | 'EMAIL' | 'SMS' | 'PUSH';
 
 // Email service interface for different providers
 export interface EmailService {
-  sendEmail(to: string, template: EmailTemplate): Promise<{
+  sendEmail(
+    to: string,
+    template: EmailTemplate
+  ): Promise<{
     success: boolean;
     messageId?: string;
     error?: string;
@@ -71,7 +74,10 @@ export interface EmailService {
 
 // SMS service interface for different providers
 export interface SMSService {
-  sendSMS(to: string, template: SMSTemplate): Promise<{
+  sendSMS(
+    to: string,
+    template: SMSTemplate
+  ): Promise<{
     success: boolean;
     messageId?: string;
     error?: string;
@@ -88,7 +94,10 @@ export class ResendEmailService implements EmailService {
     // Stored for future production use
   }
 
-  async sendEmail(to: string, template: EmailTemplate): Promise<{
+  async sendEmail(
+    to: string,
+    template: EmailTemplate
+  ): Promise<{
     success: boolean;
     messageId?: string;
     error?: string;
@@ -96,11 +105,12 @@ export class ResendEmailService implements EmailService {
     try {
       // TODO: Implement actual Resend API integration
       // For now, simulate sending with logging
-      
-      const isTestEnvironment = process.env.NODE_ENV === 'test' || 
-                               process.argv.some(arg => arg.includes('jest')) ||
-                               process.argv.some(arg => arg.includes('test'));
-      
+
+      const isTestEnvironment =
+        process.env.NODE_ENV === 'test' ||
+        process.argv.some(arg => arg.includes('jest')) ||
+        process.argv.some(arg => arg.includes('test'));
+
       if (process.env.NODE_ENV === 'development' && !isTestEnvironment) {
         // Development logging for email service (disabled during tests)
         process.stdout.write(`[RESEND EMAIL] TO: ${to}\n`);
@@ -108,12 +118,12 @@ export class ResendEmailService implements EmailService {
         process.stdout.write(`[RESEND EMAIL] HTML: ${template.html.substring(0, 100)}...\n`);
         process.stdout.write(`[RESEND EMAIL] TEXT: ${template.text.substring(0, 100)}...\n`);
       }
-      
+
       // Simulate success in development and test modes
       if (process.env.NODE_ENV === 'development' || isTestEnvironment) {
         return {
           success: true,
-          messageId: `resend_${Date.now()}_${Math.random().toString(36).substring(7)}`
+          messageId: `resend_${Date.now()}_${Math.random().toString(36).substring(7)}`,
         };
       }
 
@@ -130,14 +140,13 @@ export class ResendEmailService implements EmailService {
 
       return {
         success: false,
-        error: 'Resend API not configured in production'
+        error: 'Resend API not configured in production',
       };
-
     } catch (error) {
       console.error('Error sending email via Resend:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
@@ -156,7 +165,10 @@ export class TwilioSMSService implements SMSService {
     this.fromPhoneNumber = fromPhoneNumber;
   }
 
-  async sendSMS(to: string, template: SMSTemplate): Promise<{
+  async sendSMS(
+    to: string,
+    template: SMSTemplate
+  ): Promise<{
     success: boolean;
     messageId?: string;
     error?: string;
@@ -164,23 +176,24 @@ export class TwilioSMSService implements SMSService {
     try {
       // TODO: Implement actual Twilio API integration
       // For now, simulate sending with logging
-      
-      const isTestEnvironment = process.env.NODE_ENV === 'test' || 
-                               process.argv.some(arg => arg.includes('jest')) ||
-                               process.argv.some(arg => arg.includes('test'));
-      
+
+      const isTestEnvironment =
+        process.env.NODE_ENV === 'test' ||
+        process.argv.some(arg => arg.includes('jest')) ||
+        process.argv.some(arg => arg.includes('test'));
+
       if (process.env.NODE_ENV === 'development' && !isTestEnvironment) {
         // Development logging for SMS service (disabled during tests)
         process.stdout.write(`[TWILIO SMS] TO: ${to}\n`);
         process.stdout.write(`[TWILIO SMS] FROM: ${this.fromPhoneNumber}\n`);
         process.stdout.write(`[TWILIO SMS] MESSAGE: ${template.message}\n`);
       }
-      
-      // Simulate success in development and test modes  
+
+      // Simulate success in development and test modes
       if (process.env.NODE_ENV === 'development' || isTestEnvironment) {
         return {
           success: true,
-          messageId: `twilio_${Date.now()}_${Math.random().toString(36).substring(7)}`
+          messageId: `twilio_${Date.now()}_${Math.random().toString(36).substring(7)}`,
         };
       }
 
@@ -195,21 +208,23 @@ export class TwilioSMSService implements SMSService {
 
       return {
         success: false,
-        error: 'Twilio API not configured in production'
+        error: 'Twilio API not configured in production',
       };
-
     } catch (error) {
       console.error('Error sending SMS via Twilio:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
 }
 
 // Template generators for different notification types
-export function generateEmailTemplate(type: NotificationType, context: NotificationContext): EmailTemplate {
+export function generateEmailTemplate(
+  type: NotificationType,
+  context: NotificationContext
+): EmailTemplate {
   switch (type) {
     case 'BOOKING_CONFIRMED':
       return {
@@ -232,7 +247,7 @@ export function generateEmailTemplate(type: NotificationType, context: Notificat
             </div>
           </div>
         `,
-        text: `Hi ${context.user.firstName}, your booking for ${context.booking?.vehicleName} has been confirmed. Confirmation: ${context.booking?.confirmationNumber}. Dates: ${context.booking?.startDate} to ${context.booking?.endDate}. Total: ZMW ${context.booking?.totalAmount}.`
+        text: `Hi ${context.user.firstName}, your booking for ${context.booking?.vehicleName} has been confirmed. Confirmation: ${context.booking?.confirmationNumber}. Dates: ${context.booking?.startDate} to ${context.booking?.endDate}. Total: ZMW ${context.booking?.totalAmount}.`,
       };
 
     case 'PAYMENT_SUCCESS':
@@ -254,7 +269,7 @@ export function generateEmailTemplate(type: NotificationType, context: Notificat
             </div>
           </div>
         `,
-        text: `Hi ${context.user.firstName}, your payment of ZMW ${context.payment?.amount} via ${context.payment?.provider} has been processed successfully.`
+        text: `Hi ${context.user.firstName}, your payment of ZMW ${context.payment?.amount} via ${context.payment?.provider} has been processed successfully.`,
       };
 
     case 'MESSAGE_RECEIVED':
@@ -274,7 +289,7 @@ export function generateEmailTemplate(type: NotificationType, context: Notificat
             </div>
           </div>
         `,
-        text: `Hi ${context.user.firstName}, you have a new message from ${context.message?.senderName}: "${context.message?.content}". Reply in the ZEMO app.`
+        text: `Hi ${context.user.firstName}, you have a new message from ${context.message?.senderName}: "${context.message?.content}". Reply in the ZEMO app.`,
       };
 
     case 'SUPPORT_RESPONSE':
@@ -296,7 +311,7 @@ export function generateEmailTemplate(type: NotificationType, context: Notificat
             </div>
           </div>
         `,
-        text: `Hi ${context.user.firstName}, your support ticket ${context.ticket?.ticketNumber} has been updated. Status: ${context.ticket?.status}. View details in the ZEMO app.`
+        text: `Hi ${context.user.firstName}, your support ticket ${context.ticket?.ticketNumber} has been updated. Status: ${context.ticket?.status}. View details in the ZEMO app.`,
       };
 
     default:
@@ -312,36 +327,39 @@ export function generateEmailTemplate(type: NotificationType, context: Notificat
             </div>
           </div>
         `,
-        text: `Hi ${context.user.firstName}, you have a new notification from ZEMO. Check the app for details.`
+        text: `Hi ${context.user.firstName}, you have a new notification from ZEMO. Check the app for details.`,
       };
   }
 }
 
-export function generateSMSTemplate(type: NotificationType, context: NotificationContext): SMSTemplate {
+export function generateSMSTemplate(
+  type: NotificationType,
+  context: NotificationContext
+): SMSTemplate {
   switch (type) {
     case 'BOOKING_CONFIRMED':
       return {
-        message: `ZEMO: Booking confirmed! ${context.booking?.vehicleName} for ${context.booking?.startDate} - ${context.booking?.endDate}. Confirmation: ${context.booking?.confirmationNumber}`
+        message: `ZEMO: Booking confirmed! ${context.booking?.vehicleName} for ${context.booking?.startDate} - ${context.booking?.endDate}. Confirmation: ${context.booking?.confirmationNumber}`,
       };
 
     case 'PAYMENT_SUCCESS':
       return {
-        message: `ZEMO: Payment successful! ZMW ${context.payment?.amount} via ${context.payment?.provider}. Thank you!`
+        message: `ZEMO: Payment successful! ZMW ${context.payment?.amount} via ${context.payment?.provider}. Thank you!`,
       };
 
     case 'MESSAGE_RECEIVED':
       return {
-        message: `ZEMO: New message from ${context.message?.senderName}: "${context.message?.content?.substring(0, 100)}${context.message?.content && context.message.content.length > 100 ? '...' : ''}"`
+        message: `ZEMO: New message from ${context.message?.senderName}: "${context.message?.content?.substring(0, 100)}${context.message?.content && context.message.content.length > 100 ? '...' : ''}"`,
       };
 
     case 'SUPPORT_RESPONSE':
       return {
-        message: `ZEMO: Support ticket ${context.ticket?.ticketNumber} updated. Status: ${context.ticket?.status}. Check app for details.`
+        message: `ZEMO: Support ticket ${context.ticket?.ticketNumber} updated. Status: ${context.ticket?.status}. Check app for details.`,
       };
 
     default:
       return {
-        message: `ZEMO: You have a new notification. Check the app for details.`
+        message: `ZEMO: You have a new notification. Check the app for details.`,
       };
   }
 }
@@ -361,7 +379,10 @@ export class NotificationService {
     context: NotificationContext,
     channels: NotificationChannel[] = ['IN_APP']
   ) {
-    const results: Record<NotificationChannel, { success: boolean; messageId?: string; error?: string }> = {} as any;
+    const results: Record<
+      NotificationChannel,
+      { success: boolean; messageId?: string; error?: string }
+    > = {} as any;
 
     for (const channel of channels) {
       switch (channel) {
@@ -401,10 +422,8 @@ export class NotificationService {
 
 // Service factory
 export function createNotificationService(): NotificationService {
-  const emailService = new ResendEmailService(
-    process.env.RESEND_API_KEY || 'sandbox_key'
-  );
-  
+  const emailService = new ResendEmailService(process.env.RESEND_API_KEY || 'sandbox_key');
+
   const smsService = new TwilioSMSService(
     process.env.TWILIO_ACCOUNT_SID || 'sandbox_sid',
     process.env.TWILIO_AUTH_TOKEN || 'sandbox_token',

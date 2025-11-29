@@ -1,96 +1,89 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import {
-  ChevronLeft,
-  ChevronRight,
-  Check,
-  Save,
-  X,
-  AlertCircle
-} from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { ChevronLeft, ChevronRight, Check, Save, X, AlertCircle } from 'lucide-react';
 
 // Types for form data
 interface VehicleListingData {
   // Step 1: Vehicle Details
-  vin?: string
-  plateNumber: string
-  registrationNumber?: string
-  year: number | ''
-  make: string
-  model: string
-  trim?: string
-  engineNumber?: string
-  chassisNumber?: string
-  transmission: string
-  fuelType: string
-  seatingCapacity: number | ''
-  numberOfDoors?: number | ''
-  color: string
-  currentMileage: number | ''
-  
+  vin?: string;
+  plateNumber: string;
+  registrationNumber?: string;
+  year: number | '';
+  make: string;
+  model: string;
+  trim?: string;
+  engineNumber?: string;
+  chassisNumber?: string;
+  transmission: string;
+  fuelType: string;
+  seatingCapacity: number | '';
+  numberOfDoors?: number | '';
+  color: string;
+  currentMileage: number | '';
+
   // Step 2: Category & Features
-  vehicleCategory?: string
-  vehicleType: string
-  features: string[]
-  customFeatures?: string
-  
+  vehicleCategory?: string;
+  vehicleType: string;
+  features: string[];
+  customFeatures?: string;
+
   // Step 3: Location & Delivery
-  locationAddress: string
-  locationCity?: string
-  locationProvince?: string
-  locationPostalCode?: string
-  locationLatitude: number | ''
-  locationLongitude: number | ''
-  hideExactLocation: boolean
-  deliveryAvailable: boolean
-  deliveryRadius?: number | ''
-  deliveryFeePerKm?: number | ''
-  airportDelivery: boolean
-  airportDeliveryFee?: number | ''
-  pickupInstructions?: string
-  
+  locationAddress: string;
+  locationCity?: string;
+  locationProvince?: string;
+  locationPostalCode?: string;
+  locationLatitude: number | '';
+  locationLongitude: number | '';
+  hideExactLocation: boolean;
+  deliveryAvailable: boolean;
+  deliveryRadius?: number | '';
+  deliveryFeePerKm?: number | '';
+  airportDelivery: boolean;
+  airportDeliveryFee?: number | '';
+  pickupInstructions?: string;
+
   // Step 4: Availability & Scheduling
-  alwaysAvailable: boolean
-  advanceNoticeHours: number
-  shortestTripDuration: number
-  longestTripDuration?: number | ''
-  instantBooking: boolean
-  minRenterRating?: number | ''
-  minRenterTrips?: number | ''
-  
+  alwaysAvailable: boolean;
+  advanceNoticeHours: number;
+  shortestTripDuration: number;
+  longestTripDuration?: number | '';
+  instantBooking: boolean;
+  minRenterRating?: number | '';
+  minRenterTrips?: number | '';
+
   // Step 5: Pricing
-  dailyRate: number | ''
-  hourlyRate?: number | ''
-  weeklyDiscount?: number | ''
-  monthlyDiscount?: number | ''
-  weekendPricing?: number | ''
-  securityDeposit: number | ''
-  mileageAllowance?: number | ''
-  extraMileageFee?: number | ''
-  fuelPolicy?: string
-  lateReturnFee?: number | ''
-  cleaningFee?: number | ''
-  
+  dailyRate: number | '';
+  hourlyRate?: number | '';
+  weeklyDiscount?: number | '';
+  monthlyDiscount?: number | '';
+  weekendPricing?: number | '';
+  securityDeposit: number | '';
+  mileageAllowance?: number | '';
+  extraMileageFee?: number | '';
+  fuelPolicy?: string;
+  lateReturnFee?: number | '';
+  cleaningFee?: number | '';
+
   // Step 6: Insurance
-  insurancePolicyNumber?: string
-  insuranceCoverage?: string
-  
+  insurancePolicyNumber?: string;
+  insuranceCoverage?: string;
+
   // Step 7: Rules & Requirements
-  minDriverAge: number
-  minDrivingExperience: number
-  additionalDriverFee?: number | ''
-  smokingAllowed: boolean
-  smokingFee?: number | ''
-  petsAllowed: boolean
-  petFee?: number | ''
-  usageRestrictions: string[]
-  customRules?: string
-  
+  minDriverAge: number;
+  minDrivingExperience: number;
+  additionalDriverFee?: number | '';
+  smokingAllowed: boolean;
+  smokingFee?: number | '';
+  petsAllowed: boolean;
+  petFee?: number | '';
+  usageRestrictions: string[];
+  customRules?: string;
+
   // Step 10: Description
-  title?: string
-  description?: string
+  title?: string;
+  description?: string;
 }
 
 const STEPS = [
@@ -104,26 +97,62 @@ const STEPS = [
   { number: 8, title: 'Documents', required: true },
   { number: 9, title: 'Photos', required: true },
   { number: 10, title: 'Description', required: false },
-  { number: 11, title: 'Review & Publish', required: true }
-]
+  { number: 11, title: 'Review & Publish', required: true },
+];
 
 const POPULAR_MAKES = [
-  'Toyota', 'Nissan', 'Honda', 'Mazda', 'Suzuki', 'Mitsubishi',
-  'Mercedes-Benz', 'BMW', 'Audi', 'Volkswagen', 'Ford', 'Chevrolet',
-  'Hyundai', 'Kia', 'Peugeot', 'Renault', 'Isuzu', 'Other'
-]
+  'Toyota',
+  'Nissan',
+  'Honda',
+  'Mazda',
+  'Suzuki',
+  'Mitsubishi',
+  'Mercedes-Benz',
+  'BMW',
+  'Audi',
+  'Volkswagen',
+  'Ford',
+  'Chevrolet',
+  'Hyundai',
+  'Kia',
+  'Peugeot',
+  'Renault',
+  'Isuzu',
+  'Other',
+];
 
 const VEHICLE_CATEGORIES = [
-  'ECONOMY', 'COMPACT', 'MIDSIZE', 'FULL_SIZE', 'SUV',
-  'LUXURY', 'SPORTS', 'VAN', 'TRUCK', 'ELECTRIC'
-]
+  'ECONOMY',
+  'COMPACT',
+  'MIDSIZE',
+  'FULL_SIZE',
+  'SUV',
+  'LUXURY',
+  'SPORTS',
+  'VAN',
+  'TRUCK',
+  'ELECTRIC',
+];
 
 const STANDARD_FEATURES = [
-  'Air conditioning', 'Bluetooth/AUX', 'Backup camera', 'Parking sensors',
-  'GPS/Navigation', 'USB charger', 'Heated seats', 'Sunroof/Moonroof',
-  'Leather seats', 'All-wheel drive', 'Keyless entry', 'Apple CarPlay/Android Auto',
-  'Bike rack', 'Ski rack', 'Toll pass', 'Dash cam', 'Child seat available'
-]
+  'Air conditioning',
+  'Bluetooth/AUX',
+  'Backup camera',
+  'Parking sensors',
+  'GPS/Navigation',
+  'USB charger',
+  'Heated seats',
+  'Sunroof/Moonroof',
+  'Leather seats',
+  'All-wheel drive',
+  'Keyless entry',
+  'Apple CarPlay/Android Auto',
+  'Bike rack',
+  'Ski rack',
+  'Toll pass',
+  'Dash cam',
+  'Child seat available',
+];
 
 interface VehicleListingWizardProps {
   editMode?: boolean;
@@ -131,14 +160,18 @@ interface VehicleListingWizardProps {
   initialData?: any;
 }
 
-export default function VehicleListingWizard({ editMode = false, vehicleId, initialData }: VehicleListingWizardProps = {}) {
-  const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(1)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [lastSaved, setLastSaved] = useState<Date | null>(null)
-  
+export default function VehicleListingWizard({
+  editMode = false,
+  vehicleId,
+  initialData,
+}: VehicleListingWizardProps = {}) {
+  const router = useRouter();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
   const [formData, setFormData] = useState<VehicleListingData>({
     // Default values
     plateNumber: '',
@@ -168,40 +201,40 @@ export default function VehicleListingWizard({ editMode = false, vehicleId, init
     minDrivingExperience: 2,
     smokingAllowed: false,
     petsAllowed: false,
-    usageRestrictions: []
-  })
+    usageRestrictions: [],
+  });
 
   const saveDraft = useCallback(async () => {
     try {
-      setSaving(true)
-      localStorage.setItem('vehicleListingDraft', JSON.stringify(formData))
-      setLastSaved(new Date())
+      setSaving(true);
+      localStorage.setItem('vehicleListingDraft', JSON.stringify(formData));
+      setLastSaved(new Date());
     } catch (error) {
-      console.error('Error saving draft:', error)
+      console.error('Error saving draft:', error);
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }, [formData])
+  }, [formData]);
 
   const loadDraft = () => {
     try {
-      const draft = localStorage.getItem('vehicleListingDraft')
+      const draft = localStorage.getItem('vehicleListingDraft');
       if (draft) {
-        const parsedDraft = JSON.parse(draft)
-        setFormData(parsedDraft)
+        const parsedDraft = JSON.parse(draft);
+        setFormData(parsedDraft);
       }
     } catch (error) {
-      console.error('Error loading draft:', error)
+      console.error('Error loading draft:', error);
     }
-  }
+  };
 
   // Auto-save draft every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      saveDraft()
-    }, 30000)
-    return () => clearInterval(interval)
-  }, [formData, saveDraft])
+      saveDraft();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [formData, saveDraft]);
 
   // Load draft on mount or initialize with edit data
   useEffect(() => {
@@ -275,145 +308,153 @@ export default function VehicleListingWizard({ editMode = false, vehicleId, init
     } else {
       loadDraft();
     }
-  }, [editMode, initialData])
+  }, [editMode, initialData]);
 
   const clearDraft = () => {
-    localStorage.removeItem('vehicleListingDraft')
-  }
+    localStorage.removeItem('vehicleListingDraft');
+  };
 
   const handleInputChange = (field: keyof VehicleListingData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const validateStep = (step: number): boolean => {
-    setError('')
-    
+    setError('');
+
     switch (step) {
       case 1:
-        if (!formData.plateNumber || !formData.make || !formData.model || 
-            !formData.year || !formData.transmission || !formData.fuelType ||
-            !formData.seatingCapacity || !formData.color || !formData.currentMileage) {
-          setError('Please fill in all required fields')
-          return false
+        if (
+          !formData.plateNumber ||
+          !formData.make ||
+          !formData.model ||
+          !formData.year ||
+          !formData.transmission ||
+          !formData.fuelType ||
+          !formData.seatingCapacity ||
+          !formData.color ||
+          !formData.currentMileage
+        ) {
+          setError('Please fill in all required fields');
+          return false;
         }
-        break
+        break;
       case 2:
         if (!formData.vehicleType) {
-          setError('Please select a vehicle type')
-          return false
+          setError('Please select a vehicle type');
+          return false;
         }
-        break
+        break;
       case 3:
         if (!formData.locationAddress) {
-          setError('Please enter the vehicle location')
-          return false
+          setError('Please enter the vehicle location');
+          return false;
         }
-        break
+        break;
       case 5:
         if (!formData.dailyRate || !formData.securityDeposit) {
-          setError('Please set daily rate and security deposit')
-          return false
+          setError('Please set daily rate and security deposit');
+          return false;
         }
-        break
+        break;
     }
-    return true
-  }
+    return true;
+  };
 
   const nextStep = () => {
     if (validateStep(currentStep)) {
       if (currentStep < STEPS.length) {
-        setCurrentStep(currentStep + 1)
-        window.scrollTo(0, 0)
+        setCurrentStep(currentStep + 1);
+        window.scrollTo(0, 0);
       }
     }
-  }
+  };
 
   const prevStep = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
-      window.scrollTo(0, 0)
+      setCurrentStep(currentStep - 1);
+      window.scrollTo(0, 0);
     }
-  }
+  };
 
   const goToStep = (step: number) => {
     if (step <= currentStep || step === currentStep + 1) {
-      setCurrentStep(step)
-      window.scrollTo(0, 0)
+      setCurrentStep(step);
+      window.scrollTo(0, 0);
     }
-  }
+  };
 
   const handleSubmit = async () => {
-    if (!validateStep(currentStep)) return
+    if (!validateStep(currentStep)) return;
 
-    setLoading(true)
-    setError('')
+    setLoading(true);
+    setError('');
 
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       if (!token) {
-        router.push('/login')
-        return
+        router.push('/login');
+        return;
       }
 
-      const url = editMode && vehicleId 
-        ? `/api/vehicles/${vehicleId}` 
-        : '/api/host/vehicles';
+      const url = editMode && vehicleId ? `/api/vehicles/${vehicleId}` : '/api/host/vehicles';
       const method = editMode ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData)
-      })
+        body: JSON.stringify(formData),
+      });
 
       if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || `Failed to ${editMode ? 'update' : 'create'} vehicle listing`)
+        const data = await response.json();
+        throw new Error(
+          data.error || `Failed to ${editMode ? 'update' : 'create'} vehicle listing`
+        );
       }
 
-      const data = await response.json()
+      const data = await response.json();
       if (!editMode) {
-        clearDraft()
+        clearDraft();
       }
-      router.push(`/host/vehicles/${editMode ? vehicleId : data.vehicle.id}`)
+      router.push(`/host/vehicles/${editMode ? vehicleId : data.vehicle.id}`);
     } catch (error: any) {
-      setError(error.message)
+      setError(error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
-        return <Step1VehicleDetails formData={formData} onChange={handleInputChange} />
+        return <Step1VehicleDetails formData={formData} onChange={handleInputChange} />;
       case 2:
-        return <Step2CategoryFeatures formData={formData} onChange={handleInputChange} />
+        return <Step2CategoryFeatures formData={formData} onChange={handleInputChange} />;
       case 3:
-        return <Step3Location formData={formData} onChange={handleInputChange} />
+        return <Step3Location formData={formData} onChange={handleInputChange} />;
       case 4:
-        return <Step4Availability formData={formData} onChange={handleInputChange} />
+        return <Step4Availability formData={formData} onChange={handleInputChange} />;
       case 5:
-        return <Step5Pricing formData={formData} onChange={handleInputChange} />
+        return <Step5Pricing formData={formData} onChange={handleInputChange} />;
       case 6:
-        return <Step6Insurance formData={formData} onChange={handleInputChange} />
+        return <Step6Insurance formData={formData} onChange={handleInputChange} />;
       case 7:
-        return <Step7Rules formData={formData} onChange={handleInputChange} />
+        return <Step7Rules formData={formData} onChange={handleInputChange} />;
       case 8:
-        return <Step8Documents />
+        return <Step8Documents />;
       case 9:
-        return <Step9Photos />
+        return <Step9Photos />;
       case 10:
-        return <Step10Description formData={formData} onChange={handleInputChange} />
+        return <Step10Description formData={formData} onChange={handleInputChange} />;
       case 11:
-        return <Step11Review formData={formData} />
+        return <Step11Review formData={formData} />;
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -422,7 +463,9 @@ export default function VehicleListingWizard({ editMode = false, vehicleId, init
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{editMode ? 'Edit Vehicle' : 'List Your Vehicle'}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {editMode ? 'Edit Vehicle' : 'List Your Vehicle'}
+              </h1>
               <p className="text-sm text-gray-600 mt-1">
                 Step {currentStep} of {STEPS.length}: {STEPS[currentStep - 1]?.title || ''}
               </p>
@@ -435,8 +478,8 @@ export default function VehicleListingWizard({ editMode = false, vehicleId, init
               )}
               <button
                 onClick={() => {
-                  saveDraft()
-                  router.push('/host/vehicles')
+                  saveDraft();
+                  router.push('/host/vehicles');
                 }}
                 className="text-gray-600 hover:text-gray-900"
               >
@@ -460,18 +503,16 @@ export default function VehicleListingWizard({ editMode = false, vehicleId, init
                     step.number < currentStep
                       ? 'bg-green-600 text-white'
                       : step.number === currentStep
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-600'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-200 text-gray-600'
                   } ${step.number <= currentStep + 1 ? 'cursor-pointer hover:opacity-80' : 'cursor-not-allowed'}`}
                 >
-                  {step.number < currentStep ? (
-                    <Check className="h-5 w-5" />
-                  ) : (
-                    step.number
-                  )}
+                  {step.number < currentStep ? <Check className="h-5 w-5" /> : step.number}
                 </button>
                 {index < STEPS.length - 1 && (
-                  <div className={`w-12 h-1 mx-2 ${step.number < currentStep ? 'bg-green-600' : 'bg-gray-200'}`} />
+                  <div
+                    className={`w-12 h-1 mx-2 ${step.number < currentStep ? 'bg-green-600' : 'bg-gray-200'}`}
+                  />
                 )}
               </div>
             ))}
@@ -501,9 +542,7 @@ export default function VehicleListingWizard({ editMode = false, vehicleId, init
 
       {/* Step Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow p-8">
-          {renderStepContent()}
-        </div>
+        <div className="bg-white rounded-lg shadow p-8">{renderStepContent()}</div>
       </div>
 
       {/* Navigation Buttons */}
@@ -541,14 +580,20 @@ export default function VehicleListingWizard({ editMode = false, vehicleId, init
                 disabled={loading}
                 className="flex items-center px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
               >
-                {loading ? (editMode ? 'Saving...' : 'Publishing...') : (editMode ? 'Save Changes' : 'Publish Listing')}
+                {loading
+                  ? editMode
+                    ? 'Saving...'
+                    : 'Publishing...'
+                  : editMode
+                    ? 'Save Changes'
+                    : 'Publish Listing'}
               </button>
             )}
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Step Components will be defined next
@@ -568,7 +613,7 @@ function Step1VehicleDetails({ formData, onChange }: any) {
           <input
             type="text"
             value={formData.vin || ''}
-            onChange={(e) => onChange('vin', e.target.value)}
+            onChange={e => onChange('vin', e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Enter VIN"
           />
@@ -581,7 +626,7 @@ function Step1VehicleDetails({ formData, onChange }: any) {
           <input
             type="text"
             value={formData.plateNumber}
-            onChange={(e) => onChange('plateNumber', e.target.value.toUpperCase())}
+            onChange={e => onChange('plateNumber', e.target.value.toUpperCase())}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="ABC 1234"
             required
@@ -594,13 +639,18 @@ function Step1VehicleDetails({ formData, onChange }: any) {
           </label>
           <select
             value={formData.year}
-            onChange={(e) => onChange('year', parseInt(e.target.value))}
+            onChange={e => onChange('year', parseInt(e.target.value))}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           >
             <option value="">Select year</option>
-            {Array.from({ length: new Date().getFullYear() - 1999 }, (_, i) => new Date().getFullYear() - i).map(year => (
-              <option key={year} value={year}>{year}</option>
+            {Array.from(
+              { length: new Date().getFullYear() - 1999 },
+              (_, i) => new Date().getFullYear() - i
+            ).map(year => (
+              <option key={year} value={year}>
+                {year}
+              </option>
             ))}
           </select>
         </div>
@@ -611,13 +661,15 @@ function Step1VehicleDetails({ formData, onChange }: any) {
           </label>
           <select
             value={formData.make}
-            onChange={(e) => onChange('make', e.target.value)}
+            onChange={e => onChange('make', e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           >
             <option value="">Select make</option>
             {POPULAR_MAKES.map(make => (
-              <option key={make} value={make}>{make}</option>
+              <option key={make} value={make}>
+                {make}
+              </option>
             ))}
           </select>
         </div>
@@ -629,7 +681,7 @@ function Step1VehicleDetails({ formData, onChange }: any) {
           <input
             type="text"
             value={formData.model}
-            onChange={(e) => onChange('model', e.target.value)}
+            onChange={e => onChange('model', e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="e.g., Corolla"
             required
@@ -643,7 +695,7 @@ function Step1VehicleDetails({ formData, onChange }: any) {
           <input
             type="text"
             value={formData.trim || ''}
-            onChange={(e) => onChange('trim', e.target.value)}
+            onChange={e => onChange('trim', e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="e.g., XLE, Sport"
           />
@@ -655,7 +707,7 @@ function Step1VehicleDetails({ formData, onChange }: any) {
           </label>
           <select
             value={formData.transmission}
-            onChange={(e) => onChange('transmission', e.target.value)}
+            onChange={e => onChange('transmission', e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           >
@@ -671,7 +723,7 @@ function Step1VehicleDetails({ formData, onChange }: any) {
           </label>
           <select
             value={formData.fuelType}
-            onChange={(e) => onChange('fuelType', e.target.value)}
+            onChange={e => onChange('fuelType', e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           >
@@ -689,24 +741,24 @@ function Step1VehicleDetails({ formData, onChange }: any) {
           </label>
           <select
             value={formData.seatingCapacity}
-            onChange={(e) => onChange('seatingCapacity', parseInt(e.target.value))}
+            onChange={e => onChange('seatingCapacity', parseInt(e.target.value))}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             required
           >
             <option value="">Select capacity</option>
             {[2, 4, 5, 6, 7, 8, 9].map(num => (
-              <option key={num} value={num}>{num} seats</option>
+              <option key={num} value={num}>
+                {num} seats
+              </option>
             ))}
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Number of Doors
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Number of Doors</label>
           <select
             value={formData.numberOfDoors || ''}
-            onChange={(e) => onChange('numberOfDoors', parseInt(e.target.value))}
+            onChange={e => onChange('numberOfDoors', parseInt(e.target.value))}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">Select doors</option>
@@ -723,7 +775,7 @@ function Step1VehicleDetails({ formData, onChange }: any) {
           <input
             type="text"
             value={formData.color}
-            onChange={(e) => onChange('color', e.target.value)}
+            onChange={e => onChange('color', e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="e.g., White, Black, Silver"
             required
@@ -737,7 +789,7 @@ function Step1VehicleDetails({ formData, onChange }: any) {
           <input
             type="number"
             value={formData.currentMileage}
-            onChange={(e) => onChange('currentMileage', parseInt(e.target.value))}
+            onChange={e => onChange('currentMileage', parseInt(e.target.value))}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="0"
             min="0"
@@ -746,30 +798,33 @@ function Step1VehicleDetails({ formData, onChange }: any) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function Step2CategoryFeatures({ formData, onChange }: any) {
   const toggleFeature = (feature: string) => {
-    const currentFeatures = formData.features || []
+    const currentFeatures = formData.features || [];
     if (currentFeatures.includes(feature)) {
-      onChange('features', currentFeatures.filter((f: string) => f !== feature))
+      onChange(
+        'features',
+        currentFeatures.filter((f: string) => f !== feature)
+      );
     } else {
-      onChange('features', [...currentFeatures, feature])
+      onChange('features', [...currentFeatures, feature]);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-bold text-gray-900 mb-2">Category & Features</h2>
-        <p className="text-gray-600">Help renters find your vehicle by selecting the right category and features</p>
+        <p className="text-gray-600">
+          Help renters find your vehicle by selecting the right category and features
+        </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Vehicle Category
-        </label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">Vehicle Category</label>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {VEHICLE_CATEGORIES.map(category => (
             <button
@@ -794,7 +849,7 @@ function Step2CategoryFeatures({ formData, onChange }: any) {
         </label>
         <select
           value={formData.vehicleType}
-          onChange={(e) => onChange('vehicleType', e.target.value)}
+          onChange={e => onChange('vehicleType', e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           required
         >
@@ -816,7 +871,10 @@ function Step2CategoryFeatures({ formData, onChange }: any) {
         </label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {STANDARD_FEATURES.map(feature => (
-            <label key={feature} className="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer">
+            <label
+              key={feature}
+              className="flex items-center p-3 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
+            >
               <input
                 type="checkbox"
                 checked={formData.features?.includes(feature) || false}
@@ -835,14 +893,14 @@ function Step2CategoryFeatures({ formData, onChange }: any) {
         </label>
         <textarea
           value={formData.customFeatures || ''}
-          onChange={(e) => onChange('customFeatures', e.target.value)}
+          onChange={e => onChange('customFeatures', e.target.value)}
           rows={3}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="Add any additional features not listed above"
         />
       </div>
     </div>
-  )
+  );
 }
 
 // Continue with remaining step components...
@@ -863,7 +921,7 @@ function Step3Location({ formData, onChange }: any) {
         <input
           type="text"
           value={formData.locationAddress}
-          onChange={(e) => onChange('locationAddress', e.target.value)}
+          onChange={e => onChange('locationAddress', e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="Enter address"
           required
@@ -876,7 +934,7 @@ function Step3Location({ formData, onChange }: any) {
           <input
             type="text"
             value={formData.locationCity || ''}
-            onChange={(e) => onChange('locationCity', e.target.value)}
+            onChange={e => onChange('locationCity', e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Lusaka"
           />
@@ -887,7 +945,7 @@ function Step3Location({ formData, onChange }: any) {
           <input
             type="text"
             value={formData.locationProvince || ''}
-            onChange={(e) => onChange('locationProvince', e.target.value)}
+            onChange={e => onChange('locationProvince', e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Lusaka"
           />
@@ -898,7 +956,7 @@ function Step3Location({ formData, onChange }: any) {
           <input
             type="text"
             value={formData.locationPostalCode || ''}
-            onChange={(e) => onChange('locationPostalCode', e.target.value)}
+            onChange={e => onChange('locationPostalCode', e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="10101"
           />
@@ -909,7 +967,7 @@ function Step3Location({ formData, onChange }: any) {
         <input
           type="checkbox"
           checked={formData.hideExactLocation}
-          onChange={(e) => onChange('hideExactLocation', e.target.checked)}
+          onChange={e => onChange('hideExactLocation', e.target.checked)}
           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
         />
         <label className="ml-3 text-sm text-gray-700">
@@ -919,13 +977,13 @@ function Step3Location({ formData, onChange }: any) {
 
       <div className="border-t border-gray-200 pt-6">
         <h3 className="text-lg font-medium text-gray-900 mb-4">Delivery Options</h3>
-        
+
         <div className="space-y-4">
           <div className="flex items-center">
             <input
               type="checkbox"
               checked={formData.deliveryAvailable}
-              onChange={(e) => onChange('deliveryAvailable', e.target.checked)}
+              onChange={e => onChange('deliveryAvailable', e.target.checked)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <label className="ml-3 text-sm text-gray-700">
@@ -943,7 +1001,7 @@ function Step3Location({ formData, onChange }: any) {
                   <input
                     type="number"
                     value={formData.deliveryRadius || ''}
-                    onChange={(e) => onChange('deliveryRadius', parseInt(e.target.value))}
+                    onChange={e => onChange('deliveryRadius', parseInt(e.target.value))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="10"
                     min="0"
@@ -957,7 +1015,7 @@ function Step3Location({ formData, onChange }: any) {
                   <input
                     type="number"
                     value={formData.deliveryFeePerKm || ''}
-                    onChange={(e) => onChange('deliveryFeePerKm', parseFloat(e.target.value))}
+                    onChange={e => onChange('deliveryFeePerKm', parseFloat(e.target.value))}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="5"
                     min="0"
@@ -972,12 +1030,10 @@ function Step3Location({ formData, onChange }: any) {
             <input
               type="checkbox"
               checked={formData.airportDelivery}
-              onChange={(e) => onChange('airportDelivery', e.target.checked)}
+              onChange={e => onChange('airportDelivery', e.target.checked)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-            <label className="ml-3 text-sm text-gray-700">
-              Offer airport delivery/pickup
-            </label>
+            <label className="ml-3 text-sm text-gray-700">Offer airport delivery/pickup</label>
           </div>
 
           {formData.airportDelivery && (
@@ -988,7 +1044,7 @@ function Step3Location({ formData, onChange }: any) {
               <input
                 type="number"
                 value={formData.airportDeliveryFee || ''}
-                onChange={(e) => onChange('airportDeliveryFee', parseFloat(e.target.value))}
+                onChange={e => onChange('airportDeliveryFee', parseFloat(e.target.value))}
                 className="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="100"
                 min="0"
@@ -1005,19 +1061,23 @@ function Step3Location({ formData, onChange }: any) {
         </label>
         <textarea
           value={formData.pickupInstructions || ''}
-          onChange={(e) => onChange('pickupInstructions', e.target.value)}
+          onChange={e => onChange('pickupInstructions', e.target.value)}
           rows={4}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="Where to meet, what to bring, parking instructions, etc."
         />
       </div>
     </div>
-  )
+  );
 }
 
 // Placeholder components for remaining steps
 function Step4Availability({ formData: _formData, onChange: _onChange }: any) {
-  return <div className="text-center py-12 text-gray-500">Step 4: Availability & Scheduling (Component to be implemented)</div>
+  return (
+    <div className="text-center py-12 text-gray-500">
+      Step 4: Availability & Scheduling (Component to be implemented)
+    </div>
+  );
 }
 
 function Step5Pricing({ formData, onChange }: any) {
@@ -1036,7 +1096,7 @@ function Step5Pricing({ formData, onChange }: any) {
           <input
             type="number"
             value={formData.dailyRate}
-            onChange={(e) => onChange('dailyRate', parseFloat(e.target.value))}
+            onChange={e => onChange('dailyRate', parseFloat(e.target.value))}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="200"
             min="0"
@@ -1052,7 +1112,7 @@ function Step5Pricing({ formData, onChange }: any) {
           <input
             type="number"
             value={formData.securityDeposit}
-            onChange={(e) => onChange('securityDeposit', parseFloat(e.target.value))}
+            onChange={e => onChange('securityDeposit', parseFloat(e.target.value))}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="500"
             min="0"
@@ -1062,29 +1122,53 @@ function Step5Pricing({ formData, onChange }: any) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function Step6Insurance({ formData: _formData, onChange: _onChange }: any) {
-  return <div className="text-center py-12 text-gray-500">Step 6: Insurance & Protection (Component to be implemented)</div>
+  return (
+    <div className="text-center py-12 text-gray-500">
+      Step 6: Insurance & Protection (Component to be implemented)
+    </div>
+  );
 }
 
 function Step7Rules({ formData: _formData, onChange: _onChange }: any) {
-  return <div className="text-center py-12 text-gray-500">Step 7: Rules & Requirements (Component to be implemented)</div>
+  return (
+    <div className="text-center py-12 text-gray-500">
+      Step 7: Rules & Requirements (Component to be implemented)
+    </div>
+  );
 }
 
 function Step8Documents() {
-  return <div className="text-center py-12 text-gray-500">Step 8: Documents Upload (Component to be implemented)</div>
+  return (
+    <div className="text-center py-12 text-gray-500">
+      Step 8: Documents Upload (Component to be implemented)
+    </div>
+  );
 }
 
 function Step9Photos() {
-  return <div className="text-center py-12 text-gray-500">Step 9: Photos Upload (Component to be implemented)</div>
+  return (
+    <div className="text-center py-12 text-gray-500">
+      Step 9: Photos Upload (Component to be implemented)
+    </div>
+  );
 }
 
 function Step10Description({ formData: _formData, onChange: _onChange }: any) {
-  return <div className="text-center py-12 text-gray-500">Step 10: Description (Component to be implemented)</div>
+  return (
+    <div className="text-center py-12 text-gray-500">
+      Step 10: Description (Component to be implemented)
+    </div>
+  );
 }
 
 function Step11Review({ formData: _formData }: any) {
-  return <div className="text-center py-12 text-gray-500">Step 11: Review & Publish (Component to be implemented)</div>
+  return (
+    <div className="text-center py-12 text-gray-500">
+      Step 11: Review & Publish (Component to be implemented)
+    </div>
+  );
 }

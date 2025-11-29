@@ -23,7 +23,7 @@ const createTransporter = () => {
   if (!nodemailer) {
     return null;
   }
-  
+
   // For production, use a proper email service like SendGrid, AWS SES, or Mailgun
   // Example with Gmail (for development only):
   if (process.env.EMAIL_SERVICE === 'gmail') {

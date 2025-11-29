@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   Calendar,
   Clock,
@@ -15,104 +15,104 @@ import {
   CheckCircle,
   DollarSign,
   FileText,
-  Shield
-} from 'lucide-react'
+  Shield,
+} from 'lucide-react';
 
 interface UpcomingBooking {
-  id: string
+  id: string;
   vehicle: {
-    make: string
-    model: string
-    year: number
-    photo: string
-    licensePlate: string
-  }
+    make: string;
+    model: string;
+    year: number;
+    photo: string;
+    licensePlate: string;
+  };
   renter: {
-    name: string
-    profilePicture?: string
-    phone: string
-    email: string
-    verified: boolean
-  }
-  startDate: string
-  endDate: string
-  totalAmount: number
-  pickupLocation: string
-  dropoffLocation: string
-  hasInsurance: boolean
-  hasAgreementSigned: boolean
-  preInspectionCompleted: boolean
-  hoursUntilStart: number
+    name: string;
+    profilePicture?: string;
+    phone: string;
+    email: string;
+    verified: boolean;
+  };
+  startDate: string;
+  endDate: string;
+  totalAmount: number;
+  pickupLocation: string;
+  dropoffLocation: string;
+  hasInsurance: boolean;
+  hasAgreementSigned: boolean;
+  preInspectionCompleted: boolean;
+  hoursUntilStart: number;
 }
 
 export default function UpcomingBookingsPage() {
-  const router = useRouter()
-  const [bookings, setBookings] = useState<UpcomingBooking[]>([])
-  const [loading, setLoading] = useState(true)
+  const router = useRouter();
+  const [bookings, setBookings] = useState<UpcomingBooking[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchUpcomingBookings()
-  }, [])
+    fetchUpcomingBookings();
+  }, []);
 
   const fetchUpcomingBookings = async () => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       const res = await fetch('/api/host/bookings/upcoming', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (res.ok) {
-        const data = await res.json()
-        setBookings(data.bookings)
+        const data = await res.json();
+        setBookings(data.bookings);
       }
     } catch (error) {
-      console.error('Error fetching upcoming bookings:', error)
+      console.error('Error fetching upcoming bookings:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
-    })
-  }
+      year: 'numeric',
+    });
+  };
 
   const formatTime = (dateString: string) => {
     return new Date(dateString).toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true
-    })
-  }
+      hour12: true,
+    });
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-ZM', {
       style: 'currency',
-      currency: 'ZMW'
-    }).format(amount)
-  }
+      currency: 'ZMW',
+    }).format(amount);
+  };
 
   const getCountdown = (hoursUntilStart: number) => {
     if (hoursUntilStart < 1) {
-      return 'Starting soon'
+      return 'Starting soon';
     } else if (hoursUntilStart < 24) {
-      return `In ${hoursUntilStart} hour${hoursUntilStart > 1 ? 's' : ''}`
+      return `In ${hoursUntilStart} hour${hoursUntilStart > 1 ? 's' : ''}`;
     } else {
-      const days = Math.floor(hoursUntilStart / 24)
-      return `In ${days} day${days > 1 ? 's' : ''}`
+      const days = Math.floor(hoursUntilStart / 24);
+      return `In ${days} day${days > 1 ? 's' : ''}`;
     }
-  }
+  };
 
   const getDuration = (start: string, end: string) => {
-    const startDate = new Date(start)
-    const endDate = new Date(end)
-    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
-    return `${days} day${days > 1 ? 's' : ''}`
-  }
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    return `${days} day${days > 1 ? 's' : ''}`;
+  };
 
   if (loading) {
     return (
@@ -122,7 +122,7 @@ export default function UpcomingBookingsPage() {
           <p className="mt-4 text-gray-600">Loading upcoming bookings...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -139,22 +139,28 @@ export default function UpcomingBookingsPage() {
         {/* Bookings List */}
         {bookings.length > 0 ? (
           <div className="space-y-6">
-            {bookings.map((booking) => (
+            {bookings.map(booking => (
               <div key={booking.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
                 {/* Countdown Banner */}
-                <div className={`px-6 py-3 ${
-                  booking.hoursUntilStart < 24 
-                    ? 'bg-orange-50 border-b border-orange-200' 
-                    : 'bg-blue-50 border-b border-blue-200'
-                }`}>
+                <div
+                  className={`px-6 py-3 ${
+                    booking.hoursUntilStart < 24
+                      ? 'bg-orange-50 border-b border-orange-200'
+                      : 'bg-blue-50 border-b border-blue-200'
+                  }`}
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Clock className={`h-5 w-5 ${
-                        booking.hoursUntilStart < 24 ? 'text-orange-600' : 'text-blue-600'
-                      }`} />
-                      <span className={`font-medium ${
-                        booking.hoursUntilStart < 24 ? 'text-orange-800' : 'text-blue-800'
-                      }`}>
+                      <Clock
+                        className={`h-5 w-5 ${
+                          booking.hoursUntilStart < 24 ? 'text-orange-600' : 'text-blue-600'
+                        }`}
+                      />
+                      <span
+                        className={`font-medium ${
+                          booking.hoursUntilStart < 24 ? 'text-orange-800' : 'text-blue-800'
+                        }`}
+                      >
                         {getCountdown(booking.hoursUntilStart)}
                       </span>
                     </div>
@@ -175,7 +181,7 @@ export default function UpcomingBookingsPage() {
                         <Car className="h-4 w-4" />
                         <span>Your Vehicle</span>
                       </div>
-                      
+
                       <div className="h-40 bg-gray-200 rounded-lg overflow-hidden">
                         {booking.vehicle.photo && (
                           <Image
@@ -192,9 +198,7 @@ export default function UpcomingBookingsPage() {
                         <h3 className="font-bold text-gray-900 text-lg">
                           {booking.vehicle.year} {booking.vehicle.make} {booking.vehicle.model}
                         </h3>
-                        <p className="text-sm text-gray-600">
-                          {booking.vehicle.licensePlate}
-                        </p>
+                        <p className="text-sm text-gray-600">{booking.vehicle.licensePlate}</p>
                       </div>
 
                       <button
@@ -230,9 +234,7 @@ export default function UpcomingBookingsPage() {
                           <div className="font-medium text-gray-900">
                             {formatDate(booking.endDate)}
                           </div>
-                          <div className="text-sm text-gray-600">
-                            {formatTime(booking.endDate)}
-                          </div>
+                          <div className="text-sm text-gray-600">{formatTime(booking.endDate)}</div>
                         </div>
 
                         <div className="bg-gray-50 p-3 rounded-lg">
@@ -250,14 +252,18 @@ export default function UpcomingBookingsPage() {
                           <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
                           <div className="text-sm">
                             <div className="text-gray-600">Pickup</div>
-                            <div className="font-medium text-gray-900">{booking.pickupLocation}</div>
+                            <div className="font-medium text-gray-900">
+                              {booking.pickupLocation}
+                            </div>
                           </div>
                         </div>
                         <div className="flex items-start gap-2">
                           <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
                           <div className="text-sm">
                             <div className="text-gray-600">Dropoff</div>
-                            <div className="font-medium text-gray-900">{booking.dropoffLocation}</div>
+                            <div className="font-medium text-gray-900">
+                              {booking.dropoffLocation}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -324,7 +330,7 @@ export default function UpcomingBookingsPage() {
                       {/* Pre-Trip Checklist */}
                       <div className="border rounded-lg p-4 space-y-3">
                         <h4 className="font-medium text-gray-900 text-sm">Pre-Trip Checklist</h4>
-                        
+
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
                             {booking.hasInsurance ? (
@@ -332,9 +338,11 @@ export default function UpcomingBookingsPage() {
                             ) : (
                               <AlertCircle className="h-5 w-5 text-red-600" />
                             )}
-                            <span className={`text-sm ${
-                              booking.hasInsurance ? 'text-gray-600' : 'text-red-600'
-                            }`}>
+                            <span
+                              className={`text-sm ${
+                                booking.hasInsurance ? 'text-gray-600' : 'text-red-600'
+                              }`}
+                            >
                               Insurance verified
                             </span>
                           </div>
@@ -345,9 +353,11 @@ export default function UpcomingBookingsPage() {
                             ) : (
                               <AlertCircle className="h-5 w-5 text-red-600" />
                             )}
-                            <span className={`text-sm ${
-                              booking.hasAgreementSigned ? 'text-gray-600' : 'text-red-600'
-                            }`}>
+                            <span
+                              className={`text-sm ${
+                                booking.hasAgreementSigned ? 'text-gray-600' : 'text-red-600'
+                              }`}
+                            >
                               Agreement signed
                             </span>
                           </div>
@@ -358,9 +368,11 @@ export default function UpcomingBookingsPage() {
                             ) : (
                               <AlertCircle className="h-5 w-5 text-orange-600" />
                             )}
-                            <span className={`text-sm ${
-                              booking.preInspectionCompleted ? 'text-gray-600' : 'text-orange-600'
-                            }`}>
+                            <span
+                              className={`text-sm ${
+                                booking.preInspectionCompleted ? 'text-gray-600' : 'text-orange-600'
+                              }`}
+                            >
                               Pre-trip inspection
                             </span>
                           </div>
@@ -368,7 +380,9 @@ export default function UpcomingBookingsPage() {
 
                         {!booking.preInspectionCompleted && booking.hoursUntilStart < 24 && (
                           <button
-                            onClick={() => router.push(`/bookings/${booking.id}/pre-trip-inspection`)}
+                            onClick={() =>
+                              router.push(`/bookings/${booking.id}/pre-trip-inspection`)
+                            }
                             className="w-full mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
                           >
                             Start Inspection
@@ -403,5 +417,5 @@ export default function UpcomingBookingsPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

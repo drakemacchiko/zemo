@@ -1,53 +1,50 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
-import { extractTokenFromRequest, verifyAccessToken } from '@/lib/auth'
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+import { extractTokenFromRequest, verifyAccessToken } from '@/lib/auth';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const token = extractTokenFromRequest(request)
+    const token = extractTokenFromRequest(request);
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const decoded = verifyAccessToken(token)
+    const decoded = verifyAccessToken(token);
     if (!decoded) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const userId = decoded.userId
-    const bookingId = params.id
-    const body = await request.json()
-    const { 
+    const userId = decoded.userId;
+    const bookingId = params.id;
+    const body = await request.json();
+    const {
       inspectionType, // 'PRE_TRIP' or 'POST_TRIP'
       inspectorRole, // 'HOST' or 'RENTER'
       photos,
       fuelLevel,
       odometerReading,
-      damageNotes
-    } = body
+      damageNotes,
+    } = body;
 
     // Fetch booking to verify user
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
-      include: { vehicle: true }
-    })
+      include: { vehicle: true },
+    });
 
     if (!booking) {
-      return NextResponse.json({ error: 'Booking not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
     }
 
     // Verify user is either host or renter
     if (booking.userId !== userId && booking.vehicle.hostId !== userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
     // Get or create rental agreement
     let agreement = await prisma.rentalAgreement.findUnique({
-      where: { bookingId }
-    })
+      where: { bookingId },
+    });
 
     if (!agreement) {
       agreement = await prisma.rentalAgreement.create({
@@ -57,20 +54,20 @@ export async function POST(
           hostId: booking.vehicle.hostId,
           renterId: booking.userId,
           agreementTemplate: 'STANDARD_V1',
-          agreementContent: 'Agreement content to be generated'
-        }
-      })
+          agreementContent: 'Agreement content to be generated',
+        },
+      });
     }
 
     // Create or update inspection
     const existingInspection = await prisma.tripInspection.findFirst({
       where: {
         agreementId: agreement.id,
-        inspectionType
-      }
-    })
+        inspectionType,
+      },
+    });
 
-    let inspection
+    let inspection;
     if (existingInspection) {
       // Update existing inspection
       const updateData: any = {
@@ -79,22 +76,22 @@ export async function POST(
         odometerReading,
         notes: damageNotes,
         damageDescription: damageNotes,
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      };
 
       // Update signatures based on role
       if (inspectorRole === 'HOST') {
-        updateData.hostSignedAt = new Date()
-        updateData.hostSigned = true
+        updateData.hostSignedAt = new Date();
+        updateData.hostSigned = true;
       } else {
-        updateData.renterSignedAt = new Date()
-        updateData.renterSigned = true
+        updateData.renterSignedAt = new Date();
+        updateData.renterSigned = true;
       }
 
       inspection = await prisma.tripInspection.update({
         where: { id: existingInspection.id },
-        data: updateData
-      })
+        data: updateData,
+      });
     } else {
       // Create new inspection
       // TODO: Map checklistItems array to individual schema fields
@@ -131,55 +128,49 @@ export async function POST(
         cleanliness: 5,
         photos: JSON.stringify(photos),
         notes: damageNotes,
-        damageDescription: damageNotes
-      }
+        damageDescription: damageNotes,
+      };
 
       if (inspectorRole === 'HOST') {
-        createData.hostSignedAt = new Date()
-        createData.hostSigned = true
-        createData.renterSigned = false
+        createData.hostSignedAt = new Date();
+        createData.hostSigned = true;
+        createData.renterSigned = false;
       } else {
-        createData.renterSignedAt = new Date()
-        createData.renterSigned = true
-        createData.hostSigned = false
+        createData.renterSignedAt = new Date();
+        createData.renterSigned = true;
+        createData.hostSigned = false;
       }
 
       inspection = await prisma.tripInspection.create({
-        data: createData
-      })
+        data: createData,
+      });
     }
 
     return NextResponse.json({
       success: true,
-      inspection
-    })
+      inspection,
+    });
   } catch (error) {
-    console.error('Error saving inspection:', error)
-    return NextResponse.json(
-      { error: 'Failed to save inspection' },
-      { status: 500 }
-    )
+    console.error('Error saving inspection:', error);
+    return NextResponse.json({ error: 'Failed to save inspection' }, { status: 500 });
   }
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const token = extractTokenFromRequest(request)
+    const token = extractTokenFromRequest(request);
     if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const decoded = verifyAccessToken(token)
+    const decoded = verifyAccessToken(token);
     if (!decoded) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const bookingId = params.id
-    const searchParams = request.nextUrl.searchParams
-    const inspectionType = searchParams.get('type')
+    const bookingId = params.id;
+    const searchParams = request.nextUrl.searchParams;
+    const inspectionType = searchParams.get('type');
 
     // Get rental agreement for this booking
     const agreement = await prisma.rentalAgreement.findUnique({
@@ -189,20 +180,20 @@ export async function GET(
           include: {
             vehicle: true,
             user: {
-              include: { profile: true }
-            }
-          }
-        }
-      }
-    })
+              include: { profile: true },
+            },
+          },
+        },
+      },
+    });
 
     if (!agreement) {
-      return NextResponse.json({ inspections: [] })
+      return NextResponse.json({ inspections: [] });
     }
 
-    const where: any = { agreementId: agreement.id }
+    const where: any = { agreementId: agreement.id };
     if (inspectionType) {
-      where.inspectionType = inspectionType
+      where.inspectionType = inspectionType;
     }
 
     const inspections = await prisma.tripInspection.findMany({
@@ -214,21 +205,18 @@ export async function GET(
               include: {
                 vehicle: true,
                 user: {
-                  include: { profile: true }
-                }
-              }
-            }
-          }
-        }
-      }
-    })
+                  include: { profile: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
 
-    return NextResponse.json({ inspections })
+    return NextResponse.json({ inspections });
   } catch (error) {
-    console.error('Error fetching inspections:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch inspections' },
-      { status: 500 }
-    )
+    console.error('Error fetching inspections:', error);
+    return NextResponse.json({ error: 'Failed to fetch inspections' }, { status: 500 });
   }
 }

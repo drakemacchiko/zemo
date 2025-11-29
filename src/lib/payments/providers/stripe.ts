@@ -19,9 +19,9 @@ export class StripeService extends CardPaymentService {
   constructor() {
     super();
     this.isProduction = process.env.NODE_ENV === 'production';
-    
+
     // API key would be used to initialize Stripe client in production
-    // const apiKey = this.isProduction 
+    // const apiKey = this.isProduction
     //   ? process.env.STRIPE_SECRET_KEY || ''
     //   : process.env.STRIPE_SECRET_KEY || 'sk_test_sandbox_key';
   }
@@ -134,7 +134,7 @@ export class StripeService extends CardPaymentService {
     await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1200));
 
     const paymentId = PaymentUtils.generateTransactionId('STRIPE');
-    
+
     // Simulate 96% success rate for card payments
     const isSuccess = Math.random() > 0.04;
 
@@ -161,7 +161,7 @@ export class StripeService extends CardPaymentService {
     await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 800));
 
     const refundId = PaymentUtils.generateTransactionId('STRIPER');
-    
+
     // Simulate 98% success rate for refunds
     const isSuccess = Math.random() > 0.02;
 
@@ -170,7 +170,9 @@ export class StripeService extends CardPaymentService {
       refundId,
       amount: request.amount || 100,
       status: isSuccess ? PaymentStatus.REFUNDED : PaymentStatus.FAILED,
-      message: isSuccess ? 'Refund processed successfully - funds will return in 5-10 business days' : 'Refund failed - original payment may not be refundable',
+      message: isSuccess
+        ? 'Refund processed successfully - funds will return in 5-10 business days'
+        : 'Refund failed - original payment may not be refundable',
     };
   }
 
@@ -178,7 +180,7 @@ export class StripeService extends CardPaymentService {
     await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1500));
 
     const holdId = PaymentUtils.generateTransactionId('STRIPEH');
-    
+
     // Simulate 94% success rate for holds (authorization)
     const isSuccess = Math.random() > 0.06;
 

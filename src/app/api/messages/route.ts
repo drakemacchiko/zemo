@@ -7,7 +7,10 @@ import { withAuth, type AuthenticatedRequest } from '@/lib/middleware';
 const sendMessageSchema = z.object({
   conversationId: z.string().min(1, 'Conversation ID is required'),
   content: z.string().min(1, 'Message content is required').max(1000),
-  messageType: z.enum(['TEXT', 'SYSTEM', 'BOOKING_UPDATE', 'PAYMENT_UPDATE', 'IMAGE', 'DOCUMENT']).optional().default('TEXT'),
+  messageType: z
+    .enum(['TEXT', 'SYSTEM', 'BOOKING_UPDATE', 'PAYMENT_UPDATE', 'IMAGE', 'DOCUMENT'])
+    .optional()
+    .default('TEXT'),
   attachmentUrl: z.string().url().optional(),
   attachmentType: z.enum(['IMAGE', 'DOCUMENT', 'VIDEO', 'OTHER']).optional(),
 });
@@ -28,14 +31,14 @@ async function getMessages(request: AuthenticatedRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const query = getMessagesSchema.parse(Object.fromEntries(searchParams.entries()));
-    
+
     const page = parseInt(query.page);
     const limit = Math.min(parseInt(query.limit), 100); // Max 100 per page
     // const offset = (page - 1) * limit; // Will be used for pagination
     // const markAsRead = query.markAsRead === 'true'; // Will be used for marking messages
-    
+
     // const userId = request.user!.id; // Will be used for user filtering
-    
+
     // For now, return empty array with proper structure
     // This will work once Prisma client is regenerated
     return NextResponse.json({
@@ -46,13 +49,12 @@ async function getMessages(request: AuthenticatedRequest) {
         totalCount: 0,
         totalPages: 0,
         hasNextPage: false,
-        hasPrevPage: false
-      }
+        hasPrevPage: false,
+      },
     });
-
   } catch (error) {
     console.error('Error fetching messages:', error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid query parameters', details: error.issues },
@@ -60,10 +62,7 @@ async function getMessages(request: AuthenticatedRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Failed to fetch messages' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch messages' }, { status: 500 });
   }
 }
 
@@ -71,36 +70,32 @@ async function getMessages(request: AuthenticatedRequest) {
 async function sendMessage(request: AuthenticatedRequest) {
   try {
     const body = await request.json();
-    const { conversationId, content, messageType, attachmentUrl, attachmentType } = 
+    const { conversationId, content, messageType, attachmentUrl, attachmentType } =
       sendMessageSchema.parse(body);
-    
+
     const userId = request.user!.id;
 
     // Return success for now - full implementation when Prisma client is ready
-    return NextResponse.json({
-      message: 'Message API is ready - awaiting Prisma client regeneration',
-      conversationId,
-      content,
-      messageType,
-      attachmentUrl,
-      attachmentType,
-      senderId: userId
-    }, { status: 201 });
-
+    return NextResponse.json(
+      {
+        message: 'Message API is ready - awaiting Prisma client regeneration',
+        conversationId,
+        content,
+        messageType,
+        attachmentUrl,
+        attachmentType,
+        senderId: userId,
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error sending message:', error);
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: error.issues },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid input', details: error.issues }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to send message' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
   }
 }
 
@@ -109,7 +104,7 @@ async function markMessagesAsRead(request: AuthenticatedRequest) {
   try {
     const body = await request.json();
     const { messageIds } = markReadSchema.parse(body);
-    
+
     const userId = request.user!.id;
 
     // Return success for now - full implementation when Prisma client is ready
@@ -117,23 +112,16 @@ async function markMessagesAsRead(request: AuthenticatedRequest) {
       message: 'Mark as read API is ready - awaiting Prisma client regeneration',
       messageIds,
       userId,
-      updatedCount: messageIds.length
+      updatedCount: messageIds.length,
     });
-
   } catch (error) {
     console.error('Error marking messages as read:', error);
-    
+
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid input', details: error.issues },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid input', details: error.issues }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: 'Failed to mark messages as read' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to mark messages as read' }, { status: 500 });
   }
 }
 

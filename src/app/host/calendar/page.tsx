@@ -45,10 +45,10 @@ export default function CalendarPage() {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem('accessToken');
-      
+
       // Fetch vehicles
       const vehiclesRes = await fetch('/api/host/vehicles', {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (vehiclesRes.ok) {
         const data = await vehiclesRes.json();
@@ -56,9 +56,12 @@ export default function CalendarPage() {
       }
 
       // Fetch bookings for calendar view
-      const bookingsRes = await fetch(`/api/host/bookings?month=${currentDate.getMonth() + 1}&year=${currentDate.getFullYear()}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const bookingsRes = await fetch(
+        `/api/host/bookings?month=${currentDate.getMonth() + 1}&year=${currentDate.getFullYear()}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       if (bookingsRes.ok) {
         const data = await bookingsRes.json();
         setBookings(data.bookings || []);
@@ -66,7 +69,7 @@ export default function CalendarPage() {
 
       // Fetch blocked dates
       const blockedRes = await fetch(`/api/host/availability/blocked`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (blockedRes.ok) {
         const data = await blockedRes.json();
@@ -86,7 +89,7 @@ export default function CalendarPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(blockData),
       });
@@ -119,8 +122,11 @@ export default function CalendarPage() {
     return bookings.some(booking => {
       const start = new Date(booking.startDate);
       const end = new Date(booking.endDate);
-      return date >= start && date <= end && 
-             (selectedVehicle === 'all' || booking.vehicleId === selectedVehicle);
+      return (
+        date >= start &&
+        date <= end &&
+        (selectedVehicle === 'all' || booking.vehicleId === selectedVehicle)
+      );
     });
   };
 
@@ -128,8 +134,11 @@ export default function CalendarPage() {
     return blockedDates.some(block => {
       const start = new Date(block.startDate);
       const end = new Date(block.endDate);
-      return date >= start && date <= end && 
-             (selectedVehicle === 'all' || block.vehicleId === selectedVehicle);
+      return (
+        date >= start &&
+        date <= end &&
+        (selectedVehicle === 'all' || block.vehicleId === selectedVehicle)
+      );
     });
   };
 
@@ -166,7 +175,7 @@ export default function CalendarPage() {
             <label className="font-medium text-gray-700">Vehicle:</label>
             <select
               value={selectedVehicle}
-              onChange={(e) => setSelectedVehicle(e.target.value)}
+              onChange={e => setSelectedVehicle(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400"
             >
               <option value="all">All Vehicles</option>
@@ -336,7 +345,7 @@ export default function CalendarPage() {
                 <label className="block font-medium mb-2">Vehicle</label>
                 <select
                   value={blockData.vehicleId}
-                  onChange={(e) => setBlockData({ ...blockData, vehicleId: e.target.value })}
+                  onChange={e => setBlockData({ ...blockData, vehicleId: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400"
                   required
                 >
@@ -354,7 +363,7 @@ export default function CalendarPage() {
                 <input
                   type="date"
                   value={blockData.startDate}
-                  onChange={(e) => setBlockData({ ...blockData, startDate: e.target.value })}
+                  onChange={e => setBlockData({ ...blockData, startDate: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400"
                   required
                 />
@@ -365,7 +374,7 @@ export default function CalendarPage() {
                 <input
                   type="date"
                   value={blockData.endDate}
-                  onChange={(e) => setBlockData({ ...blockData, endDate: e.target.value })}
+                  onChange={e => setBlockData({ ...blockData, endDate: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400"
                   required
                 />
@@ -375,7 +384,7 @@ export default function CalendarPage() {
                 <label className="block font-medium mb-2">Reason</label>
                 <textarea
                   value={blockData.reason}
-                  onChange={(e) => setBlockData({ ...blockData, reason: e.target.value })}
+                  onChange={e => setBlockData({ ...blockData, reason: e.target.value })}
                   placeholder="E.g., Personal use, Maintenance, Holiday"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400"
                   rows={3}

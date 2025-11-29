@@ -66,7 +66,7 @@ describe('Support System API', () => {
         }
 
         const ticketNumber = `TICKET-${Date.now()}`;
-        
+
         const ticket = await mockDb.supportTicket.create({
           data: {
             userId: user.id,
@@ -278,13 +278,16 @@ describe('Support System API', () => {
     it('should validate required fields for ticket creation', () => {
       const validateTicket = (data: any) => {
         const errors = [];
-        
+
         if (!data.subject) errors.push('Subject is required');
         if (!data.description) errors.push('Description is required');
         if (data.priority && !['LOW', 'MEDIUM', 'HIGH', 'URGENT'].includes(data.priority)) {
           errors.push('Invalid priority');
         }
-        if (data.category && !['GENERAL', 'VEHICLE', 'BOOKING', 'PAYMENT', 'TECHNICAL'].includes(data.category)) {
+        if (
+          data.category &&
+          !['GENERAL', 'VEHICLE', 'BOOKING', 'PAYMENT', 'TECHNICAL'].includes(data.category)
+        ) {
           errors.push('Invalid category');
         }
 
@@ -293,8 +296,9 @@ describe('Support System API', () => {
 
       expect(validateTicket({})).toEqual(['Subject is required', 'Description is required']);
       expect(validateTicket({ subject: 'Test', description: 'Test desc' })).toEqual([]);
-      expect(validateTicket({ subject: 'Test', description: 'Test desc', priority: 'INVALID' }))
-        .toEqual(['Invalid priority']);
+      expect(
+        validateTicket({ subject: 'Test', description: 'Test desc', priority: 'INVALID' })
+      ).toEqual(['Invalid priority']);
     });
 
     it('should validate message content', () => {
@@ -330,7 +334,9 @@ describe('Support System API', () => {
       expect(validateAttachment(null)).toBe('File is required');
       expect(validateAttachment({ type: 'image/jpeg', size: 1024 })).toBeNull();
       expect(validateAttachment({ type: 'application/exe', size: 1024 })).toBe('Invalid file type');
-      expect(validateAttachment({ type: 'image/jpeg', size: 20 * 1024 * 1024 })).toBe('File too large');
+      expect(validateAttachment({ type: 'image/jpeg', size: 20 * 1024 * 1024 })).toBe(
+        'File too large'
+      );
     });
 
     it('should generate unique file names', () => {
@@ -373,7 +379,7 @@ describe('Support System API', () => {
     it('should auto-reopen closed tickets on new message', async () => {
       const mockTicket = { id: '1', status: 'CLOSED' };
       const mockDb = require('@/lib/db').default;
-      
+
       mockDb.supportTicket.findUnique.mockResolvedValue(mockTicket);
       mockDb.supportTicket.update.mockResolvedValue({ ...mockTicket, status: 'OPEN' });
 
@@ -406,11 +412,11 @@ describe('Support System API', () => {
     it('should calculate response time metrics', () => {
       const calculateResponseTime = (createdAt: Date, firstResponseAt?: Date) => {
         if (!firstResponseAt) return null;
-        
+
         const diffMs = firstResponseAt.getTime() - createdAt.getTime();
         const hours = Math.floor(diffMs / (1000 * 60 * 60));
         const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-        
+
         return { hours, minutes, totalMinutes: Math.floor(diffMs / (1000 * 60)) };
       };
 
@@ -434,10 +440,13 @@ describe('Support System API', () => {
       ];
 
       const categorize = (tickets: any[]) => {
-        const categories = tickets.reduce((acc, ticket) => {
-          acc[ticket.priority] = (acc[ticket.priority] || 0) + 1;
-          return acc;
-        }, {} as { [key: string]: number });
+        const categories = tickets.reduce(
+          (acc, ticket) => {
+            acc[ticket.priority] = (acc[ticket.priority] || 0) + 1;
+            return acc;
+          },
+          {} as { [key: string]: number }
+        );
 
         return categories;
       };

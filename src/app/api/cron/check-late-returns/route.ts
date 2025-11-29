@@ -12,10 +12,7 @@ export async function GET(request: NextRequest) {
     const cronSecret = process.env.CRON_SECRET;
 
     if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
     const now = new Date();
@@ -46,7 +43,7 @@ export async function GET(request: NextRequest) {
     for (const booking of lateBookings) {
       // Check if late return already detected
       const existingLateReturn = booking.lateReturns.find(
-        (lr) => lr.status !== 'RESOLVED' && lr.status !== 'RETURNED'
+        lr => lr.status !== 'RESOLVED' && lr.status !== 'RETURNED'
       );
 
       if (existingLateReturn) {

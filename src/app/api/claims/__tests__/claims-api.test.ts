@@ -141,7 +141,7 @@ describe('Claims API Integration Tests', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify(claimData),
       });
@@ -174,7 +174,7 @@ describe('Claims API Integration Tests', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify(claimData),
       });
@@ -229,7 +229,7 @@ describe('Claims API Integration Tests', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify(claimData),
       });
@@ -283,7 +283,7 @@ describe('Claims API Integration Tests', () => {
       const request = new NextRequest('http://localhost:3000/api/claims', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
       });
 
@@ -305,7 +305,7 @@ describe('Claims API Integration Tests', () => {
       const request = new NextRequest(url.toString(), {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
       });
 
@@ -325,7 +325,7 @@ describe('Claims API Integration Tests', () => {
       const request = new NextRequest(url.toString(), {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
       });
 
@@ -346,7 +346,7 @@ describe('Claims API Integration Tests', () => {
       const request = new NextRequest(url.toString(), {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
       });
 
@@ -381,7 +381,7 @@ describe('Claims API Integration Tests', () => {
       const request = new NextRequest(url.toString(), {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
       });
 

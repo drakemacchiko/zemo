@@ -15,18 +15,12 @@ export async function POST(request: NextRequest) {
   try {
     const token = extractTokenFromRequest(request);
     if (!token) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const payload = verifyAccessToken(token);
     if (!payload) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -47,18 +41,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (!payment) {
-      return NextResponse.json(
-        { error: 'Payment not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
     }
 
     // Verify payment can be refunded
     if (payment.status !== 'COMPLETED') {
-      return NextResponse.json(
-        { error: 'Payment not completed, cannot refund' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Payment not completed, cannot refund' }, { status: 400 });
     }
 
     // Verify user is authorized (must be renter or host)
@@ -67,10 +55,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const isRenter = payment.booking.userId === user.id;
@@ -78,20 +63,14 @@ export async function POST(request: NextRequest) {
     const isAdmin = user.role === 'ADMIN';
 
     if (!isRenter && !isHost && !isAdmin) {
-      return NextResponse.json(
-        { error: 'Unauthorized to process refund' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Unauthorized to process refund' }, { status: 403 });
     }
 
     // Calculate refund amount based on cancellation policy
     const refundAmount = validatedData.amount || payment.amount;
 
     if (refundAmount > payment.amount) {
-      return NextResponse.json(
-        { error: 'Refund amount exceeds payment amount' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Refund amount exceeds payment amount' }, { status: 400 });
     }
 
     // Process refund with payment provider
@@ -180,7 +159,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error('Refund payment error:', error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid request data', details: error.issues },
@@ -188,9 +167,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

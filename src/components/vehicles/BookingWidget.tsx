@@ -29,7 +29,7 @@ export function BookingWidget({
   instantBooking,
   availabilityStatus,
   minTripDuration = 1,
-  maxTripDuration
+  maxTripDuration,
 }: BookingWidgetProps) {
   const router = useRouter();
   const [startDate, setStartDate] = useState('');
@@ -118,7 +118,9 @@ export function BookingWidget({
 
       const days = calculateDays();
       if (minTripDuration && days < minTripDuration) {
-        newErrors.push(`Minimum trip duration is ${minTripDuration} day${minTripDuration > 1 ? 's' : ''}`);
+        newErrors.push(
+          `Minimum trip duration is ${minTripDuration} day${minTripDuration > 1 ? 's' : ''}`
+        );
       }
 
       if (maxTripDuration && days > maxTripDuration) {
@@ -138,7 +140,7 @@ export function BookingWidget({
       startDate,
       endDate,
       startTime,
-      endTime
+      endTime,
     });
 
     router.push(`/vehicles/${vehicleId}/book?${params.toString()}`);
@@ -162,9 +164,7 @@ export function BookingWidget({
             <span className="text-gray-600">/day</span>
           </div>
           {weeklyDiscount && weeklyDiscount > 0 && (
-            <p className="text-sm text-green-600 mt-1">
-              Save {weeklyDiscount}% on weekly rentals
-            </p>
+            <p className="text-sm text-green-600 mt-1">Save {weeklyDiscount}% on weekly rentals</p>
           )}
         </div>
 
@@ -172,16 +172,14 @@ export function BookingWidget({
         <div className="space-y-4 mb-6">
           {/* Pickup Date & Time */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Pickup
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Pickup</label>
             <div className="grid grid-cols-2 gap-2">
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="date"
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  onChange={e => setStartDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
                   className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zemo-yellow focus:border-transparent text-sm"
                 />
@@ -190,10 +188,10 @@ export function BookingWidget({
                 <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <select
                   value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
+                  onChange={e => setStartTime(e.target.value)}
                   className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zemo-yellow focus:border-transparent text-sm"
                 >
-                  {timeOptions.map((time) => (
+                  {timeOptions.map(time => (
                     <option key={time} value={time}>
                       {time}
                     </option>
@@ -205,16 +203,14 @@ export function BookingWidget({
 
           {/* Return Date & Time */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Return
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Return</label>
             <div className="grid grid-cols-2 gap-2">
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="date"
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  onChange={e => setEndDate(e.target.value)}
                   min={startDate || new Date().toISOString().split('T')[0]}
                   className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zemo-yellow focus:border-transparent text-sm"
                 />
@@ -223,10 +219,10 @@ export function BookingWidget({
                 <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <select
                   value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
+                  onChange={e => setEndTime(e.target.value)}
                   className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zemo-yellow focus:border-transparent text-sm"
                 >
-                  {timeOptions.map((time) => (
+                  {timeOptions.map(time => (
                     <option key={time} value={time}>
                       {time}
                     </option>
@@ -250,7 +246,8 @@ export function BookingWidget({
             {discount > 0 && (
               <div className="flex justify-between text-sm text-green-600">
                 <span>
-                  {days >= 28 ? 'Monthly' : 'Weekly'} discount ({days >= 28 ? monthlyDiscount : weeklyDiscount}%)
+                  {days >= 28 ? 'Monthly' : 'Weekly'} discount (
+                  {days >= 28 ? monthlyDiscount : weeklyDiscount}%)
                 </span>
                 <span>-ZMW {discount.toLocaleString()}</span>
               </div>
@@ -311,9 +308,7 @@ export function BookingWidget({
         </button>
 
         {instantBooking && (
-          <p className="text-xs text-gray-500 text-center mt-2">
-            You won't be charged yet
-          </p>
+          <p className="text-xs text-gray-500 text-center mt-2">You won't be charged yet</p>
         )}
 
         {/* Availability Status */}

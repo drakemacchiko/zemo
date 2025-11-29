@@ -27,7 +27,7 @@ const defaultExtras: Extra[] = [
     price: 2000,
     priceType: 'per_day',
     icon: '👶',
-    maxQuantity: 2
+    maxQuantity: 2,
   },
   {
     id: 'gps',
@@ -36,7 +36,7 @@ const defaultExtras: Extra[] = [
     price: 1500,
     priceType: 'per_day',
     icon: '🗺️',
-    maxQuantity: 1
+    maxQuantity: 1,
   },
   {
     id: 'wifi',
@@ -45,7 +45,7 @@ const defaultExtras: Extra[] = [
     price: 3000,
     priceType: 'per_day',
     icon: '📶',
-    maxQuantity: 1
+    maxQuantity: 1,
   },
   {
     id: 'driver',
@@ -54,7 +54,7 @@ const defaultExtras: Extra[] = [
     price: 15000,
     priceType: 'per_day',
     icon: '👨‍✈️',
-    maxQuantity: 1
+    maxQuantity: 1,
   },
   {
     id: 'cooler',
@@ -63,7 +63,7 @@ const defaultExtras: Extra[] = [
     price: 5000,
     priceType: 'per_trip',
     icon: '🧊',
-    maxQuantity: 1
+    maxQuantity: 1,
   },
   {
     id: 'bike-rack',
@@ -72,14 +72,14 @@ const defaultExtras: Extra[] = [
     price: 8000,
     priceType: 'per_trip',
     icon: '🚴',
-    maxQuantity: 1
-  }
+    maxQuantity: 1,
+  },
 ];
 
 export function VehicleExtras({
   extras = defaultExtras,
   selectedExtras = {},
-  onUpdateExtras
+  onUpdateExtras,
 }: VehicleExtrasProps) {
   const [selected, setSelected] = useState<{ [key: string]: number }>(selectedExtras);
 
@@ -104,7 +104,7 @@ export function VehicleExtras({
   const getTotalPrice = () => {
     return extras.reduce((total, extra) => {
       const qty = selected[extra.id] || 0;
-      return total + (extra.price * qty);
+      return total + extra.price * qty;
     }, 0);
   };
 
@@ -114,15 +114,13 @@ export function VehicleExtras({
         <Plus className="w-6 h-6 text-zemo-yellow flex-shrink-0 mt-1" />
         <div>
           <h2 className="text-2xl font-bold mb-2">Extras</h2>
-          <p className="text-gray-600">
-            Add optional items to enhance your trip
-          </p>
+          <p className="text-gray-600">Add optional items to enhance your trip</p>
         </div>
       </div>
 
       {/* Extras List */}
       <div className="space-y-4">
-        {extras.map((extra) => {
+        {extras.map(extra => {
           const quantity = selected[extra.id] || 0;
           const isSelected = quantity > 0;
 
@@ -130,9 +128,7 @@ export function VehicleExtras({
             <div
               key={extra.id}
               className={`p-4 rounded-lg border-2 transition-all ${
-                isSelected
-                  ? 'border-zemo-yellow bg-yellow-50'
-                  : 'border-gray-200'
+                isSelected ? 'border-zemo-yellow bg-yellow-50' : 'border-gray-200'
               }`}
             >
               <div className="flex items-start gap-4">
@@ -147,9 +143,7 @@ export function VehicleExtras({
                       <p className="text-sm text-gray-600">{extra.description}</p>
                     </div>
                     <div className="text-right ml-4">
-                      <div className="font-bold text-gray-900">
-                        ₦{extra.price.toLocaleString()}
-                      </div>
+                      <div className="font-bold text-gray-900">₦{extra.price.toLocaleString()}</div>
                       <div className="text-xs text-gray-600">
                         {extra.priceType === 'per_day' ? 'per day' : 'per trip'}
                       </div>
@@ -165,9 +159,9 @@ export function VehicleExtras({
                     >
                       <Minus className="w-4 h-4" />
                     </button>
-                    
+
                     <span className="w-8 text-center font-semibold">{quantity}</span>
-                    
+
                     <button
                       onClick={() => handleQuantityChange(extra.id, 1)}
                       disabled={quantity >= (extra.maxQuantity || 99)}
@@ -177,9 +171,7 @@ export function VehicleExtras({
                     </button>
 
                     {extra.maxQuantity && extra.maxQuantity > 1 && (
-                      <span className="text-sm text-gray-600">
-                        (max {extra.maxQuantity})
-                      </span>
+                      <span className="text-sm text-gray-600">(max {extra.maxQuantity})</span>
                     )}
                   </div>
                 </div>
@@ -194,9 +186,7 @@ export function VehicleExtras({
         <div className="mt-6 pt-6 border-t border-gray-200">
           <div className="flex items-center justify-between text-lg">
             <span className="font-semibold">Extras Total</span>
-            <span className="font-bold text-gray-900">
-              ₦{getTotalPrice().toLocaleString()}
-            </span>
+            <span className="font-bold text-gray-900">₦{getTotalPrice().toLocaleString()}</span>
           </div>
         </div>
       )}
@@ -207,7 +197,7 @@ export function VehicleExtras({
           <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-gray-700">
             <p>
-              <strong>Note:</strong> Extras must be returned in the same condition as provided. 
+              <strong>Note:</strong> Extras must be returned in the same condition as provided.
               Additional charges may apply for damage or loss.
             </p>
           </div>

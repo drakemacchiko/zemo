@@ -30,31 +30,31 @@ export function SearchBar({
   initialEndDate = '',
   initialStartTime = '10:00',
   initialEndTime = '10:00',
-  compact = false
+  compact = false,
 }: SearchBarProps) {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<'location' | 'dates' | 'time' | null>(null);
-  
+
   // Form state - use Location object for coordinates
   const [location, setLocation] = useState<Location | null>(() => {
     if (initialLocation && initialLat !== undefined && initialLng !== undefined) {
       return {
         address: initialLocation,
         lat: initialLat,
-        lng: initialLng
+        lng: initialLng,
       };
     }
     return null;
   });
-  
+
   const [startDate, setStartDate] = useState(initialStartDate);
   const [endDate, setEndDate] = useState(initialEndDate);
   const [startTime, setStartTime] = useState(initialStartTime);
   const [endTime, setEndTime] = useState(initialEndTime);
-  
+
   // Validation errors
   const [errors, setErrors] = useState<string[]>([]);
-  
+
   const searchBarRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
@@ -84,7 +84,7 @@ export function SearchBar({
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
+
     switch (option) {
       case 'today':
         return today.toISOString().split('T')[0];
@@ -135,7 +135,7 @@ export function SearchBar({
     if (startDate && endDate) {
       const start = new Date(startDate + 'T' + startTime);
       const end = new Date(endDate + 'T' + endTime);
-      
+
       if (end <= start) {
         newErrors.push('Return must be after pickup');
       }
@@ -155,13 +155,13 @@ export function SearchBar({
         startDate,
         endDate,
         startTime,
-        endTime
+        endTime,
       });
-      
+
       if (location.placeId) {
         params.append('placeId', location.placeId);
       }
-      
+
       router.push(`/search?${params.toString()}`);
     }
   };
@@ -205,7 +205,9 @@ export function SearchBar({
             className="flex-1 px-6 py-4 text-left hover:bg-gray-50 transition-colors"
           >
             <div className="text-xs font-semibold text-gray-700 mb-1">Dates</div>
-            <div className={`text-sm ${startDate && endDate ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>
+            <div
+              className={`text-sm ${startDate && endDate ? 'text-gray-900 font-medium' : 'text-gray-400'}`}
+            >
               {getDatesDisplay()}
             </div>
           </button>
@@ -216,7 +218,9 @@ export function SearchBar({
             className="flex-1 px-6 py-4 text-left hover:bg-gray-50 transition-colors"
           >
             <div className="text-xs font-semibold text-gray-700 mb-1">Time</div>
-            <div className={`text-sm ${startTime && endTime ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>
+            <div
+              className={`text-sm ${startTime && endTime ? 'text-gray-900 font-medium' : 'text-gray-400'}`}
+            >
               {getTimeDisplay()}
             </div>
           </button>
@@ -227,7 +231,12 @@ export function SearchBar({
             className="px-8 py-4 bg-zemo-yellow hover:bg-yellow-400 rounded-r-full transition-colors flex items-center justify-center"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
             </svg>
             <span className="ml-2 font-bold hidden md:inline">Search</span>
           </button>
@@ -246,7 +255,7 @@ export function SearchBar({
                 </label>
                 <LocationAutocomplete
                   value={location?.address || ''}
-                  onChange={(newLocation) => {
+                  onChange={newLocation => {
                     setLocation(newLocation);
                     setActiveSection(null);
                   }}
@@ -268,7 +277,7 @@ export function SearchBar({
                   <input
                     type="date"
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+                    onChange={e => setStartDate(e.target.value)}
                     min={new Date().toISOString().split('T')[0]}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zemo-yellow focus:border-transparent"
                   />
@@ -280,7 +289,7 @@ export function SearchBar({
                   <input
                     type="date"
                     value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
+                    onChange={e => setEndDate(e.target.value)}
                     min={startDate || new Date().toISOString().split('T')[0]}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zemo-yellow focus:border-transparent"
                   />
@@ -290,7 +299,7 @@ export function SearchBar({
               <div>
                 <div className="text-sm font-medium text-gray-700 mb-2">Quick options</div>
                 <div className="flex flex-wrap gap-2">
-                  {['today', 'tomorrow', 'this-weekend', 'next-week'].map((option) => (
+                  {['today', 'tomorrow', 'this-weekend', 'next-week'].map(option => (
                     <button
                       key={option}
                       onClick={() => handleQuickDate(option)}
@@ -308,15 +317,13 @@ export function SearchBar({
           {activeSection === 'time' && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Pickup Time
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Pickup Time</label>
                 <select
                   value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
+                  onChange={e => setStartTime(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zemo-yellow focus:border-transparent"
                 >
-                  {timeOptions.map((time) => (
+                  {timeOptions.map(time => (
                     <option key={time} value={time}>
                       {time}
                     </option>
@@ -324,15 +331,13 @@ export function SearchBar({
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Return Time
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Return Time</label>
                 <select
                   value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
+                  onChange={e => setEndTime(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zemo-yellow focus:border-transparent"
                 >
-                  {timeOptions.map((time) => (
+                  {timeOptions.map(time => (
                     <option key={time} value={time}>
                       {time}
                     </option>
@@ -349,7 +354,9 @@ export function SearchBar({
         <div className="mt-2 p-4 bg-red-50 border border-red-200 rounded-lg">
           <ul className="list-disc list-inside space-y-1">
             {errors.map((error, index) => (
-              <li key={index} className="text-sm text-red-600">{error}</li>
+              <li key={index} className="text-sm text-red-600">
+                {error}
+              </li>
             ))}
           </ul>
         </div>

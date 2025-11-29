@@ -44,90 +44,90 @@ export async function GET(request: NextRequest) {
     // Get earnings data
     const [earnings, bookings] = await Promise.all([
       // Total earnings from completed bookings
-      withPrismaRetry(async (prisma) => {
+      withPrismaRetry(async prisma => {
         const result = await prisma.booking.aggregate({
           where: {
             vehicle: {
-              hostId: userId
+              hostId: userId,
             },
             status: 'COMPLETED',
             createdAt: {
-              gte: startDate
-            }
+              gte: startDate,
+            },
           },
           _sum: {
-            totalAmount: true
+            totalAmount: true,
           },
-          _count: true
+          _count: true,
         });
 
         const totalRevenue = result._sum.totalAmount || 0;
         // Calculate host earnings as 85% (15% platform fee)
         const hostEarnings = totalRevenue * 0.85;
-        
+
         return {
           totalRevenue,
           hostEarnings,
-          completedBookings: result._count
+          completedBookings: result._count,
         };
       }),
 
       // Booking details for breakdown
-      withPrismaRetry(async (prisma) =>
+      withPrismaRetry(async prisma =>
         prisma.booking.findMany({
           where: {
             vehicle: {
-              hostId: userId
+              hostId: userId,
             },
             status: 'COMPLETED',
             createdAt: {
-              gte: startDate
-            }
+              gte: startDate,
+            },
           },
           include: {
             vehicle: {
               select: {
                 make: true,
                 model: true,
-                year: true
-              }
+                year: true,
+              },
             },
             user: {
               select: {
                 profile: {
                   select: {
                     firstName: true,
-                    lastName: true
-                  }
-                }
-              }
-            }
+                    lastName: true,
+                  },
+                },
+              },
+            },
           },
           orderBy: {
-            createdAt: 'desc'
-          }
+            createdAt: 'desc',
+          },
         })
-      )
+      ),
     ]);
 
     // Get pending payouts (last 7 days completed bookings)
-    const pendingPayouts = await withPrismaRetry(async (prisma) => {
+    const pendingPayouts = await withPrismaRetry(async prisma => {
       const sevenDaysAgo = new Date(now);
       sevenDaysAgo.setDate(now.getDate() - 7);
-      
+
       const result = await prisma.booking.aggregate({
         where: {
           vehicle: {
-            hostId: userId
+            hostId: userId,
           },
           status: 'COMPLETED',
           completedAt: {
-            gte: sevenDaysAgo
-          }
+            gte: sevenDaysAgo,
+          },
         },
         _sum: {
-          totalAmount: true
-        }
+          totalAmount: true,
+        },
       });
 
       // Calculate host earnings as 85% of total
@@ -142,23 +142,26 @@ export async function GET(request: NextRequest) {
     }
 
     // Calculate earnings by vehicle
-    const earningsByVehicle = bookings.reduce((acc: any, booking: any) => {
-      const vehicleKey = `${booking.vehicle.year} ${booking.vehicle.make} ${booking.vehicle.model}`;
-      if (!acc[vehicleKey]) {
-        acc[vehicleKey] = {
-          vehicle: vehicleKey,
-          vehicleId: booking.vehicleId,
-          earnings: 0,
-          bookings: 0
-        };
-      }
-      acc[vehicleKey].earnings += (booking.totalAmount * 0.85) || 0;
-      acc[vehicleKey].bookings += 1;
-      return acc;
-    }, {} as Record<string, any>);
+    const earningsByVehicle = bookings.reduce(
+      (acc: any, booking: any) => {
+        const vehicleKey = `${booking.vehicle.year} ${booking.vehicle.make} ${booking.vehicle.model}`;
+        if (!acc[vehicleKey]) {
+          acc[vehicleKey] = {
+            vehicle: vehicleKey,
+            vehicleId: booking.vehicleId,
+            earnings: 0,
+            bookings: 0,
+          };
+        }
+        acc[vehicleKey].earnings += booking.totalAmount * 0.85 || 0;
+        acc[vehicleKey].bookings += 1;
+        return acc;
+      },
+      {} as Record<string, any>
+    );
 
     // Calculate earnings trend (last 12 months)
-    const earningsTrend = await withPrismaRetry(async (prisma) => {
+    const earningsTrend = await withPrismaRetry(async prisma => {
       const months = [];
       for (let i = 11; i >= 0; i--) {
         const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -167,23 +170,23 @@ export async function GET(request: NextRequest) {
         const monthEarnings = await prisma.booking.aggregate({
           where: {
             vehicle: {
-              hostId: userId
+              hostId: userId,
             },
             status: 'COMPLETED',
             createdAt: {
               gte: monthStart,
-              lte: monthEnd
-            }
+              lte: monthEnd,
+            },
           },
           _sum: {
-            totalAmount: true
-          }
+            totalAmount: true,
+          },
         });
 
         months.push({
           month: monthStart.toLocaleDateString('en-US', { month: 'short' }),
           year: monthStart.getFullYear(),
-          earnings: (monthEarnings._sum.totalAmount || 0) * 0.85
+          earnings: (monthEarnings._sum.totalAmount || 0) * 0.85,
         });
       }
       return months;
@@ -196,28 +199,28 @@ export async function GET(request: NextRequest) {
         completedBookings: earnings.completedBookings,
         pendingPayouts,
         nextPayoutDate: nextPayout.toISOString(),
-        platformFee: earnings.totalRevenue - earnings.hostEarnings
+        platformFee: earnings.totalRevenue - earnings.hostEarnings,
       },
       byVehicle: Object.values(earningsByVehicle),
       trend: earningsTrend,
       recentBookings: bookings.slice(0, 10).map((booking: any) => ({
         id: booking.id,
         vehicle: `${booking.vehicle.year} ${booking.vehicle.make} ${booking.vehicle.model}`,
-        renter: `${booking.user.profile?.firstName || ''} ${booking.user.profile?.lastName || ''}`.trim(),
+        renter:
+          `${booking.user.profile?.firstName || ''} ${booking.user.profile?.lastName || ''}`.trim(),
         startDate: booking.startDate,
         endDate: booking.endDate,
         amount: booking.totalAmount,
         hostEarnings: booking.totalAmount * 0.85,
-        status: 'COMPLETED'
-      }))
+        status: 'COMPLETED',
+      })),
     });
-
   } catch (error) {
     console.error('Earnings overview error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Failed to fetch earnings overview',
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

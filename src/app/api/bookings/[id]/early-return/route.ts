@@ -5,27 +5,18 @@ import { extractTokenFromRequest, verifyAccessToken } from '@/lib/auth';
 const prisma = new PrismaClient();
 
 // POST /api/bookings/[id]/early-return - Request early return
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const bookingId = params.id;
     const token = extractTokenFromRequest(request);
 
     if (!token) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
     const decoded = verifyAccessToken(token);
     if (!decoded || !decoded.userId) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, message: 'Invalid token' }, { status: 401 });
     }
 
     const userId = decoded.userId;
@@ -53,10 +44,7 @@ export async function POST(
     });
 
     if (!booking) {
-      return NextResponse.json(
-        { success: false, message: 'Booking not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, message: 'Booking not found' }, { status: 404 });
     }
 
     // Verify user is the renter
@@ -217,27 +205,18 @@ export async function POST(
 }
 
 // GET /api/bookings/[id]/early-return - Get early return details
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const bookingId = params.id;
     const token = extractTokenFromRequest(request);
 
     if (!token) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
     }
 
     const decoded = verifyAccessToken(token);
     if (!decoded || !decoded.userId) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, message: 'Invalid token' }, { status: 401 });
     }
 
     // Fetch early returns for this booking

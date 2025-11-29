@@ -18,7 +18,7 @@ async function authenticateRequest(request: NextRequest) {
 
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { id: true, email: true }
+    select: { id: true, email: true },
   });
 
   if (!user) {
@@ -29,18 +29,12 @@ async function authenticateRequest(request: NextRequest) {
 }
 
 // GET /api/payments/[id]/status
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Authenticate the request
     const authResult = await authenticateRequest(request);
     if (!authResult.success || !authResult.user) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const paymentId = params.id;
@@ -57,16 +51,13 @@ export async function GET(
             id: true,
             confirmationNumber: true,
             status: true,
-          }
-        }
-      }
+          },
+        },
+      },
     });
 
     if (!payment) {
-      return NextResponse.json(
-        { error: 'Payment not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
     }
 
     // Get updated status from payment provider if needed
@@ -75,7 +66,7 @@ export async function GET(
       try {
         const paymentService = PaymentServiceFactory.getService(payment.provider as any);
         providerStatus = await paymentService.getPaymentStatus(payment.providerTransactionId);
-        
+
         // Update local payment record if status changed
         if (providerStatus.status !== payment.status) {
           await prisma.payment?.update({
@@ -83,7 +74,7 @@ export async function GET(
             data: {
               status: providerStatus.status as any,
               processedAt: providerStatus.processedAt || new Date(),
-            }
+            },
           });
         }
       } catch (error) {
@@ -109,12 +100,8 @@ export async function GET(
       },
       booking: payment.booking,
     });
-
   } catch (error) {
     console.error('Payment status check error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

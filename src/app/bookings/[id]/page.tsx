@@ -1,47 +1,47 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function BookingDetailPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const [booking, setBooking] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
+  const router = useRouter();
+  const [booking, setBooking] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchBooking()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    fetchBooking();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchBooking = async () => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       if (!token) {
-        router.push('/login')
-        return
+        router.push('/login');
+        return;
       }
 
       const response = await fetch(`/api/bookings/${params.id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      })
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (response.ok) {
-        const data = await response.json()
-        setBooking(data.booking)
+        const data = await response.json();
+        setBooking(data.booking);
       }
     } catch (err) {
-      console.error('Failed to fetch booking:', err)
+      console.error('Failed to fetch booking:', err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-zemo-yellow" />
       </div>
-    )
+    );
   }
 
   if (!booking) {
@@ -54,7 +54,7 @@ export default function BookingDetailPage({ params }: { params: { id: string } }
           </Link>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -68,7 +68,12 @@ export default function BookingDetailPage({ params }: { params: { id: string } }
           <div className="text-center mb-8">
             <div className="inline-block bg-zemo-yellow p-4 rounded-full mb-4">
               <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             </div>
             <h1 className="text-3xl font-black mb-2">Booking Confirmed!</h1>
@@ -83,11 +88,15 @@ export default function BookingDetailPage({ params }: { params: { id: string } }
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <p className="text-gray-600">Pickup</p>
-                <p className="font-semibold text-lg">{new Date(booking.startDate).toLocaleDateString()}</p>
+                <p className="font-semibold text-lg">
+                  {new Date(booking.startDate).toLocaleDateString()}
+                </p>
               </div>
               <div>
                 <p className="text-gray-600">Return</p>
-                <p className="font-semibold text-lg">{new Date(booking.endDate).toLocaleDateString()}</p>
+                <p className="font-semibold text-lg">
+                  {new Date(booking.endDate).toLocaleDateString()}
+                </p>
               </div>
             </div>
           </div>
@@ -131,5 +140,5 @@ export default function BookingDetailPage({ params }: { params: { id: string } }
         </div>
       </div>
     </div>
-  )
+  );
 }

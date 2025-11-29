@@ -8,10 +8,7 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('stripe-signature');
 
     if (!signature) {
-      return NextResponse.json(
-        { error: 'No signature provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No signature provided' }, { status: 400 });
     }
 
     // Verify webhook signature
@@ -22,10 +19,7 @@ export async function POST(request: NextRequest) {
     );
 
     if (!event) {
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
     }
 
     console.log('Stripe webhook event:', event.type);
@@ -55,10 +49,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   } catch (error: any) {
     console.error('Stripe webhook error:', error);
-    return NextResponse.json(
-      { error: 'Webhook handler failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
   }
 }
 

@@ -2,7 +2,10 @@
 // Phase 11: PWA & Accessibility
 
 // Screen reader announcements
-export function announceToScreenReader(message: string, priority: 'polite' | 'assertive' = 'polite') {
+export function announceToScreenReader(
+  message: string,
+  priority: 'polite' | 'assertive' = 'polite'
+) {
   if (typeof window === 'undefined') return;
 
   const announcement = document.createElement('div');
@@ -147,7 +150,7 @@ function getLuminance(color: string): number {
   const rgb = hexToRgb(color);
   if (!rgb) return 0;
 
-  const [r = 0, g = 0, b = 0] = rgb.map((val) => {
+  const [r = 0, g = 0, b = 0] = rgb.map(val => {
     val = val / 255;
     return val <= 0.03928 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);
   });
@@ -158,11 +161,7 @@ function getLuminance(color: string): number {
 function hexToRgb(hex: string): [number, number, number] | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result
-    ? [
-        parseInt(result[1]!, 16),
-        parseInt(result[2]!, 16),
-        parseInt(result[3]!, 16),
-      ]
+    ? [parseInt(result[1]!, 16), parseInt(result[2]!, 16), parseInt(result[3]!, 16)]
     : null;
 }
 
@@ -185,10 +184,7 @@ export function announceFormSuccess(message: string) {
 }
 
 // Modal accessibility helper
-export function makeModalAccessible(
-  modal: HTMLElement,
-  onClose: () => void
-): () => void {
+export function makeModalAccessible(modal: HTMLElement, onClose: () => void): () => void {
   const restoreFocus = saveFocus();
   const removeTrapFocus = trapFocus(modal);
 

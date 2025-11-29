@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   Calendar,
   XCircle,
@@ -10,96 +10,96 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-  Info
-} from 'lucide-react'
+  Info,
+} from 'lucide-react';
 
 interface CancelledBooking {
-  id: string
+  id: string;
   vehicle: {
-    id: string
-    name: string
-    plateNumber: string
-    photo?: string
-  }
+    id: string;
+    name: string;
+    plateNumber: string;
+    photo?: string;
+  };
   renter: {
-    id: string
-    name: string
-    email: string
-    profilePicture?: string
-  }
-  startDate: string
-  endDate: string
-  totalAmount: number
-  cancelledBy: 'host' | 'renter'
-  cancelledAt: string
-  cancellationReason: string
-  refundAmount: number
-  penalty: number
-  status: string
-  createdAt: string
+    id: string;
+    name: string;
+    email: string;
+    profilePicture?: string;
+  };
+  startDate: string;
+  endDate: string;
+  totalAmount: number;
+  cancelledBy: 'host' | 'renter';
+  cancelledAt: string;
+  cancellationReason: string;
+  refundAmount: number;
+  penalty: number;
+  status: string;
+  createdAt: string;
 }
 
 export default function CancelledBookingsPage() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(true)
-  const [bookings, setBookings] = useState<CancelledBooking[]>([])
-  
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [bookings, setBookings] = useState<CancelledBooking[]>([]);
+
   // Pagination
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [total, setTotal] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   const fetchBookings = useCallback(async () => {
     try {
-      setLoading(true)
-      const token = localStorage.getItem('accessToken')
+      setLoading(true);
+      const token = localStorage.getItem('accessToken');
       if (!token) {
-        router.push('/login')
-        return
+        router.push('/login');
+        return;
       }
 
       const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: '10'
-      })
+        limit: '10',
+      });
 
       const response = await fetch(`/api/host/bookings/cancelled?${params}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (response.ok) {
-        const data = await response.json()
-        setBookings(data.bookings)
-        setTotal(data.pagination.total)
-        setTotalPages(data.pagination.totalPages)
+        const data = await response.json();
+        setBookings(data.bookings);
+        setTotal(data.pagination.total);
+        setTotalPages(data.pagination.totalPages);
       } else {
-        console.error('Failed to fetch cancelled bookings')
+        console.error('Failed to fetch cancelled bookings');
       }
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Error:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [currentPage, router])
+  }, [currentPage, router]);
 
   useEffect(() => {
-    fetchBookings()
-  }, [fetchBookings])
+    fetchBookings();
+  }, [fetchBookings]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-ZM', {
       style: 'currency',
-      currency: 'ZMW'
-    }).format(amount)
-  }
+      currency: 'ZMW',
+    }).format(amount);
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
-    })
-  }
+      year: 'numeric',
+    });
+  };
 
   const formatDateTime = (dateString: string) => {
     return new Date(dateString).toLocaleString('en-US', {
@@ -107,14 +107,14 @@ export default function CancelledBookingsPage() {
       day: 'numeric',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
+      minute: '2-digit',
+    });
+  };
 
   const calculateDays = (start: string, end: string) => {
-    const diff = new Date(end).getTime() - new Date(start).getTime()
-    return Math.ceil(diff / (1000 * 60 * 60 * 24))
-  }
+    const diff = new Date(end).getTime() - new Date(start).getTime();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  };
 
   if (loading) {
     return (
@@ -124,7 +124,7 @@ export default function CancelledBookingsPage() {
           <p className="mt-4 text-gray-600">Loading cancelled bookings...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -193,12 +193,8 @@ export default function CancelledBookingsPage() {
         {bookings.length === 0 ? (
           <div className="bg-white rounded-lg shadow-md p-12 text-center">
             <XCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">
-              No Cancelled Bookings
-            </h3>
-            <p className="text-gray-600 mb-6">
-              You don't have any cancelled bookings
-            </p>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Cancelled Bookings</h3>
+            <p className="text-gray-600 mb-6">You don't have any cancelled bookings</p>
             <Link
               href="/host/bookings/requests"
               className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -208,7 +204,7 @@ export default function CancelledBookingsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {bookings.map((booking) => (
+            {bookings.map(booking => (
               <div
                 key={booking.id}
                 className="bg-white rounded-lg shadow-md p-6 border-l-4 border-red-500"
@@ -365,5 +361,5 @@ export default function CancelledBookingsPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -115,8 +115,8 @@ export default function ExtensionRequestCard({
               extension.status === 'APPROVED'
                 ? 'bg-green-100 text-green-800'
                 : extension.status === 'DECLINED'
-                ? 'bg-red-100 text-red-800'
-                : 'bg-gray-100 text-gray-800'
+                  ? 'bg-red-100 text-red-800'
+                  : 'bg-gray-100 text-gray-800'
             }`}
           >
             {extension.status}
@@ -136,9 +136,7 @@ export default function ExtensionRequestCard({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="font-semibold text-gray-900">Extension Request</h3>
-            <p className="text-sm text-gray-600">
-              {renterName} wants to extend their trip
-            </p>
+            <p className="text-sm text-gray-600">{renterName} wants to extend their trip</p>
           </div>
           <span className="px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
             Pending Response
@@ -172,7 +170,7 @@ export default function ExtensionRequestCard({
           </label>
           <textarea
             value={approveMessage}
-            onChange={(e) => setApproveMessage(e.target.value)}
+            onChange={e => setApproveMessage(e.target.value)}
             rows={2}
             placeholder="Add a personal message..."
             className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
@@ -215,9 +213,10 @@ export default function ExtensionRequestCard({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Decline Extension Request</h3>
-            
+
             <p className="text-sm text-gray-600 mb-4">
-              Please provide a reason for declining this extension request. The renter will see this message.
+              Please provide a reason for declining this extension request. The renter will see this
+              message.
             </p>
 
             <div className="mb-4">
@@ -226,7 +225,7 @@ export default function ExtensionRequestCard({
               </label>
               <textarea
                 value={declineReason}
-                onChange={(e) => setDeclineReason(e.target.value)}
+                onChange={e => setDeclineReason(e.target.value)}
                 rows={4}
                 placeholder="e.g., Vehicle is already booked for those dates, prior commitment, etc."
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"

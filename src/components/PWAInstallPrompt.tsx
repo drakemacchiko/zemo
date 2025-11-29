@@ -1,96 +1,96 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { X, Download, Check } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import { X, Download, Check } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
 export function PWAInstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
-  const [showPrompt, setShowPrompt] = useState(false)
-  const [isInstalled, setIsInstalled] = useState(false)
-  const [isIOS, setIsIOS] = useState(false)
-  const [showIOSInstructions, setShowIOSInstructions] = useState(false)
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [showIOSInstructions, setShowIOSInstructions] = useState(false);
 
   useEffect(() => {
     // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true)
-      return
+      setIsInstalled(true);
+      return;
     }
 
     // Check if dismissed before
-    const dismissed = localStorage.getItem('pwa-prompt-dismissed')
+    const dismissed = localStorage.getItem('pwa-prompt-dismissed');
     if (dismissed) {
-      const dismissedDate = new Date(dismissed)
-      const now = new Date()
-      const daysSinceDismissed = (now.getTime() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24)
-      
+      const dismissedDate = new Date(dismissed);
+      const now = new Date();
+      const daysSinceDismissed = (now.getTime() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24);
+
       // Show again after 7 days
       if (daysSinceDismissed < 7) {
-        return
+        return;
       }
     }
 
     // Detect iOS
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream
-    setIsIOS(isIOSDevice)
+    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    setIsIOS(isIOSDevice);
 
     // Listen for beforeinstallprompt event (Android/Desktop)
     const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault()
-      setDeferredPrompt(e as BeforeInstallPromptEvent)
-      
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+
       // Show prompt after 30 seconds
       setTimeout(() => {
-        setShowPrompt(true)
-      }, 30000)
-    }
+        setShowPrompt(true);
+      }, 30000);
+    };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     // For iOS, show instructions after 30 seconds
     if (isIOSDevice) {
       setTimeout(() => {
-        setShowPrompt(true)
-      }, 30000)
+        setShowPrompt(true);
+      }, 30000);
     }
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    }
-  }, [])
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt && !isIOS) return
+    if (!deferredPrompt && !isIOS) return;
 
     if (isIOS) {
-      setShowIOSInstructions(true)
-      return
+      setShowIOSInstructions(true);
+      return;
     }
 
     if (deferredPrompt) {
-      deferredPrompt.prompt()
-      const { outcome } = await deferredPrompt.userChoice
-      
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+
       if (outcome === 'accepted') {
-        setShowPrompt(false)
-        setIsInstalled(true)
+        setShowPrompt(false);
+        setIsInstalled(true);
       }
-      
-      setDeferredPrompt(null)
+
+      setDeferredPrompt(null);
     }
-  }
+  };
 
   const handleDismiss = () => {
-    setShowPrompt(false)
-    localStorage.setItem('pwa-prompt-dismissed', new Date().toISOString())
-  }
+    setShowPrompt(false);
+    localStorage.setItem('pwa-prompt-dismissed', new Date().toISOString());
+  };
 
-  if (isInstalled || !showPrompt) return null
+  if (isInstalled || !showPrompt) return null;
 
   return (
     <>
@@ -110,12 +110,8 @@ export function PWAInstallPrompt() {
               <Download className="w-6 h-6 text-black" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">
-                Install ZEMO App
-              </h3>
-              <p className="text-sm text-gray-600">
-                Get faster access and a better experience
-              </p>
+              <h3 className="text-lg font-bold text-gray-900 mb-1">Install ZEMO App</h3>
+              <p className="text-sm text-gray-600">Get faster access and a better experience</p>
             </div>
           </div>
 
@@ -163,13 +159,11 @@ export function PWAInstallPrompt() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4">
           <div className="bg-white rounded-t-2xl md:rounded-2xl max-w-md w-full p-6 animate-slide-up">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-900">
-                Install on iOS
-              </h3>
+              <h3 className="text-xl font-bold text-gray-900">Install on iOS</h3>
               <button
                 onClick={() => {
-                  setShowIOSInstructions(false)
-                  setShowPrompt(false)
+                  setShowIOSInstructions(false);
+                  setShowPrompt(false);
                 }}
                 className="p-1 rounded-full hover:bg-gray-100 transition-colors"
               >
@@ -188,7 +182,7 @@ export function PWAInstallPrompt() {
                   </p>
                   <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z"/>
+                      <path d="M16 5l-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4 4 4zm4 5v11c0 1.1-.9 2-2 2H6c-1.11 0-2-.9-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3c1.1 0 2 .89 2 2z" />
                     </svg>
                     <span>(Square with arrow pointing up)</span>
                   </div>
@@ -220,9 +214,9 @@ export function PWAInstallPrompt() {
 
             <button
               onClick={() => {
-                setShowIOSInstructions(false)
-                setShowPrompt(false)
-                localStorage.setItem('pwa-prompt-dismissed', new Date().toISOString())
+                setShowIOSInstructions(false);
+                setShowPrompt(false);
+                localStorage.setItem('pwa-prompt-dismissed', new Date().toISOString());
               }}
               className="w-full px-4 py-3 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-600 transition-colors"
             >
@@ -232,5 +226,5 @@ export function PWAInstallPrompt() {
         </div>
       )}
     </>
-  )
+  );
 }

@@ -23,7 +23,7 @@ export function VehicleOverview({ vehicle }: VehicleOverviewProps) {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-2xl font-bold mb-4">Vehicle Overview</h2>
-      
+
       {/* Quick Stats */}
       <div className="flex flex-wrap gap-4 mb-6">
         {/* Rating */}
@@ -34,13 +34,13 @@ export function VehicleOverview({ vehicle }: VehicleOverviewProps) {
             <span className="text-gray-600">({vehicle.tripCount || 0} trips)</span>
           </div>
         )}
-        
+
         {/* Location */}
         <div className="flex items-center gap-1.5 text-gray-700">
           <MapPin className="w-5 h-5" />
           <span>{vehicle.location}</span>
         </div>
-        
+
         {/* Instant Booking Badge */}
         {vehicle.instantBooking && (
           <div className="flex items-center gap-1.5 bg-zemo-yellow px-3 py-1 rounded-full">

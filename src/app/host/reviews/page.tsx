@@ -32,7 +32,7 @@ export default function ReviewsPage() {
     try {
       const token = localStorage.getItem('accessToken');
       const response = await fetch('/api/host/reviews', {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.ok) {
@@ -53,7 +53,7 @@ export default function ReviewsPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ response: replyText }),
       });
@@ -175,7 +175,7 @@ export default function ReviewsPage() {
                     <div className="space-y-2">
                       <textarea
                         value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
+                        onChange={e => setReplyText(e.target.value)}
                         placeholder="Write your response..."
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400"
                         rows={3}

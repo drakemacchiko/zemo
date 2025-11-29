@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 /**
  * Health Check Endpoint
  * GET /api/health
- * 
+ *
  * Returns system health status for monitoring tools (Uptime Robot, Pingdom, etc.)
  * Checks:
  * - API responsiveness
@@ -31,9 +31,7 @@ export async function GET() {
     // Check database connection with timeout
     const dbCheck = await Promise.race([
       prisma.$queryRaw`SELECT 1 as result`,
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Database timeout')), 5000)
-      ),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Database timeout')), 5000)),
     ]);
 
     if (dbCheck) {

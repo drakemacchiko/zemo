@@ -283,7 +283,11 @@ export async function notifyBookingCancelled(
   });
 }
 
-export async function notifyVehicleApproved(userId: string, vehicleId: string, vehicleName: string) {
+export async function notifyVehicleApproved(
+  userId: string,
+  vehicleId: string,
+  vehicleName: string
+) {
   return createNotification({
     userId,
     type: 'VEHICLE_APPROVED',

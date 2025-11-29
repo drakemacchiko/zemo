@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   Clock,
   Check,
@@ -13,153 +13,153 @@ import {
   DollarSign,
   Shield,
   AlertCircle,
-  Star
-} from 'lucide-react'
+  Star,
+} from 'lucide-react';
 
 interface BookingRequest {
-  id: string
+  id: string;
   vehicle: {
-    make: string
-    model: string
-    year: number
-    photo: string
-  }
+    make: string;
+    model: string;
+    year: number;
+    photo: string;
+  };
   renter: {
-    name: string
-    profilePicture?: string
-    rating: number
-    tripCount: number
-    verified: boolean
-  }
-  startDate: string
-  endDate: string
-  totalAmount: number
-  specialRequests?: string
-  expiresAt: string
+    name: string;
+    profilePicture?: string;
+    rating: number;
+    tripCount: number;
+    verified: boolean;
+  };
+  startDate: string;
+  endDate: string;
+  totalAmount: number;
+  specialRequests?: string;
+  expiresAt: string;
 }
 
 export default function BookingRequestsPage() {
-  const router = useRouter()
-  const [requests, setRequests] = useState<BookingRequest[]>([])
-  const [loading, setLoading] = useState(true)
-  const [processing, setProcessing] = useState<string | null>(null)
-  const [showDeclineModal, setShowDeclineModal] = useState<string | null>(null)
-  const [declineReason, setDeclineReason] = useState('')
+  const router = useRouter();
+  const [requests, setRequests] = useState<BookingRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState<string | null>(null);
+  const [showDeclineModal, setShowDeclineModal] = useState<string | null>(null);
+  const [declineReason, setDeclineReason] = useState('');
 
   useEffect(() => {
-    fetchBookingRequests()
-  }, [])
+    fetchBookingRequests();
+  }, []);
 
   const fetchBookingRequests = async () => {
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       const res = await fetch('/api/host/bookings/requests', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (res.ok) {
-        const data = await res.json()
-        setRequests(data.requests)
+        const data = await res.json();
+        setRequests(data.requests);
       }
     } catch (error) {
-      console.error('Error fetching booking requests:', error)
+      console.error('Error fetching booking requests:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleAccept = async (requestId: string) => {
-    if (!confirm('Accept this booking request?')) return
+    if (!confirm('Accept this booking request?')) return;
 
-    setProcessing(requestId)
+    setProcessing(requestId);
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       const res = await fetch(`/api/host/bookings/${requestId}/accept`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        }
-      })
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (res.ok) {
-        setRequests(requests.filter(r => r.id !== requestId))
-        alert('Booking accepted! The renter has been notified.')
+        setRequests(requests.filter(r => r.id !== requestId));
+        alert('Booking accepted! The renter has been notified.');
       } else {
-        const data = await res.json()
-        alert(data.error || 'Failed to accept booking')
+        const data = await res.json();
+        alert(data.error || 'Failed to accept booking');
       }
     } catch (error) {
-      console.error('Error accepting booking:', error)
-      alert('Failed to accept booking')
+      console.error('Error accepting booking:', error);
+      alert('Failed to accept booking');
     } finally {
-      setProcessing(null)
+      setProcessing(null);
     }
-  }
+  };
 
   const handleDecline = async () => {
-    if (!showDeclineModal || !declineReason) return
+    if (!showDeclineModal || !declineReason) return;
 
-    setProcessing(showDeclineModal)
+    setProcessing(showDeclineModal);
     try {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken');
       const res = await fetch(`/api/host/bookings/${showDeclineModal}/decline`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ reason: declineReason })
-      })
+        body: JSON.stringify({ reason: declineReason }),
+      });
 
       if (res.ok) {
-        setRequests(requests.filter(r => r.id !== showDeclineModal))
-        setShowDeclineModal(null)
-        setDeclineReason('')
-        alert('Booking declined. The renter has been notified.')
+        setRequests(requests.filter(r => r.id !== showDeclineModal));
+        setShowDeclineModal(null);
+        setDeclineReason('');
+        alert('Booking declined. The renter has been notified.');
       } else {
-        const data = await res.json()
-        alert(data.error || 'Failed to decline booking')
+        const data = await res.json();
+        alert(data.error || 'Failed to decline booking');
       }
     } catch (error) {
-      console.error('Error declining booking:', error)
-      alert('Failed to decline booking')
+      console.error('Error declining booking:', error);
+      alert('Failed to decline booking');
     } finally {
-      setProcessing(null)
+      setProcessing(null);
     }
-  }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
-    })
-  }
+      year: 'numeric',
+    });
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-ZM', {
       style: 'currency',
-      currency: 'ZMW'
-    }).format(amount)
-  }
+      currency: 'ZMW',
+    }).format(amount);
+  };
 
   const getTimeRemaining = (expiresAt: string) => {
-    const now = new Date()
-    const expires = new Date(expiresAt)
-    const diffInHours = Math.ceil((expires.getTime() - now.getTime()) / (1000 * 60 * 60))
-    
-    if (diffInHours < 1) return 'Less than 1 hour'
-    if (diffInHours === 1) return '1 hour'
-    return `${diffInHours} hours`
-  }
+    const now = new Date();
+    const expires = new Date(expiresAt);
+    const diffInHours = Math.ceil((expires.getTime() - now.getTime()) / (1000 * 60 * 60));
+
+    if (diffInHours < 1) return 'Less than 1 hour';
+    if (diffInHours === 1) return '1 hour';
+    return `${diffInHours} hours`;
+  };
 
   const getDuration = (start: string, end: string) => {
-    const startDate = new Date(start)
-    const endDate = new Date(end)
-    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))
-    return `${days} day${days > 1 ? 's' : ''}`
-  }
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    return `${days} day${days > 1 ? 's' : ''}`;
+  };
 
   if (loading) {
     return (
@@ -169,7 +169,7 @@ export default function BookingRequestsPage() {
           <p className="mt-4 text-gray-600">Loading booking requests...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -186,7 +186,7 @@ export default function BookingRequestsPage() {
         {/* Requests List */}
         {requests.length > 0 ? (
           <div className="space-y-6">
-            {requests.map((request) => (
+            {requests.map(request => (
               <div key={request.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
                 <div className="p-6">
                   {/* Time Remaining Banner */}
@@ -272,7 +272,9 @@ export default function BookingRequestsPage() {
                       {/* Special Requests */}
                       {request.specialRequests && (
                         <div className="border-t pt-4">
-                          <h4 className="text-sm font-medium text-gray-700 mb-2">Special Requests:</h4>
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">
+                            Special Requests:
+                          </h4>
                           <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
                             {request.specialRequests}
                           </p>
@@ -381,7 +383,7 @@ export default function BookingRequestsPage() {
 
               <select
                 value={declineReason}
-                onChange={(e) => setDeclineReason(e.target.value)}
+                onChange={e => setDeclineReason(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Select a reason...</option>
@@ -401,8 +403,8 @@ export default function BookingRequestsPage() {
                 </button>
                 <button
                   onClick={() => {
-                    setShowDeclineModal(null)
-                    setDeclineReason('')
+                    setShowDeclineModal(null);
+                    setDeclineReason('');
                   }}
                   className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium"
                 >
@@ -414,5 +416,5 @@ export default function BookingRequestsPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

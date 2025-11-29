@@ -15,7 +15,7 @@ describe('Handover and Damage Assessment', () => {
       ];
 
       const result = calculateDamageScore(damageItems, 'GOOD');
-      
+
       expect(result.totalScore).toBeGreaterThan(0);
       expect(result.totalScore).toBeLessThan(20);
       expect(result.totalRepairCost).toBe(150.0);
@@ -41,7 +41,7 @@ describe('Handover and Damage Assessment', () => {
       ];
 
       const result = calculateDamageScore(damageItems, 'POOR');
-      
+
       expect(result.totalScore).toBeGreaterThan(40);
       expect(result.totalRepairCost).toBe(1200.0);
       expect(result.adjustedScore).toBeGreaterThan(result.totalScore);
@@ -50,7 +50,7 @@ describe('Handover and Damage Assessment', () => {
     test('should handle no damage scenario', () => {
       const damageItems: any[] = [];
       const result = calculateDamageScore(damageItems, 'EXCELLENT');
-      
+
       expect(result.totalScore).toBe(0);
       expect(result.totalRepairCost).toBe(0);
       expect(result.adjustedScore).toBe(0);
@@ -69,7 +69,7 @@ describe('Handover and Damage Assessment', () => {
 
       const excellentResult = calculateDamageScore(damageItems, 'EXCELLENT');
       const poorResult = calculateDamageScore(damageItems, 'POOR');
-      
+
       expect(poorResult.adjustedScore).toBeGreaterThan(excellentResult.adjustedScore);
     });
   });
@@ -80,7 +80,7 @@ describe('Handover and Damage Assessment', () => {
       const damageCharges = 300;
       const cleaningCharges = 50;
       const fuelCharges = 25;
-      
+
       const totalCharges = damageCharges + cleaningCharges + fuelCharges;
       const adjustmentAmount = totalCharges;
       const finalReturn = originalDeposit - totalCharges;
@@ -92,7 +92,7 @@ describe('Handover and Damage Assessment', () => {
     test('should handle full deposit forfeiture', () => {
       const originalDeposit = 1000;
       const damageCharges = 1200;
-      
+
       const adjustmentAmount = Math.min(damageCharges, originalDeposit);
       const finalReturn = Math.max(0, originalDeposit - damageCharges);
 
@@ -103,7 +103,7 @@ describe('Handover and Damage Assessment', () => {
     test('should handle no charges scenario', () => {
       const originalDeposit = 1000;
       const totalCharges = 0;
-      
+
       const adjustmentAmount = totalCharges;
       const finalReturn = originalDeposit - totalCharges;
 

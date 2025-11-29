@@ -38,7 +38,7 @@ export function ReviewsSection({
   reviews,
   averageRating,
   totalReviews,
-  ratingBreakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+  ratingBreakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
 }: ReviewsSectionProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -50,9 +50,7 @@ export function ReviewsSection({
       <Star
         key={i}
         className={`w-4 h-4 ${
-          i < rating
-            ? 'fill-yellow-400 text-yellow-400'
-            : 'fill-gray-200 text-gray-200'
+          i < rating ? 'fill-yellow-400 text-yellow-400' : 'fill-gray-200 text-gray-200'
         }`}
       />
     ));
@@ -80,7 +78,7 @@ export function ReviewsSection({
           <div className="mb-8 p-6 bg-gray-50 rounded-lg">
             <h3 className="font-bold mb-4">Rating Breakdown</h3>
             <div className="space-y-3">
-              {[5, 4, 3, 2, 1].map((stars) => (
+              {[5, 4, 3, 2, 1].map(stars => (
                 <div key={stars} className="flex items-center gap-3">
                   <div className="flex items-center gap-1 w-16">
                     <span className="text-sm font-medium">{stars}</span>
@@ -90,7 +88,7 @@ export function ReviewsSection({
                     <div
                       className="h-full bg-zemo-yellow"
                       style={{
-                        width: `${getRatingPercentage(ratingBreakdown[stars as keyof typeof ratingBreakdown])}%`
+                        width: `${getRatingPercentage(ratingBreakdown[stars as keyof typeof ratingBreakdown])}%`,
                       }}
                     />
                   </div>
@@ -104,7 +102,7 @@ export function ReviewsSection({
 
           {/* Reviews List */}
           <div className="space-y-6">
-            {reviews.map((review) => (
+            {reviews.map(review => (
               <div key={review.id} className="pb-6 border-b border-gray-200 last:border-0">
                 {/* Reviewer Info */}
                 <div className="flex items-start gap-3 mb-3">
@@ -132,9 +130,7 @@ export function ReviewsSection({
                       )}
                     </div>
                     <div className="flex items-center gap-3 text-sm text-gray-600">
-                      <div className="flex items-center gap-1">
-                        {renderStars(review.rating)}
-                      </div>
+                      <div className="flex items-center gap-1">{renderStars(review.rating)}</div>
                       <span>•</span>
                       <span>{formatDate(review.date)}</span>
                       {review.tripDuration && (

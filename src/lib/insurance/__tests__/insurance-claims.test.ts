@@ -148,12 +148,7 @@ describe('Insurance and Claims System', () => {
       endDate.setDate(endDate.getDate() + 3);
 
       await expect(
-        InsurancePricingService.calculatePremium(
-          testInsurance.id,
-          30000,
-          startDate,
-          endDate
-        )
+        InsurancePricingService.calculatePremium(testInsurance.id, 30000, startDate, endDate)
       ).rejects.toThrow('Insurance product not found or inactive');
     });
 
@@ -263,18 +258,14 @@ describe('Insurance and Claims System', () => {
       const incidentDate = new Date();
       incidentDate.setDate(incidentDate.getDate() + 2); // During booking period
 
-      const claim = await ClaimService.createClaim(
-        testPolicy.id,
-        testUser.id,
-        {
-          incidentDate,
-          incidentLocation: 'Lusaka Central',
-          incidentDescription: 'Minor fender bender at traffic light',
-          claimType: 'ACCIDENT',
-          estimatedDamageAmount: 2500,
-          policeReportNumber: 'POL123456',
-        }
-      );
+      const claim = await ClaimService.createClaim(testPolicy.id, testUser.id, {
+        incidentDate,
+        incidentLocation: 'Lusaka Central',
+        incidentDescription: 'Minor fender bender at traffic light',
+        claimType: 'ACCIDENT',
+        estimatedDamageAmount: 2500,
+        policeReportNumber: 'POL123456',
+      });
 
       expect(claim).toHaveProperty('id');
       expect(claim).toHaveProperty('claimNumber');
@@ -346,17 +337,13 @@ describe('Insurance and Claims System', () => {
       const incidentDate = new Date();
       incidentDate.setDate(incidentDate.getDate() + 2);
 
-      const claim = await ClaimService.createClaim(
-        testPolicy.id,
-        testUser.id,
-        {
-          incidentDate,
-          incidentLocation: 'Lusaka Central',
-          incidentDescription: 'Minor fender bender',
-          claimType: 'ACCIDENT',
-          estimatedDamageAmount: 2500,
-        }
-      );
+      const claim = await ClaimService.createClaim(testPolicy.id, testUser.id, {
+        incidentDate,
+        incidentLocation: 'Lusaka Central',
+        incidentDescription: 'Minor fender bender',
+        claimType: 'ACCIDENT',
+        estimatedDamageAmount: 2500,
+      });
 
       const updatedClaim = await ClaimService.updateClaim(
         claim.id,
@@ -426,16 +413,12 @@ describe('Insurance and Claims System', () => {
       const incidentDate = new Date();
       incidentDate.setDate(incidentDate.getDate() + 2);
 
-      const claim = await ClaimService.createClaim(
-        testPolicy.id,
-        testUser.id,
-        {
-          incidentDate,
-          incidentLocation: 'Lusaka Central',
-          incidentDescription: 'Test claim',
-          claimType: 'ACCIDENT',
-        }
-      );
+      const claim = await ClaimService.createClaim(testPolicy.id, testUser.id, {
+        incidentDate,
+        incidentLocation: 'Lusaka Central',
+        incidentDescription: 'Test claim',
+        claimType: 'ACCIDENT',
+      });
 
       // Get claim as owner
       const retrievedClaim = await ClaimService.getClaimById(claim.id, testUser.id);
@@ -451,9 +434,9 @@ describe('Insurance and Claims System', () => {
       });
 
       // Try to get claim as unauthorized user
-      await expect(
-        ClaimService.getClaimById(claim.id, anotherUser.id)
-      ).rejects.toThrow('Unauthorized to view this claim');
+      await expect(ClaimService.getClaimById(claim.id, anotherUser.id)).rejects.toThrow(
+        'Unauthorized to view this claim'
+      );
     });
   });
 });

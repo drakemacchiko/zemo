@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { DollarSign, Shield, TrendingUp, Smartphone } from 'lucide-react'
+import Link from 'next/link';
+import { DollarSign, Shield, TrendingUp, Smartphone } from 'lucide-react';
 
 export function BecomeAHost() {
   return (
@@ -15,11 +15,11 @@ export function BecomeAHost() {
               src="/images/host-earnings.jpg"
               alt="Become a host"
               className="w-full h-full object-cover"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none'
-                const parent = e.currentTarget.parentElement
+              onError={e => {
+                e.currentTarget.style.display = 'none';
+                const parent = e.currentTarget.parentElement;
                 if (parent) {
-                  parent.style.background = 'linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%)'
+                  parent.style.background = 'linear-gradient(135deg, #FCD34D 0%, #F59E0B 100%)';
                 }
               }}
             />
@@ -36,8 +36,8 @@ export function BecomeAHost() {
               Turn your car into income
             </h2>
             <p className="text-lg text-gray-600 mb-8">
-              Join thousands of hosts earning extra money by sharing their cars when they're not using them. 
-              It's easy, safe, and profitable.
+              Join thousands of hosts earning extra money by sharing their cars when they're not
+              using them. It's easy, safe, and profitable.
             </p>
 
             {/* Benefits */}
@@ -84,9 +84,7 @@ export function BecomeAHost() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Manage from anywhere</h3>
-                  <p className="text-gray-600 text-sm">
-                    Easy-to-use dashboard on web and mobile
-                  </p>
+                  <p className="text-gray-600 text-sm">Easy-to-use dashboard on web and mobile</p>
                 </div>
               </div>
             </div>
@@ -110,5 +108,5 @@ export function BecomeAHost() {
         </div>
       </div>
     </section>
-  )
+  );
 }

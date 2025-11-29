@@ -13,18 +13,12 @@ export async function POST(request: NextRequest) {
   try {
     const token = extractTokenFromRequest(request);
     if (!token) {
-      return NextResponse.json(
-        { error: 'Authentication required' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const payload = verifyAccessToken(token);
     if (!payload) {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -44,26 +38,17 @@ export async function POST(request: NextRequest) {
     });
 
     if (!payment) {
-      return NextResponse.json(
-        { error: 'Payment not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Payment not found' }, { status: 404 });
     }
 
     // Verify this is a security deposit
     if (payment.paymentType !== 'SECURITY_DEPOSIT') {
-      return NextResponse.json(
-        { error: 'Payment is not a security deposit' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Payment is not a security deposit' }, { status: 400 });
     }
 
     // Verify user is the host
     if (payment.booking.vehicle.hostId !== payload.userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized - must be vehicle host' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: 'Unauthorized - must be vehicle host' }, { status: 403 });
     }
 
     // Verify booking has ended
@@ -135,9 +120,7 @@ export async function POST(request: NextRequest) {
     } else {
       // Release full deposit (no damages)
       if (payment.provider === 'STRIPE') {
-        result = await stripe.releaseHeldPayment(
-          payment.providerTransactionId || ''
-        );
+        result = await stripe.releaseHeldPayment(payment.providerTransactionId || '');
       } else {
         // For Flutterwave, mark as released (funds weren't actually held)
         result = { success: true };
@@ -176,14 +159,14 @@ export async function POST(request: NextRequest) {
         status: validatedData.captureAmount ? 'COMPLETED' : 'RELEASED',
         amount: payment.amount,
         captured: validatedData.captureAmount || 0,
-        released: validatedData.captureAmount 
-          ? payment.amount - validatedData.captureAmount 
+        released: validatedData.captureAmount
+          ? payment.amount - validatedData.captureAmount
           : payment.amount,
       },
     });
   } catch (error: any) {
     console.error('Release deposit error:', error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid request data', details: error.issues },
@@ -191,9 +174,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
