@@ -57,6 +57,10 @@ model User {
   documents                 Document[] // User's uploaded documents
   isVerified                Boolean                    @default(false) // All required documents verified
 
+  // Phase 3: Reviews Relations
+  reviewsGiven    Review[] @relation("ReviewsGiven")
+  reviewsReceived Review[] @relation("ReviewsReceived")
+
   @@map("users")
 }
 
@@ -245,6 +249,9 @@ model Vehicle {
   notifications  Notification[]
   supportTickets SupportTicket[]
 
+  // Phase 3: Reviews Relations
+  reviews Review[]
+
   @@index([hostId])
   @@index([availabilityStatus, isActive])
   @@index([locationLatitude, locationLongitude])
@@ -376,6 +383,14 @@ model Booking {
   notifications  Notification[]
   supportTickets SupportTicket[]
 
+  // Phase 3: Reviews Relations
+  reviews Review[]
+
+  // Phase 3: Trip Modifications Relations
+  extensions   TripExtension[]
+  earlyReturns EarlyReturn[]
+  lateReturns  LateReturn[]
+
   @@unique([vehicleId, startDate, endDate], name: "no_overlap_booking")
   @@index([userId])
   @@index([vehicleId])
@@ -383,6 +398,161 @@ model Booking {
   @@index([status])
   @@index([startDate, endDate])
   @@map("bookings")
+}
+
+// Phase 3: Trip Modifications
+model TripExtension {
+  id        String @id @default(cuid())
+  bookingId String
+
+  // Extension details
+  requestedBy   String // userId who requested (usually renter)
+  originalEndDate DateTime
+  newEndDate      DateTime
+  additionalDays  Int
+  
+  // Pricing
+  dailyRate          Float
+  extensionSubtotal  Float // additionalDays * dailyRate
+  serviceFee         Float @default(0)
+  taxAmount          Float @default(0)
+  totalExtensionCost Float
+  
+  // Status
+  status ExtensionStatus @default(PENDING)
+  
+  // Host response
+  respondedBy String? // hostId
+  responseMessage String? @db.Text
+  declineReason String? @db.Text
+  
+  // Timestamps
+  requestedAt DateTime @default(now())
+  respondedAt DateTime?
+  approvedAt  DateTime?
+  paidAt      DateTime?
+  
+  // Payment reference
+  paymentId String? @unique
+  
+  // Relations
+  booking Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  payment Payment? @relation("ExtensionPayment", fields: [paymentId], references: [id])
+  
+  @@index([bookingId])
+  @@index([status])
+  @@index([requestedBy])
+  @@map("trip_extensions")
+}
+
+model EarlyReturn {
+  id        String @id @default(cuid())
+  bookingId String
+
+  // Return details
+  requestedBy       String // userId (renter)
+  originalEndDate   DateTime
+  actualReturnDate  DateTime
+  daysUnused        Int
+  
+  // Refund calculation
+  dailyRate     Float
+  refundAmount  Float // Calculated based on cancellation policy
+  refundReason  String? @db.Text
+  policyApplied String? // Which cancellation policy was applied
+  
+  // Status
+  status EarlyReturnStatus @default(PENDING)
+  
+  // Timestamps
+  requestedAt DateTime @default(now())
+  approvedAt  DateTime?
+  refundedAt  DateTime?
+  
+  // Payment reference
+  refundId String? @unique
+  
+  // Relations
+  booking Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  refund  Payment? @relation("RefundPayment", fields: [refundId], references: [id])
+  
+  @@index([bookingId])
+  @@index([status])
+  @@map("early_returns")
+}
+
+model LateReturn {
+  id        String @id @default(cuid())
+  bookingId String
+
+  // Late return details
+  originalEndDate  DateTime
+  actualReturnDate DateTime?
+  hoursLate        Int
+  
+  // Fee calculation
+  hourlyLateFee    Float // Fee per hour
+  dailyRate        Float // For comparison
+  totalLateFee     Float
+  capped           Boolean @default(false) // If capped at daily rate
+  
+  // Status
+  status LateReturnStatus @default(DETECTED)
+  
+  // Host actions
+  lateFeesWaived   Boolean @default(false)
+  waivedBy         String? // hostId
+  waiverReason     String? @db.Text
+  
+  // Payment
+  feesCharged Boolean @default(false)
+  chargedAt   DateTime?
+  
+  // Escalation
+  escalated   Boolean @default(false)
+  escalatedAt DateTime?
+  escalationNotes String? @db.Text
+  
+  // Timestamps
+  detectedAt  DateTime @default(now())
+  returnedAt  DateTime?
+  resolvedAt  DateTime?
+  
+  // Payment reference
+  feePaymentId String? @unique
+  
+  // Relations
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  feePayment Payment? @relation("LateFeePayment", fields: [feePaymentId], references: [id])
+  
+  @@index([bookingId])
+  @@index([status])
+  @@map("late_returns")
+}
+
+enum ExtensionStatus {
+  PENDING     // Awaiting host approval
+  APPROVED    // Host approved
+  DECLINED    // Host declined
+  CANCELLED   // Cancelled by renter
+  PAID        // Extension paid
+  ACTIVE      // Extension active
+}
+
+enum EarlyReturnStatus {
+  PENDING     // Return requested
+  APPROVED    // Approved by system/host
+  REFUNDED    // Refund processed
+  COMPLETED   // Early return completed
+}
+
+enum LateReturnStatus {
+  DETECTED    // System detected late return
+  NOTIFIED    // Both parties notified
+  EXTENDED    // Converted to extension
+  RETURNED    // Vehicle returned (late)
+  ESCALATED   // Escalated to support
+  RESOLVED    // Issue resolved
 }
 
 model Payment {
@@ -418,6 +588,11 @@ model Payment {
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   paymentMethod PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
   transactions  Transaction[]
+
+  // Phase 3: Trip Modifications Relations
+  tripExtension TripExtension? @relation("ExtensionPayment")
+  earlyReturn   EarlyReturn?   @relation("RefundPayment")
+  lateReturn    LateReturn?    @relation("LateFeePayment")
 
   @@index([bookingId])
   @@index([userId])
@@ -1415,6 +1590,10 @@ enum NotificationType {
   SUPPORT_RESPONSE // Support ticket response
   SYSTEM_ANNOUNCEMENT // System-wide announcement
   MARKETING // Marketing communication
+  EARLY_RETURN // Trip ended early
+  LATE_RETURN // Vehicle returned late
+  EXTENSION_REQUESTED // Trip extension requested
+  BOOKING_MODIFIED // Booking details modified
 }
 
 enum NotificationChannel {
@@ -1665,4 +1844,82 @@ enum DocumentStatus {
   UNDER_REVIEW
   APPROVED
   REJECTED
+}
+
+// Phase 3: Reviews & Ratings System
+model Review {
+  id         String @id @default(cuid())
+  bookingId  String
+  reviewerId String // Person leaving the review
+  revieweeId String // Person being reviewed
+  vehicleId  String? // If reviewing vehicle
+
+  // Review type (determines which ratings apply)
+  reviewType ReviewType
+
+  // Overall rating (required)
+  rating Float // 1-5 stars
+
+  // Category ratings (for vehicle reviews by renters)
+  cleanliness   Float? // How clean was the vehicle?
+  communication Float? // Host's responsiveness
+  convenience   Float? // Pickup/return process
+  accuracy      Float? // Did vehicle match listing?
+
+  // Review content
+  title   String? // Optional review title
+  comment String  @db.Text // Main review text (min 50 chars)
+
+  // Host review of renter specific fields
+  wouldRentAgain     Boolean? // Would host rent to this renter again?
+  vehicleCondition   String? // Condition at return: EXCELLENT, GOOD, FAIR, POOR
+  followedRules      Boolean? // Did renter follow rules?
+  onTimeReturn       Boolean? // Did renter return on time?
+
+  // Response from reviewee
+  response    String? @db.Text
+  respondedAt DateTime?
+
+  // Private feedback (not shown publicly)
+  privateFeedback String? @db.Text
+
+  // Review visibility & status
+  isPublic Boolean @default(true)
+  isHidden Boolean @default(false) // If flagged/moderated
+
+  // Moderation
+  flagged         Boolean @default(false)
+  flagReason      String? // Reason for flagging
+  moderatedBy     String? // Admin user ID
+  moderatedAt     DateTime?
+  moderationNotes String? @db.Text
+
+  // Blind review system (reviews shown after both submit or deadline)
+  isVisible       Boolean   @default(false)
+  madeVisibleAt   DateTime?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  booking  Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  reviewer User    @relation("ReviewsGiven", fields: [reviewerId], references: [id], onDelete: Cascade)
+  reviewee User    @relation("ReviewsReceived", fields: [revieweeId], references: [id], onDelete: Cascade)
+  vehicle  Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+
+  @@unique([bookingId, reviewerId]) // Each user can only review once per booking
+  @@index([bookingId])
+  @@index([reviewerId])
+  @@index([revieweeId])
+  @@index([vehicleId])
+  @@index([rating])
+  @@index([isVisible])
+  @@index([createdAt])
+  @@map("reviews")
+}
+
+enum ReviewType {
+  RENTER_TO_HOST    // Renter reviewing host/vehicle
+  HOST_TO_RENTER    // Host reviewing renter
 }

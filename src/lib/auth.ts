@@ -204,6 +204,21 @@ export async function getUserWithPermissions(userId: string) {
   }
 }
 
+// Simple auth verification helper
+export async function verifyAuth(request: NextRequest) {
+  const token = extractTokenFromRequest(request)
+  if (!token) {
+    return { authenticated: false, userId: null, error: 'Authentication required' }
+  }
+  
+  const payload = verifyAccessToken(token)
+  if (!payload) {
+    return { authenticated: false, userId: null, error: 'Invalid or expired token' }
+  }
+  
+  return { authenticated: true, userId: payload.userId, payload }
+}
+
 // Admin authentication middleware
 export async function requireAdmin(request: NextRequest, requiredPermission?: AdminPermission) {
   const token = extractTokenFromRequest(request)

@@ -1,113 +1,204 @@
-import { NextResponse } from 'next/server';
-import { z } from 'zod';
-// import { prisma } from '@/lib/db'; // Will be used when Prisma client is regenerated
-import { withAuth, type AuthenticatedRequest } from '@/lib/middleware';
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+import { extractTokenFromRequest, verifyAccessToken } from '@/lib/auth';
 
-// Validation schemas
-const querySchema = z.object({
-  page: z.string().optional().default('1'),
-  limit: z.string().optional().default('20'),
-  unread: z.string().optional().default('false'),
-  type: z.string().optional(),
-});
-
-const markReadSchema = z.object({
-  notificationIds: z.array(z.string()).optional(),
-  markAllRead: z.boolean().optional().default(false),
-});
-
-// Notification preferences schema (will be used for future preferences endpoint)
-// const preferencesSchema = z.object({
-//   emailEnabled: z.boolean().optional(),
-//   smsEnabled: z.boolean().optional(),
-//   pushEnabled: z.boolean().optional(),
-//   bookingUpdates: z.boolean().optional(),
-//   paymentUpdates: z.boolean().optional(),
-//   messageAlerts: z.boolean().optional(),
-//   marketingEmails: z.boolean().optional(),
-//   systemAlerts: z.boolean().optional(),
-//   quietHoursStart: z.number().min(0).max(23).optional(),
-//   quietHoursEnd: z.number().min(0).max(23).optional(),
-//   timezone: z.string().optional(),
-// });
-
-// GET /api/notifications - Get user's notifications
-async function getNotifications(request: AuthenticatedRequest) {
+/**
+ * GET /api/notifications
+ * Fetch all notifications for current user
+ */
+export async function GET(request: NextRequest) {
   try {
+    const token = extractTokenFromRequest(request);
+    if (!token) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const payload = verifyAccessToken(token);
+    if (!payload) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid token' },
+        { status: 401 }
+      );
+    }
+
+    const userId = payload.userId;
+
     const { searchParams } = new URL(request.url);
-    const query = querySchema.parse(Object.fromEntries(searchParams.entries()));
-    
-    const page = parseInt(query.page);
-    const limit = Math.min(parseInt(query.limit), 100); // Max 100 per page
-    // const unreadOnly = query.unread === 'true'; // Will be used for filtering
-    // const offset = (page - 1) * limit; // Will be used for pagination
-    
-    // const userId = request.user!.id; // Will be used for user filtering
-    
-    // For now, return empty array with proper structure
-    // This will work once Prisma client is regenerated
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const filter = searchParams.get('filter'); // 'all', 'unread', 'bookings', 'messages', 'reviews', 'account'
+    const type = searchParams.get('type'); // Specific notification type
+
+    const skip = (page - 1) * limit;
+
+    // Build where clause
+    const whereClause: any = { userId };
+
+    if (filter === 'unread') {
+      whereClause.isRead = false;
+    } else if (filter === 'bookings') {
+      whereClause.type = {
+        in: ['BOOKING_CONFIRMED', 'BOOKING_CANCELLED', 'PAYMENT_SUCCESS', 'PAYMENT_FAILED'],
+      };
+    } else if (filter === 'messages') {
+      whereClause.type = 'MESSAGE_RECEIVED';
+    } else if (filter === 'account') {
+      whereClause.type = {
+        in: ['DOCUMENT_REQUIRED', 'VEHICLE_APPROVED', 'SYSTEM_ANNOUNCEMENT'],
+      };
+    }
+
+    if (type) {
+      whereClause.type = type;
+    }
+
+    // Fetch notifications
+    const notifications = await prisma.notification.findMany({
+      where: whereClause,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      skip,
+      take: limit,
+      include: {
+        booking: {
+          select: {
+            id: true,
+            confirmationNumber: true,
+            status: true,
+          },
+        },
+        vehicle: {
+          select: {
+            id: true,
+            make: true,
+            model: true,
+            year: true,
+          },
+        },
+      },
+    });
+
+    // Get total count
+    const totalCount = await prisma.notification.count({
+      where: whereClause,
+    });
+
+    // Get unread count
+    const unreadCount = await prisma.notification.count({
+      where: {
+        userId,
+        isRead: false,
+      },
+    });
+
     return NextResponse.json({
-      notifications: [],
+      success: true,
+      notifications,
+      unreadCount,
       pagination: {
         page,
         limit,
-        totalCount: 0,
-        totalPages: 0,
-        hasNextPage: false,
-        hasPrevPage: false
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / limit),
       },
-      unreadCount: 0
     });
-
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching notifications:', error);
-    
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid query parameters', details: error.issues },
-        { status: 400 }
-      );
-    }
-
     return NextResponse.json(
-      { error: 'Failed to fetch notifications' },
+      {
+        success: false,
+        error: 'Failed to fetch notifications',
+        message: error.message,
+      },
       { status: 500 }
     );
   }
 }
 
-// PATCH /api/notifications - Mark notifications as read
-async function markNotificationsAsRead(request: AuthenticatedRequest) {
+/**
+ * PATCH /api/notifications
+ * Mark notifications as read
+ */
+export async function PATCH(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { notificationIds, markAllRead } = markReadSchema.parse(body);
-    
-    const userId = request.user!.id;
-
-    // Return success for now - full implementation when Prisma client is ready
-    return NextResponse.json({
-      message: 'Mark notifications as read API is ready - awaiting Prisma client regeneration',
-      notificationIds: notificationIds || [],
-      markAllRead,
-      userId
-    });
-
-  } catch (error) {
-    console.error('Error marking notifications as read:', error);
-    
-    if (error instanceof z.ZodError) {
+    const token = extractTokenFromRequest(request);
+    if (!token) {
       return NextResponse.json(
-        { error: 'Invalid input', details: error.issues },
-        { status: 400 }
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
       );
     }
 
+    const payload = verifyAccessToken(token);
+    if (!payload) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid token' },
+        { status: 401 }
+      );
+    }
+
+    const userId = payload.userId;
+    const body = await request.json();
+    const { notificationIds, markAllRead } = body;
+
+    if (markAllRead) {
+      // Mark all notifications as read
+      const result = await prisma.notification.updateMany({
+        where: {
+          userId,
+          isRead: false,
+        },
+        data: {
+          isRead: true,
+          readAt: new Date(),
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        markedCount: result.count,
+      });
+    }
+
+    if (notificationIds && Array.isArray(notificationIds)) {
+      // Mark specific notifications as read
+      const result = await prisma.notification.updateMany({
+        where: {
+          id: { in: notificationIds },
+          userId, // Ensure user owns these notifications
+        },
+        data: {
+          isRead: true,
+          readAt: new Date(),
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        markedCount: result.count,
+      });
+    }
+
     return NextResponse.json(
-      { error: 'Failed to mark notifications as read' },
+      {
+        success: false,
+        error: 'Either notificationIds or markAllRead must be provided',
+      },
+      { status: 400 }
+    );
+  } catch (error: any) {
+    console.error('Error marking notifications as read:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to mark notifications as read',
+        message: error.message,
+      },
       { status: 500 }
     );
   }
 }
-
-export const GET = withAuth(getNotifications);
-export const PATCH = withAuth(markNotificationsAsRead);

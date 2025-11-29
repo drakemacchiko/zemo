@@ -1,24 +1,8 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Search, MapPin, Calendar } from 'lucide-react'
+import { SearchBar } from '@/components/search/SearchBar'
 
-export function Hero() {
-  const router = useRouter()
-  const [location, setLocation] = useState('')
-  const [pickupDate, setPickupDate] = useState('')
-  const [returnDate, setReturnDate] = useState('')
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    const params = new URLSearchParams()
-    if (location) params.set('location', location)
-    if (pickupDate) params.set('pickupDate', pickupDate)
-    if (returnDate) params.set('returnDate', returnDate)
-    router.push(`/search?${params.toString()}`)
-  }
-
+export default function Hero() {
   return (
     <section className="relative h-[600px] md:h-[700px] flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
@@ -53,72 +37,9 @@ export function Hero() {
           </p>
 
           {/* Prominent Search Box */}
-          <form onSubmit={handleSearch} className="w-full max-w-3xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-2xl p-4 md:p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Location Input */}
-                <div className="relative">
-                  <label htmlFor="location" className="block text-xs font-semibold text-gray-700 mb-1">
-                    Where
-                  </label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      id="location"
-                      type="text"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      placeholder="City or airport"
-                      className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                {/* Pickup Date Input */}
-                <div className="relative">
-                  <label htmlFor="pickupDate" className="block text-xs font-semibold text-gray-700 mb-1">
-                    From
-                  </label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      id="pickupDate"
-                      type="date"
-                      value={pickupDate}
-                      onChange={(e) => setPickupDate(e.target.value)}
-                      className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                {/* Return Date Input */}
-                <div className="relative">
-                  <label htmlFor="returnDate" className="block text-xs font-semibold text-gray-700 mb-1">
-                    Until
-                  </label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      id="returnDate"
-                      type="date"
-                      value={returnDate}
-                      onChange={(e) => setReturnDate(e.target.value)}
-                      className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Search Button */}
-              <button
-                type="submit"
-                className="w-full mt-4 flex items-center justify-center gap-2 px-6 py-4 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-600 transition-colors text-lg"
-              >
-                <Search className="w-5 h-5" />
-                Search
-              </button>
-            </div>
-          </form>
+          <div className="w-full max-w-4xl mx-auto">
+            <SearchBar />
+          </div>
 
           {/* Trust Badges */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-12 text-white">

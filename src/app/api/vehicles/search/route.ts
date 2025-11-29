@@ -31,7 +31,7 @@ const searchSchema = z.object({
   limit: z.string().optional().transform(val => val ? Math.min(parseInt(val), 50) : 20), // Max 50, default 20
   
   // Sorting
-  sortBy: z.enum(['price', 'distance', 'rating', 'newest']).optional().default('distance'),
+  sortBy: z.enum(['price', 'distance', 'rating', 'newest', 'recommended']).optional().default('recommended'),
   sortOrder: z.enum(['asc', 'desc']).optional().default('asc'),
 });
 
@@ -305,6 +305,25 @@ export async function GET(request: NextRequest) {
             ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
             : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
+        break;
+      case 'recommended':
+        // Sort by multiple factors: rating (if available), distance, and trips completed
+        sortedVehicles.sort((a, b) => {
+          // Primary: Rating (higher is better)
+          const ratingDiff = (b.rating || 0) - (a.rating || 0);
+          if (Math.abs(ratingDiff) > 0.1) return ratingDiff;
+          
+          // Secondary: Distance (closer is better)
+          if (latitude && longitude) {
+            const distanceA = a.distance || Number.MAX_VALUE;
+            const distanceB = b.distance || Number.MAX_VALUE;
+            const distanceDiff = distanceA - distanceB;
+            if (Math.abs(distanceDiff) > 1) return distanceDiff;
+          }
+          
+          // Tertiary: Trips completed (more experience is better)
+          return (b.tripsCompleted || 0) - (a.tripsCompleted || 0);
+        });
         break;
       // TODO: Implement rating sort when rating system is added
     }

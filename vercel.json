@@ -4,6 +4,12 @@
   "installCommand": "npm install",
   "devCommand": "npm run dev",
   "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/cron/check-late-returns",
+      "schedule": "0 * * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
