@@ -429,3 +429,4 @@ export default function HostVehiclesPage() {
     </div>
   );
 }
+

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface Booking {
   id: string;
@@ -257,10 +258,11 @@ export default function ReviewPage({ params }: ReviewPageProps) {
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex items-center gap-4">
             {!isHost && booking.vehicle.photos[0] && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={booking.vehicle.photos[0].url}
                 alt={`${booking.vehicle.make} ${booking.vehicle.model}`}
+                width={80}
+                height={80}
                 className="w-20 h-20 object-cover rounded-lg"
               />
             )}

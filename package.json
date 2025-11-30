@@ -23,6 +23,7 @@
     "load:search": "artillery run load/search.yml",
     "db:backup": "bash scripts/backup-database.sh production",
     "db:restore": "bash scripts/restore-database.sh",
+    "seed:help": "tsx prisma/seed-help-articles.ts",
     "deploy:check": "node scripts/pre-deploy-check.js",
     "deploy:prepare": "npm run deploy:check && git push origin main",
     "deploy:production": "npm run security:audit && npm run test && npm run build && vercel --prod"
@@ -30,7 +31,13 @@
   "dependencies": {
     "@prisma/client": "^6.18.0",
     "@radix-ui/react-slider": "^1.3.6",
+    "@sendgrid/mail": "^8.1.6",
     "@stripe/stripe-js": "^8.5.3",
+    "@tiptap/extension-image": "^3.11.1",
+    "@tiptap/extension-link": "^3.11.1",
+    "@tiptap/extension-placeholder": "^3.11.1",
+    "@tiptap/react": "^3.11.1",
+    "@tiptap/starter-kit": "^3.11.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
@@ -40,6 +47,7 @@
     "bcryptjs": "^3.0.3",
     "chart.js": "^4.5.1",
     "clsx": "^2.0.0",
+    "date-fns": "^4.1.0",
     "flutterwave-node-v3": "^1.3.0",
     "jose": "^6.1.2",
     "jsonwebtoken": "^9.0.2",
@@ -47,11 +55,13 @@
     "lucide-react": "^0.553.0",
     "multer": "^2.0.2",
     "next": "^14.0.3",
+    "nodemailer": "^7.0.11",
     "prisma": "^6.18.0",
     "puppeteer": "^24.31.0",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^18.2.0",
+    "recharts": "^3.5.1",
     "stripe": "^20.0.0",
     "tailwind-merge": "^2.0.0",
     "tesseract.js": "^6.0.1",
@@ -69,6 +79,7 @@
     "@testing-library/user-event": "^14.5.1",
     "@types/google.maps": "^3.58.1",
     "@types/jest": "^29.5.8",
+    "@types/nodemailer": "^7.0.4",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.4.16",
@@ -82,7 +93,10 @@
     "lint-staged": "^15.0.2",
     "postcss": "^8.4.31",
     "prettier": "^3.0.3",
-    "tailwindcss": "^3.3.5"
+    "tailwindcss": "^3.3.5",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.20.6"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

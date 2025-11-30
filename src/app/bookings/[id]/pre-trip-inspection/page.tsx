@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Image from 'next/image';
 import {
   Camera,
   CheckCircle,
@@ -372,11 +373,11 @@ export default function PreTripInspectionPage() {
                 key={index}
                 className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden"
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={photo}
                   alt={`Vehicle ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  fill
+                  className="object-cover"
                 />
               </div>
             ))}
@@ -481,10 +482,11 @@ export default function PreTripInspectionPage() {
                                 key={idx}
                                 className="w-16 h-16 bg-gray-100 rounded overflow-hidden"
                               >
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
+                                <Image
                                   src={photo}
                                   alt={`Damage ${idx + 1}`}
+                                  width={64}
+                                  height={64}
                                   className="w-full h-full object-cover"
                                 />
                               </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface Booking {
   id: string;
@@ -176,10 +177,11 @@ export default function ExtendTripPage({ params }: { params: { id: string } }) {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div className="flex items-start space-x-4">
           {booking.vehicle.photoUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={booking.vehicle.photoUrl}
               alt={`${booking.vehicle.make} ${booking.vehicle.model}`}
+              width={96}
+              height={96}
               className="w-24 h-24 object-cover rounded-lg"
             />
           )}

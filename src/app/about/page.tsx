@@ -1,3 +1,12 @@
+export const metadata = {
+  title: 'About Us | ZEMO',
+  description: 'Learn about ZEMO, Zambia\'s premier peer-to-peer car rental marketplace. Discover our mission to make car sharing safe, affordable, and accessible for everyone.',
+  openGraph: {
+    title: 'About ZEMO',
+    description: 'Revolutionizing car rentals in Zambia through peer-to-peer car sharing',
+  },
+};
+
 export default function AboutPage() {
   return (
     <div className="container mx-auto px-4 py-12">
@@ -63,3 +72,4 @@ export default function AboutPage() {
     </div>
   );
 }
+

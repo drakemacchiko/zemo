@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Calendar,
   XCircle,
@@ -214,10 +215,11 @@ export default function CancelledBookingsPage() {
                   <div className="flex items-start space-x-4 flex-1">
                     <div className="w-24 h-24 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
                       {booking.vehicle.photo ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img
+                        <Image
                           src={booking.vehicle.photo}
                           alt={booking.vehicle.name}
+                          width={96}
+                          height={96}
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -245,10 +247,11 @@ export default function CancelledBookingsPage() {
                       <div className="flex items-center space-x-2">
                         <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
                           {booking.renter.profilePicture ? (
-                            /* eslint-disable-next-line @next/next/no-img-element */
-                            <img
+                            <Image
                               src={booking.renter.profilePicture}
                               alt={booking.renter.name}
+                              width={32}
+                              height={32}
                               className="w-full h-full rounded-full object-cover"
                             />
                           ) : (
@@ -363,3 +366,4 @@ export default function CancelledBookingsPage() {
     </div>
   );
 }
+

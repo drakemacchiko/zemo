@@ -1923,3 +1923,180 @@ enum ReviewType {
   RENTER_TO_HOST    // Renter reviewing host/vehicle
   HOST_TO_RENTER    // Host reviewing renter
 }
+
+// Phase 4: Help Center & Support System
+model HelpCategory {
+  id        String        @id @default(cuid())
+  name      String
+  slug      String        @unique
+  icon      String
+  order     Int
+  published Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  
+  // Relations
+  articles  HelpArticle[]
+
+  @@index([slug])
+  @@index([order])
+  @@index([published])
+  @@map("help_categories")
+}
+
+model HelpArticle {
+  id          String       @id @default(cuid())
+  categoryId  String
+  title       String
+  slug        String       @unique
+  content     String       @db.Text
+  keywords    String[] // For search
+  views       Int          @default(0)
+  helpful     Int          @default(0)
+  notHelpful  Int          @default(0)
+  published   Boolean      @default(true)
+  featured    Boolean      @default(false) // Featured in popular articles
+  order       Int          @default(0)
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  category    HelpCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([published])
+  @@index([featured])
+  @@index([views])
+  @@index([order])
+  @@map("help_articles")
+}
+
+// Phase 4: Blog System
+model BlogCategory {
+  id        String      @id @default(cuid())
+  name      String
+  slug      String      @unique
+  order     Int         @default(0)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  
+  // Relations
+  posts     BlogPost[]
+
+  @@index([slug])
+  @@map("blog_categories")
+}
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  categoryId  String
+  authorId    String // User ID of author
+  title       String
+  slug        String   @unique
+  excerpt     String?  @db.Text
+  content     String   @db.Text
+  
+  // Media
+  featuredImage String?
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  
+  // Status
+  status      BlogStatus @default(DRAFT)
+  publishedAt DateTime?
+  
+  // Engagement
+  views       Int        @default(0)
+  likes       Int        @default(0)
+  
+  // Tags
+  tags        String[] // Array of tag strings
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  category    BlogCategory @relation(fields: [categoryId], references: [id])
+
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([slug])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([views])
+  @@map("blog_posts")
+}
+
+enum BlogStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+}
+
+// Phase 4: Platform Settings
+model PlatformSettings {
+  id    String @id @default(cuid())
+  key   String @unique
+  value Json // Flexible JSON value
+  
+  // Metadata
+  category    String // e.g., "general", "booking", "payment", "insurance"
+  description String?
+  dataType    String // "string", "number", "boolean", "json"
+  
+  updatedAt DateTime @updatedAt
+  updatedBy String? // Admin user ID
+
+  @@index([key])
+  @@index([category])
+  @@map("platform_settings")
+}
+
+// Phase 4: Email Templates
+model EmailTemplate {
+  id          String   @id @default(cuid())
+  name        String   @unique // e.g., "booking_confirmed", "payment_failed"
+  subject     String
+  previewText String?
+  htmlBody    String   @db.Text
+  variables   String[] // Available variables like {{userName}}, {{bookingId}}
+  
+  // A/B Testing
+  variant     String   @default("A") // "A", "B", etc.
+  isActive    Boolean  @default(true)
+  
+  // Metadata
+  category    EmailCategory
+  description String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  updatedBy   String? // Admin user ID
+
+  @@index([name])
+  @@index([category])
+  @@index([isActive])
+  @@map("email_templates")
+}
+
+enum EmailCategory {
+  AUTHENTICATION
+  BOOKING
+  PAYMENT
+  DOCUMENT
+  VERIFICATION
+  VEHICLE
+  MESSAGE
+  SUPPORT
+  MARKETING
+  SYSTEM
+}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Car,
   Calendar,
@@ -317,10 +318,11 @@ export default function HostDashboardPage() {
                         <div className="flex items-center space-x-4">
                           <div className="h-12 w-12 bg-gray-200 rounded-full flex items-center justify-center">
                             {booking.renter.profilePicture ? (
-                              /* eslint-disable-next-line @next/next/no-img-element */
-                              <img
+                              <Image
                                 src={booking.renter.profilePicture}
                                 alt={booking.renter.name}
+                                width={40}
+                                height={40}
                                 className="w-10 h-10 rounded-full object-cover"
                               />
                             ) : (
@@ -518,3 +520,4 @@ export default function HostDashboardPage() {
     </div>
   );
 }
+
