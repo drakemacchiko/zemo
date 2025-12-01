@@ -21,8 +21,14 @@ export async function middleware(request: NextRequest) {
   const headerToken = request.headers.get('Authorization')?.replace('Bearer ', '');
   const token = cookieToken || headerToken;
 
+  // Debug logging for protected routes
+  if (pathname.startsWith('/messages') || pathname.startsWith('/notifications')) {
+    console.log(`[Middleware] ${pathname} - Cookie: ${cookieToken ? 'present' : 'missing'}, Header: ${headerToken ? 'present' : 'missing'}`);
+  }
+
   // Public routes that don't require authentication
   const publicRoutes = [
+    '/',
     '/login',
     '/register',
     '/forgot-password',
@@ -31,6 +37,7 @@ export async function middleware(request: NextRequest) {
     '/contact',
     '/privacy',
     '/terms',
+    '/search',
   ];
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
@@ -52,7 +59,8 @@ export async function middleware(request: NextRequest) {
       isHostRoute ||
       pathname.startsWith('/profile') ||
       pathname.startsWith('/bookings') ||
-      pathname.startsWith('/messages'))
+      pathname.startsWith('/messages') ||
+      pathname.startsWith('/notifications'))
   ) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
@@ -85,18 +93,9 @@ export async function middleware(request: NextRequest) {
         if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
           return NextResponse.redirect(new URL('/admin', request.url));
         } else if (userRole === 'HOST') {
-          return NextResponse.redirect(new URL('/host', request.url));
+          return NextResponse.redirect(new URL('/host/dashboard', request.url));
         } else {
-          return NextResponse.redirect(new URL('/profile', request.url));
-        }
-      }
-
-      // Redirect from root to appropriate dashboard for authenticated users
-      if (pathname === '/' && request.headers.get('referer')?.includes('/login')) {
-        if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
-          return NextResponse.redirect(new URL('/admin', request.url));
-        } else if (userRole === 'HOST') {
-          return NextResponse.redirect(new URL('/host', request.url));
+          return NextResponse.redirect(new URL('/', request.url));
         }
       }
     } catch (error) {

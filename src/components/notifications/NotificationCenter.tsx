@@ -45,7 +45,7 @@ export default function NotificationCenter({ isOpen, onClose }: NotificationCent
     try {
       const response = await fetch('/api/notifications?limit=10', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
 
@@ -88,7 +88,7 @@ export default function NotificationCenter({ isOpen, onClose }: NotificationCent
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
         body: JSON.stringify({ markAllRead: true }),
       });

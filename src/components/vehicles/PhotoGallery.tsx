@@ -44,7 +44,7 @@ export function PhotoGallery({ photos, vehicleName }: PhotoGalleryProps) {
           onClick={() => setIsFullscreen(true)}
         >
           <Image
-            src={photos[0]?.photoUrl || '/placeholder-vehicle.jpg'}
+            src={photos[0]?.photoUrl || '/images/placeholder-vehicle.svg'}
             alt={`${vehicleName} - Main photo`}
             fill
             className="object-cover"
@@ -115,7 +115,7 @@ export function PhotoGallery({ photos, vehicleName }: PhotoGalleryProps) {
           <div className="absolute inset-0 flex items-center justify-center p-4">
             <div className="relative w-full h-full max-w-6xl max-h-[90vh]">
               <Image
-                src={photos[selectedIndex]?.photoUrl || '/placeholder-vehicle.jpg'}
+                src={photos[selectedIndex]?.photoUrl || '/images/placeholder-vehicle.svg'}
                 alt={`${vehicleName} - Photo ${selectedIndex + 1}`}
                 fill
                 className="object-contain"

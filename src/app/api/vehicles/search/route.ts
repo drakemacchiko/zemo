@@ -29,9 +29,26 @@ const searchSchema = z.object({
     .transform(val => (val ? new Date(val) : undefined)),
 
   // Vehicle filters
-  vehicleType: z.string().optional(),
-  make: z.string().optional(),
-  model: z.string().optional(),
+  vehicleType: z
+    .string()
+    .optional()
+    .transform(val => (!val || val === '' ? undefined : val)),
+  vehicleTypes: z
+    .string()
+    .optional()
+    .transform(val => (!val || val === '' ? undefined : val)),
+  make: z
+    .string()
+    .optional()
+    .transform(val => (!val || val === '' ? undefined : val)),
+  makes: z
+    .string()
+    .optional()
+    .transform(val => (!val || val === '' ? undefined : val)),
+  model: z
+    .string()
+    .optional()
+    .transform(val => (!val || val === '' ? undefined : val)),
   minSeating: z
     .string()
     .optional()
@@ -40,8 +57,32 @@ const searchSchema = z.object({
     .string()
     .optional()
     .transform(val => (val ? parseInt(val) : undefined)),
-  transmission: z.enum(['MANUAL', 'AUTOMATIC']).optional(),
-  fuelType: z.enum(['PETROL', 'DIESEL', 'HYBRID', 'ELECTRIC']).optional(),
+  seats: z
+    .string()
+    .optional()
+    .transform(val => (!val || val === '' ? undefined : val)),
+  transmission: z
+    .string()
+    .optional()
+    .transform(val => (!val || val === '' ? undefined : val))
+    .refine(val => !val || val === 'MANUAL' || val === 'AUTOMATIC', {
+      message: 'Transmission must be MANUAL or AUTOMATIC',
+    }),
+  fuelType: z
+    .string()
+    .optional()
+    .transform(val => (!val || val === '' ? undefined : val))
+    .refine(val => !val || ['PETROL', 'DIESEL', 'HYBRID', 'ELECTRIC'].includes(val), {
+      message: 'Invalid fuel type',
+    }),
+  fuelTypes: z
+    .string()
+    .optional()
+    .transform(val => (!val || val === '' ? undefined : val)),
+  features: z
+    .string()
+    .optional()
+    .transform(val => (!val || val === '' ? undefined : val)),
 
   // Price range
   minPrice: z
@@ -52,8 +93,36 @@ const searchSchema = z.object({
     .string()
     .optional()
     .transform(val => (val ? parseFloat(val) : undefined)),
+  priceRange: z
+    .string()
+    .optional()
+    .transform(val => (!val || val === '' ? undefined : val)),
+
+  // Year range
+  yearRange: z
+    .string()
+    .optional()
+    .transform(val => (!val || val === '' ? undefined : val)),
+
+  // Other filters
+  instantBook: z
+    .string()
+    .optional()
+    .transform(val => val === 'true'),
+  minRating: z
+    .string()
+    .optional()
+    .transform(val => (val ? parseFloat(val) : undefined)),
+  hasDelivery: z
+    .string()
+    .optional()
+    .transform(val => val === 'true'),
 
   // Pagination
+  page: z
+    .string()
+    .optional()
+    .transform(val => (val ? parseInt(val) : 1)),
   cursor: z.string().optional(), // For cursor-based pagination
   limit: z
     .string()

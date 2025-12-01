@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import ImageUploader, { UploadedImage } from '@/components/upload/ImageUploader';
+import EnhancedImageUploader, { UploadedImage } from '@/components/upload/EnhancedImageUploader';
 
 interface VehiclePhotosPageProps {
   params: { id: string };
@@ -78,7 +78,7 @@ export default function VehiclePhotosPage({ params }: VehiclePhotosPageProps) {
                 <p className="text-gray-600">Loading...</p>
               </div>
             ) : (
-              <ImageUploader
+              <EnhancedImageUploader
                 vehicleId={vehicleId}
                 existingImages={existingPhotos}
                 onUploadComplete={handleUploadComplete}

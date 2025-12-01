@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
-import Hero from '@/components/sections/Hero';
-import { FeaturedVehicles } from '@/components/sections/FeaturedVehicles';
+import { HeroSection } from '@/components/sections/HeroSection';
+import { InlineSearchBar } from '@/components/search/InlineSearchBar';
+import { VehicleCategories } from '@/components/sections/VehicleCategories';
+import { PopularLocations } from '@/components/sections/PopularLocations';
+import { TripPurposes } from '@/components/sections/TripPurposes';
 import { HowItWorks } from '@/components/sections/HowItWorks';
 import { Testimonials } from '@/components/sections/Testimonials';
 import { BecomeAHost } from '@/components/sections/BecomeAHost';
@@ -31,11 +34,19 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
-      {/* Hero Section with Prominent Search */}
-      <Hero />
+      {/* Hero Section with Inline Search */}
+      <HeroSection 
+        searchComponent={<InlineSearchBar />}
+      />
 
-      {/* Featured Vehicles from Database */}
-      <FeaturedVehicles />
+      {/* Browse by Category */}
+      <VehicleCategories />
+
+      {/* Popular Locations */}
+      <PopularLocations />
+
+      {/* Trip Purposes */}
+      <TripPurposes />
 
       {/* How It Works - Step by Step */}
       <HowItWorks />

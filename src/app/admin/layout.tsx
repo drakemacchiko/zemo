@@ -40,27 +40,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const checkAuth = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        router.push('/login?redirect=/admin');
-        return;
-      }
-
+      // Try localStorage first, fall back to cookie
+      let token = localStorage.getItem('accessToken');
+      
+      // If no localStorage token, check if cookie exists by trying the API call
       const response = await fetch('/api/auth/me', {
-        headers: {
+        headers: token ? {
           Authorization: `Bearer ${token}`,
-        },
+        } : {},
+        credentials: 'include', // Include cookies
       });
 
       if (!response.ok) {
+        // No valid auth found, redirect to login
         router.push('/login?redirect=/admin');
         return;
       }
 
-      const userData = await response.json();
+      const data = await response.json();
+      const userData = data.user || data;
 
       // Check if user has admin role
       if (userData.role !== 'ADMIN' && userData.role !== 'SUPER_ADMIN') {
+        // User is authenticated but not admin, go to homepage
         router.push('/');
         return;
       }

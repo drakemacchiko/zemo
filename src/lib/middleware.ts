@@ -28,12 +28,20 @@ export function withRateLimit(maxAttempts = 5, windowMs = 15 * 60 * 1000) {
 }
 
 // Authentication middleware
-// Extract token from request headers
+// Extract token from request headers or cookies
 function extractTokenFromRequest(request: NextRequest): string | null {
+  // Try Authorization header first
   const authHeader = request.headers.get('authorization');
   if (authHeader && authHeader.startsWith('Bearer ')) {
     return authHeader.substring(7);
   }
+  
+  // Fall back to cookie
+  const cookieToken = request.cookies.get('accessToken')?.value;
+  if (cookieToken) {
+    return cookieToken;
+  }
+  
   return null;
 }
 

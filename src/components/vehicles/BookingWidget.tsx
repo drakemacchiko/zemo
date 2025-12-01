@@ -136,14 +136,13 @@ export function BookingWidget({
     if (!validate()) return;
 
     const params = new URLSearchParams({
-      vehicleId,
-      startDate,
-      endDate,
+      start: startDate,
+      end: endDate,
       startTime,
       endTime,
     });
 
-    router.push(`/vehicles/${vehicleId}/book?${params.toString()}`);
+    router.push(`/booking/${vehicleId}?${params.toString()}`);
   };
 
   const days = calculateDays();

@@ -1,10 +1,24 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { CheckCircle, Calendar, MapPin, User, Download, MessageCircle } from 'lucide-react';
+import { 
+  CheckCircle, 
+  Calendar, 
+  MapPin, 
+  User, 
+  Download, 
+  MessageCircle, 
+  Share2, 
+  QrCode,
+  Mail,
+  Phone,
+  Clock,
+  Car
+} from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface Booking {
   id: string;
@@ -36,6 +50,9 @@ export default function BookingConfirmationPage({ params }: { params: { id: stri
   const router = useRouter();
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showQR, setShowQR] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const printRef = useRef<HTMLDivElement>(null);
 
   const fetchBooking = useCallback(async () => {
     try {
@@ -100,6 +117,50 @@ END:VCALENDAR`;
     }
   };
 
+  const handleDownloadReceipt = async () => {
+    if (!booking) return;
+    
+    setDownloading(true);
+    try {
+      const response = await fetch(`/api/bookings/${params.id}/receipt`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ZEMO-Receipt-${booking.confirmationNumber}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Failed to download receipt:', error);
+      alert('Failed to download receipt. Please try again.');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleEmailReceipt = async () => {
+    if (!booking) return;
+    
+    try {
+      const response = await fetch(`/api/bookings/${params.id}/send-receipt`, {
+        method: 'POST',
+      });
+      
+      if (response.ok) {
+        alert('Receipt sent to your email!');
+      }
+    } catch (error) {
+      console.error('Failed to send receipt:', error);
+      alert('Failed to send receipt. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -145,12 +206,91 @@ END:VCALENDAR`;
           </p>
         </div>
 
+        {/* Quick Actions Bar */}
+        <div className="bg-white rounded-lg shadow-md p-4 mb-6 print:hidden">
+          <div className="flex flex-wrap gap-3 justify-center">
+            <button
+              onClick={() => setShowQR(!showQR)}
+              className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 hover:border-zemo-yellow rounded-lg font-semibold transition-colors"
+            >
+              <QrCode className="w-5 h-5" />
+              <span className="hidden sm:inline">Show QR Code</span>
+              <span className="sm:hidden">QR Code</span>
+            </button>
+            <button
+              onClick={handleDownloadReceipt}
+              disabled={downloading}
+              className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 hover:border-zemo-yellow rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Download className="w-5 h-5" />
+              <span className="hidden sm:inline">{downloading ? 'Downloading...' : 'Download Receipt'}</span>
+              <span className="sm:hidden">Receipt</span>
+            </button>
+            <button
+              onClick={handleAddToCalendar}
+              className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 hover:border-zemo-yellow rounded-lg font-semibold transition-colors"
+            >
+              <Calendar className="w-5 h-5" />
+              <span className="hidden sm:inline">Add to Calendar</span>
+              <span className="sm:hidden">Calendar</span>
+            </button>
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 hover:border-zemo-yellow rounded-lg font-semibold transition-colors"
+            >
+              <Share2 className="w-5 h-5" />
+              <span className="hidden sm:inline">Share</span>
+            </button>
+          </div>
+        </div>
+
+        {/* QR Code Modal */}
+        {showQR && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm print:hidden"
+            onClick={() => setShowQR(false)}
+          >
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
+              <div className="text-center">
+                <h3 className="text-xl font-bold mb-4">Booking QR Code</h3>
+                <div className="bg-white p-6 rounded-lg border-4 border-zemo-yellow inline-block mb-4">
+                  <QRCodeSVG
+                    value={`https://zemo.zm/bookings/${booking.id}`}
+                    size={200}
+                    level="H"
+                    includeMargin={false}
+                  />
+                </div>
+                <p className="text-sm text-gray-600 mb-4">
+                  Show this QR code at pickup to verify your booking
+                </p>
+                <div className="text-xs text-gray-500 font-mono mb-6">
+                  {booking.confirmationNumber}
+                </div>
+                <button
+                  onClick={() => setShowQR(false)}
+                  className="w-full px-6 py-3 bg-zemo-yellow hover:bg-yellow-400 text-gray-900 font-bold rounded-lg transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Main Card */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
+        <div ref={printRef} className="bg-white rounded-lg shadow-lg p-8 mb-6">
           {/* Confirmation Number */}
           <div className="text-center mb-8 pb-8 border-b border-gray-200">
             <div className="text-sm text-gray-600 mb-1">Confirmation Number</div>
-            <div className="text-2xl font-bold text-gray-900">{booking.confirmationNumber}</div>
+            <div className="text-2xl font-bold text-gray-900 font-mono">{booking.confirmationNumber}</div>
+            <div className="mt-4 print:block hidden">
+              <QRCodeSVG
+                value={`https://zemo.zm/bookings/${booking.id}`}
+                size={150}
+                level="H"
+                includeMargin={false}
+              />
+            </div>
           </div>
 
           {/* Vehicle & Trip Details */}

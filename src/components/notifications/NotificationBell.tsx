@@ -11,7 +11,7 @@ export default function NotificationBell() {
 
   useEffect(() => {
     // Check if user is authenticated
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     setIsAuthenticated(!!token);
 
     if (token) {
@@ -42,14 +42,14 @@ export default function NotificationBell() {
     try {
       const response = await fetch('/api/notifications?filter=unread&limit=1', {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
 
       if (!response.ok) {
         // If unauthorized, clear token and mark as not authenticated
         if (response.status === 401) {
-          localStorage.removeItem('token');
+          localStorage.removeItem('accessToken');
           setIsAuthenticated(false);
         }
         return;

@@ -2,13 +2,28 @@
 
 import { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
-import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { useDropzone } from 'react-dropzone';
+import imageCompression from 'browser-image-compression';
+import { 
+  Upload, 
+  X, 
+  Image as ImageIcon, 
+  Loader2, 
+  GripVertical, 
+  Star, 
+  Trash2,
+  CheckCircle,
+  AlertCircle
+} from 'lucide-react';
 
 export interface UploadedImage {
   id: string;
   url: string;
-  type?: string;
+  type?: 'EXTERIOR' | 'INTERIOR' | 'DASHBOARD' | 'FEATURES' | 'OTHER';
   isPrimary?: boolean;
+  order?: number;
+  uploading?: boolean;
+  progress?: number;
 }
 
 interface ImageUploaderProps {
@@ -16,8 +31,13 @@ interface ImageUploaderProps {
   existingImages?: UploadedImage[];
   onUploadComplete?: (images: UploadedImage[]) => void;
   maxImages?: number;
-  maxSizeMB?: number;
-}
+const PHOTO_CATEGORIES = [
+  { value: 'EXTERIOR', label: 'Exterior' },
+  { value: 'INTERIOR', label: 'Interior' },
+  { value: 'DASHBOARD', label: 'Dashboard' },
+  { value: 'FEATURES', label: 'Features' },
+  { value: 'OTHER', label: 'Other' },
+] as const;
 
 export default function ImageUploader({
   vehicleId,
@@ -26,46 +46,151 @@ export default function ImageUploader({
   maxImages = 20,
   maxSizeMB = 10,
 }: ImageUploaderProps) {
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>(existingImages);
   const [uploading, setUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState('');
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>(existingImages);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
-  const handleFileSelect = useCallback(
-    (files: FileList | null) => {
-      if (!files) return;
+  // Compress image before upload
+  const compressImage = async (file: File): Promise<Blob> => {
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+      fileType: 'image/jpeg' as const,
+    };
 
-      const filesArray = Array.from(files);
-      const totalImages = uploadedImages.length + selectedFiles.length + filesArray.length;
+    try {
+      return await imageCompression(file, options);
+    } catch (error) {
+      console.error('Compression failed:', error);
+      return file;
+    }
+  };
 
-      if (totalImages > maxImages) {
-        setError(`Maximum ${maxImages} photos allowed per vehicle.`);
+  // Handle file drop with react-dropzone
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      const remainingSlots = maxImages - uploadedImages.length;
+      const filesToUpload = acceptedFiles.slice(0, remainingSlots);
+
+      if (filesToUpload.length === 0) {
+        setError(`Maximum ${maxImages} photos allowed`);
         return;
       }
 
-      // Validate all files
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-
-      for (const file of filesArray) {
-        if (!allowedTypes.includes(file.type)) {
-          setError(`${file.name}: Invalid file type. Please use JPEG, PNG, or WebP.`);
-          return;
-        }
-
-        if (file.size > maxSizeMB * 1024 * 1024) {
-          setError(`${file.name}: File too large (max ${maxSizeMB}MB).`);
-          return;
-        }
+      // Validate file sizes
+      const oversizedFiles = filesToUpload.filter((file) => file.size > maxSizeMB * 1024 * 1024);
+      if (oversizedFiles.length > 0) {
+        setError(`Some files exceed ${maxSizeMB}MB limit and will be skipped`);
       }
 
-      setSelectedFiles(prev => [...prev, ...filesArray]);
+      const validFiles = filesToUpload.filter((file) => file.size <= maxSizeMB * 1024 * 1024);
+
+      // Create placeholder photos
+      const newPhotos: UploadedImage[] = validFiles.map((file, index) => ({
+        id: `temp-${Date.now()}-${index}`,
+        url: URL.createObjectURL(file),
+        type: 'EXTERIOR',
+        isPrimary: uploadedImages.length === 0 && index === 0,
+        order: uploadedImages.length + index,
+        uploading: true,
+        progress: 0,
+      }));
+
+      setUploadedImages((prev) => [...prev, ...newPhotos]);
       setError('');
+
+      // Upload each file
+      for (let i = 0; i < validFiles.length; i++) {
+        const file = validFiles[i];
+        const photoId = newPhotos[i].id;
+
+        try {
+          setUploading(true);
+
+          // Compress image
+          const compressedBlob = await compressImage(file);
+
+          // Upload
+          const formData = new FormData();
+          formData.append('file', compressedBlob);
+          formData.append('vehicleId', vehicleId);
+          formData.append('photoType', 'EXTERIOR');
+          formData.append('isPrimary', String(uploadedImages.length === 0 && i === 0));
+
+          // Simulate progress
+          const progressInterval = setInterval(() => {
+            setUploadedImages((prev) =>
+              prev.map((photo) =>
+                photo.id === photoId 
+                  ? { ...photo, progress: Math.min((photo.progress || 0) + 10, 90) }
+                  : photo
+              )
+            );
+          }, 200);
+
+          const token = localStorage.getItem('accessToken');
+          const response = await fetch('/api/upload/vehicle-images', {
+            method: 'POST',
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+            body: formData,
+          });
+
+          clearInterval(progressInterval);
+
+          if (!response.ok) {
+            throw new Error('Upload failed');
+          }
+
+          const data = await response.json();
+
+          // Update photo with real URL
+          setUploadedImages((prev) =>
+            prev.map((photo) =>
+              photo.id === photoId
+                ? { 
+                    ...photo, 
+                    id: data.photo.id,
+                    url: data.photo.url,
+                    uploading: false, 
+                    progress: 100 
+                  }
+                : photo
+            )
+          );
+
+          if (onUploadComplete && data.photo) {
+            onUploadComplete([data.photo]);
+          }
+        } catch (error) {
+          console.error('Upload failed:', error);
+          setUploadedImages((prev) =>
+            prev.filter((photo) => photo.id !== photoId)
+          );
+          setError('Failed to upload some photos');
+        } finally {
+          setUploading(false);
+        }
+      }
     },
-    [uploadedImages.length, selectedFiles.length, maxImages, maxSizeMB]
+    [uploadedImages, vehicleId, maxImages, maxSizeMB, onUploadComplete]
   );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png'],
+      'image/webp': ['.webp'],
+    },
+    maxFiles: maxImages - uploadedImages.length,
+    disabled: uploadedImages.length >= maxImages || uploading,
+  });
 
   const handleDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {

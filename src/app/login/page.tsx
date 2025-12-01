@@ -69,15 +69,18 @@ export default function LoginPage() {
         localStorage.setItem('accessToken', data.tokens.accessToken);
         localStorage.setItem('refreshToken', data.tokens.refreshToken);
 
-        // Force hard navigation to ensure middleware sees httpOnly cookie
+        // Determine redirect based on user role
         const userRole = data.user?.role;
+        let redirectPath = '/';
+        
         if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
-          window.location.href = '/admin';
+          redirectPath = '/admin';
         } else if (userRole === 'HOST') {
-          window.location.href = '/host/dashboard';
-        } else {
-          window.location.href = '/profile';
+          redirectPath = '/host/dashboard';
         }
+
+        // Use window.location for hard navigation to ensure middleware processes the new state
+        window.location.href = redirectPath;
       } else {
         setErrors({ general: data.error || 'Login failed' });
       }

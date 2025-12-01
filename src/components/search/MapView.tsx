@@ -135,7 +135,7 @@ export default function MapView({
             <div style="padding: 8px; max-width: 280px;">
               <div style="position: relative; width: 100%; height: 150px; margin-bottom: 8px; border-radius: 8px; overflow: hidden;">
                 <img
-                  src="${vehicle.images[0]?.url || '/placeholder-vehicle.jpg'}"
+                  src="${vehicle.images[0]?.url || '/images/placeholder-vehicle.svg'}"
                   alt="${vehicle.make} ${vehicle.model}"
                   style="width: 100%; height: 100%; object-fit: cover;"
                 />
@@ -272,7 +272,7 @@ export default function MapView({
 
             <div className="relative h-40">
               <Image
-                src={selectedVehicle.images[0]?.url || '/placeholder-vehicle.jpg'}
+                src={selectedVehicle.images[0]?.url || '/images/placeholder-vehicle.svg'}
                 alt={`${selectedVehicle.make} ${selectedVehicle.model}`}
                 fill
                 className="object-cover"

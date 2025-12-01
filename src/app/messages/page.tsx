@@ -19,7 +19,7 @@ function MessagesContent() {
 
   // Get current user ID from token
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       router.push('/login');
       return;
@@ -51,7 +51,7 @@ function MessagesContent() {
       try {
         const response = await fetch(`/api/messages/conversations/${selectedConversationId}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },
         });
 

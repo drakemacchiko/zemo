@@ -1,93 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { X, Download, Check } from 'lucide-react';
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-}
+import { useState } from 'react';
+import { X, Download, Check, Share, Plus } from 'lucide-react';
+import { usePWAInstall } from '@/hooks/usePWAInstall';
 
 export function PWAInstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [showPrompt, setShowPrompt] = useState(false);
-  const [isInstalled, setIsInstalled] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  const { isInstalled, canInstall, showPrompt, platform, install, dismiss } = usePWAInstall();
   const [showIOSInstructions, setShowIOSInstructions] = useState(false);
 
-  useEffect(() => {
-    // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true);
-      return;
-    }
-
-    // Check if dismissed before
-    const dismissed = localStorage.getItem('pwa-prompt-dismissed');
-    if (dismissed) {
-      const dismissedDate = new Date(dismissed);
-      const now = new Date();
-      const daysSinceDismissed = (now.getTime() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24);
-
-      // Show again after 7 days
-      if (daysSinceDismissed < 7) {
-        return;
-      }
-    }
-
-    // Detect iOS
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-    setIsIOS(isIOSDevice);
-
-    // Listen for beforeinstallprompt event (Android/Desktop)
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-
-      // Show prompt after 30 seconds
-      setTimeout(() => {
-        setShowPrompt(true);
-      }, 30000);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // For iOS, show instructions after 30 seconds
-    if (isIOSDevice) {
-      setTimeout(() => {
-        setShowPrompt(true);
-      }, 30000);
-    }
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
-
   const handleInstallClick = async () => {
-    if (!deferredPrompt && !isIOS) return;
-
-    if (isIOS) {
+    if (platform === 'ios') {
       setShowIOSInstructions(true);
       return;
     }
 
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-
-      if (outcome === 'accepted') {
-        setShowPrompt(false);
-        setIsInstalled(true);
-      }
-
-      setDeferredPrompt(null);
+    if (canInstall) {
+      await install();
     }
-  };
-
-  const handleDismiss = () => {
-    setShowPrompt(false);
-    localStorage.setItem('pwa-prompt-dismissed', new Date().toISOString());
   };
 
   if (isInstalled || !showPrompt) return null;
@@ -98,7 +27,7 @@ export function PWAInstallPrompt() {
       {!showIOSInstructions && (
         <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-white rounded-xl shadow-2xl border border-gray-200 p-6 z-50 animate-slide-up">
           <button
-            onClick={handleDismiss}
+            onClick={dismiss}
             className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 transition-colors"
             aria-label="Dismiss"
           >
@@ -145,7 +74,7 @@ export function PWAInstallPrompt() {
               Install Now
             </button>
             <button
-              onClick={handleDismiss}
+              onClick={dismiss}
               className="px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-gray-400 transition-colors"
             >
               Later
@@ -163,7 +92,7 @@ export function PWAInstallPrompt() {
               <button
                 onClick={() => {
                   setShowIOSInstructions(false);
-                  setShowPrompt(false);
+                  dismiss();
                 }}
                 className="p-1 rounded-full hover:bg-gray-100 transition-colors"
               >
@@ -215,8 +144,7 @@ export function PWAInstallPrompt() {
             <button
               onClick={() => {
                 setShowIOSInstructions(false);
-                setShowPrompt(false);
-                localStorage.setItem('pwa-prompt-dismissed', new Date().toISOString());
+                dismiss();
               }}
               className="w-full px-4 py-3 bg-yellow-500 text-black font-semibold rounded-lg hover:bg-yellow-600 transition-colors"
             >

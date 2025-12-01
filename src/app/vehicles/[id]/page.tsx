@@ -3,19 +3,18 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { PhotoGallery } from '@/components/vehicles/PhotoGallery';
-import { BookingWidget } from '@/components/vehicles/BookingWidget';
-import { VehicleOverview } from '@/components/vehicles/VehicleOverview';
-import { VehicleFeatures } from '@/components/vehicles/VehicleFeatures';
-import { ProtectionPlans } from '@/components/vehicles/ProtectionPlans';
-import { VehicleExtras } from '@/components/vehicles/VehicleExtras';
-import { HostInfo } from '@/components/vehicles/HostInfo';
-import { LocationMap } from '@/components/vehicles/LocationMap';
-import { AvailabilityCalendar } from '@/components/vehicles/AvailabilityCalendar';
-import { RulesRequirements } from '@/components/vehicles/RulesRequirements';
-import { CancellationPolicy } from '@/components/vehicles/CancellationPolicy';
-import { ReviewsSection } from '@/components/vehicles/ReviewsSection';
-import { SimilarVehicles } from '@/components/vehicles/SimilarVehicles';
+import { EnhancedPhotoGallery } from '@/components/vehicles/EnhancedPhotoGallery';
+import { EnhancedBookingWidget } from '@/components/vehicles/EnhancedBookingWidget';
+import { VehicleDetailsAccordion } from '@/components/vehicles/VehicleDetailsAccordion';
+import { DescriptionAccordion } from '@/components/vehicles/DescriptionAccordion';
+import { FeaturesAccordion } from '@/components/vehicles/FeaturesAccordion';
+import { LocationAccordion } from '@/components/vehicles/LocationAccordion';
+import { ProtectionAccordion } from '@/components/vehicles/ProtectionAccordion';
+import { RulesAccordion } from '@/components/vehicles/RulesAccordion';
+import { HostAccordion } from '@/components/vehicles/HostAccordion';
+import { ExtrasAccordion } from '@/components/vehicles/ExtrasAccordion';
+import { CancellationPolicyAccordion } from '@/components/vehicles/CancellationPolicyAccordion';
+import { EnhancedPhotoGallery } from '@/components/vehicles/EnhancedPhotoGallery';
 import { Star, Share2, Heart, ChevronLeft } from 'lucide-react';
 
 interface Vehicle {
@@ -29,7 +28,12 @@ interface Vehicle {
   transmission: string;
   fuelType: string;
   seatingCapacity: number;
+  doors?: number;
   dailyRate: number;
+  weeklyRate?: number;
+  monthlyRate?: number;
+  weeklyDiscount?: number;
+  monthlyDiscount?: number;
   securityDeposit: number;
   locationAddress: string;
   description?: string;
@@ -39,18 +43,22 @@ interface Vehicle {
   rating?: number;
   tripCount?: number;
   instantBooking?: boolean;
+  minTripDuration?: number;
+  maxTripDuration?: number;
   host: {
     id: string;
     profile: {
       firstName: string;
       lastName: string;
       profilePictureUrl?: string;
+      bio?: string;
     };
   };
   photos: Array<{
     id: string;
     photoUrl: string;
     isPrimary: boolean;
+    photoType?: 'EXTERIOR' | 'INTERIOR' | 'DASHBOARD' | 'FEATURES' | 'OTHER';
   }>;
 }
 
@@ -59,11 +67,8 @@ export default function VehicleDetailPage({ params }: { params: { id: string } }
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [startDate] = useState('');
-  const [endDate] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedProtection, setSelectedProtection] = useState('standard');
-  const [selectedExtras, setSelectedExtras] = useState<{ [key: string]: number }>({});
 
   useEffect(() => {
     fetchVehicle();
@@ -87,21 +92,11 @@ export default function VehicleDetailPage({ params }: { params: { id: string } }
   };
 
   const handleBookNow = () => {
-    if (!startDate || !endDate) {
-      alert('Please select rental dates');
-      return;
+    // Scroll to booking widget on mobile
+    const widget = document.querySelector('.sticky');
+    if (widget && window.innerWidth < 1024) {
+      widget.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-
-    // Store booking data and navigate to booking creation
-    const bookingData = {
-      vehicleId: params.id,
-      startDate,
-      endDate,
-      protection: selectedProtection,
-      extras: selectedExtras,
-    };
-    localStorage.setItem('pendingBooking', JSON.stringify(bookingData));
-    router.push(`/bookings/new?vehicleId=${params.id}&start=${startDate}&end=${endDate}`);
   };
 
   const handleShare = () => {
@@ -148,44 +143,6 @@ export default function VehicleDetailPage({ params }: { params: { id: string } }
       </div>
     );
   }
-
-  // Prepare data for components
-  const photos = vehicle.photos.map(p => p.photoUrl);
-
-  // Mock data for components (replace with real data when APIs are ready)
-  const mockReviews =
-    vehicle.rating && vehicle.tripCount
-      ? [
-          {
-            id: '1',
-            renter: {
-              name: 'John Doe',
-              totalTrips: 5,
-            },
-            rating: 5,
-            date: new Date().toISOString(),
-            tripDuration: '3 days',
-            comment: 'Great vehicle! Clean and well-maintained. Host was very responsive.',
-            helpfulCount: 3,
-          },
-        ]
-      : [];
-
-  const mockSimilarVehicles = [
-    {
-      id: 'similar-1',
-      make: vehicle.make,
-      model: 'Similar Model',
-      year: vehicle.year,
-      pricePerDay: vehicle.dailyRate,
-      images: photos.length > 0 && photos[0] ? [photos[0]] : ['/placeholder-car.jpg'],
-      location: vehicle.locationAddress?.split(',')[0] || 'Unknown',
-      rating: 4.5,
-      tripCount: 10,
-      instantBooking: true,
-      features: vehicle.features.slice(0, 3),
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -247,8 +204,8 @@ export default function VehicleDetailPage({ params }: { params: { id: string } }
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Photo Gallery */}
-            <PhotoGallery
+            {/* Enhanced Photo Gallery */}
+            <EnhancedPhotoGallery
               photos={
                 vehicle.photos.length > 0
                   ? vehicle.photos
@@ -264,84 +221,159 @@ export default function VehicleDetailPage({ params }: { params: { id: string } }
               vehicleName={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
             />
 
-            {/* Vehicle Overview */}
-            <VehicleOverview
-              vehicle={{
-                make: vehicle.make,
-                model: vehicle.model,
-                year: vehicle.year,
-                seats: vehicle.seatingCapacity,
-                transmission: vehicle.transmission,
-                fuelType: vehicle.fuelType,
-                location: vehicle.locationAddress,
-                rating: vehicle.rating || 0,
-                tripCount: vehicle.tripCount || 0,
-                instantBooking: vehicle.instantBooking || false,
-              }}
-            />
-
-            {/* Description */}
-            {vehicle.description && (
-              <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-2xl font-bold mb-4">Description</h2>
-                <p className="text-gray-700 leading-relaxed">{vehicle.description}</p>
+            {/* Quick Specs Bar */}
+            <div className="bg-white rounded-lg shadow-md p-4">
+              <div className="flex flex-wrap gap-6 text-sm">
+                <div>
+                  <span className="text-gray-600">Transmission:</span>{' '}
+                  <span className="font-semibold">{vehicle.transmission}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Fuel:</span>{' '}
+                  <span className="font-semibold">{vehicle.fuelType}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Seats:</span>{' '}
+                  <span className="font-semibold">{vehicle.seatingCapacity}</span>
+                </div>
+                {vehicle.color && (
+                  <div>
+                    <span className="text-gray-600">Color:</span>{' '}
+                    <span className="font-semibold">{vehicle.color}</span>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
 
-            {/* Vehicle Features */}
-            <VehicleFeatures features={vehicle.features} />
-
-            {/* Protection Plans */}
-            <ProtectionPlans
-              plans={[]}
-              selectedPlanId={selectedProtection}
-              onSelectPlan={setSelectedProtection}
-            />
-
-            {/* Vehicle Extras */}
-            <VehicleExtras
-              extras={[]}
-              selectedExtras={selectedExtras}
-              onUpdateExtras={setSelectedExtras}
-            />
-
-            {/* Host Info */}
-            <HostInfo
-              host={vehicle.host}
-              joinedYear={2024}
-              totalVehicles={1}
-              totalTrips={vehicle.tripCount || 0}
-              rating={vehicle.rating || 0}
-              reviewCount={vehicle.tripCount || 0}
-              responseTime="Within a few hours"
-              responseRate={95}
-              onMessageHost={handleMessageHost}
-            />
-
-            {/* Location Map */}
-            <LocationMap location={vehicle.locationAddress} />
-
-            {/* Availability Calendar */}
-            <AvailabilityCalendar />
-
-            {/* Rules & Requirements */}
-            <RulesRequirements
-              minAge={23}
-              licenseRequired
-              securityDeposit={vehicle.securityDeposit}
-            />
-
-            {/* Cancellation Policy */}
-            <CancellationPolicy policyType="moderate" />
-
-            {/* Reviews Section */}
-            {vehicle.tripCount && vehicle.tripCount > 0 ? (
-              <ReviewsSection
-                reviews={mockReviews}
-                averageRating={vehicle.rating || 0}
-                totalReviews={vehicle.tripCount || 0}
-                ratingBreakdown={{ 5: vehicle.tripCount || 0, 4: 0, 3: 0, 2: 0, 1: 0 }}
+            {/* Accordion Sections */}
+            <AccordionGroup>
+              {/* Vehicle Details */}
+              <VehicleDetailsAccordion
+                make={vehicle.make}
+                model={vehicle.model}
+                year={vehicle.year}
+                transmission={vehicle.transmission}
+                fuelType={vehicle.fuelType}
+                seatingCapacity={vehicle.seatingCapacity}
+                doors={vehicle.doors}
+                color={vehicle.color}
+                plateNumber={vehicle.plateNumber}
+                defaultOpen={true}
               />
+
+              {/* Description */}
+              {vehicle.description && (
+                <DescriptionAccordion description={vehicle.description} defaultOpen={true} />
+              )}
+
+              {/* Features & Amenities */}
+              {vehicle.features.length > 0 && (
+                <FeaturesAccordion features={vehicle.features} defaultOpen={true} />
+              )}
+
+              {/* Location & Delivery */}
+              <LocationAccordion
+                address={vehicle.locationAddress}
+                deliveryOptions={{
+                  pickup: true,
+                  delivery: true,
+                  deliveryFee: 50,
+                  deliveryRadius: 20,
+                  airportPickup: true,
+                  airportFee: 100,
+                }}
+                defaultOpen={false}
+              />
+
+              {/* Protection & Insurance */}
+              <ProtectionAccordion
+                selectedPlanId={selectedProtection}
+                onSelectPlan={setSelectedProtection}
+                defaultOpen={false}
+              />
+
+              {/* Rules & Requirements */}
+              <RulesAccordion
+                rules={{
+                  minAge: 23,
+                  licenseRequired: true,
+                  licenseMinYears: 2,
+                  securityDeposit: vehicle.securityDeposit,
+                  fuelPolicy: 'full-to-full',
+                  smokingAllowed: false,
+                  petsAllowed: false,
+                  mileageLimit: 200,
+                  mileageLimitType: 'daily',
+                  additionalMileageFee: 0.5,
+                  lateReturnFee: 50,
+                }}
+                defaultOpen={false}
+              />
+
+              {/* Extras & Add-ons */}
+              <ExtrasAccordion
+                extras={[]}
+                selectedExtras={{}}
+                onUpdateExtras={() => {}}
+                defaultOpen={false}
+              />
+
+              {/* Cancellation Policy */}
+              <CancellationPolicyAccordion
+                cancellationPolicy={{
+                  type: 'moderate',
+                  allowModifications: true,
+                  modificationFee: 50,
+                }}
+                defaultOpen={false}
+              />
+
+              {/* Host Information */}
+              <HostAccordion
+                host={vehicle.host}
+                joinedYear={2024}
+                totalVehicles={1}
+                totalTrips={vehicle.tripCount || 0}
+                rating={vehicle.rating || 0}
+                reviewCount={vehicle.tripCount || 0}
+                responseTime="Within a few hours"
+                responseRate={95}
+                verificationBadges={['verified']}
+                onMessageHost={handleMessageHost}
+                defaultOpen={false}
+              />
+            </AccordionGroup>
+
+            {/* Reviews Section (Outside accordion for emphasis) */}
+            {vehicle.tripCount && vehicle.tripCount > 0 ? (
+              <div className="bg-white rounded-lg shadow-md p-6">
+                <h2 className="text-2xl font-bold mb-4">Reviews</h2>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      <div className="text-4xl font-bold">{vehicle.rating?.toFixed(1)}</div>
+                      <div className="flex items-center gap-1 mt-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-4 h-4 ${
+                              star <= (vehicle.rating || 0)
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'text-gray-300'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {vehicle.tripCount} {vehicle.tripCount === 1 ? 'review' : 'reviews'}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    Detailed reviews will be displayed here
+                  </p>
+                </div>
+              </div>
             ) : (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-2xl font-bold mb-4">Reviews</h2>
@@ -354,9 +386,6 @@ export default function VehicleDetailPage({ params }: { params: { id: string } }
                 </div>
               </div>
             )}
-
-            {/* Similar Vehicles */}
-            <SimilarVehicles vehicles={mockSimilarVehicles} currentVehicleId={vehicle.id} />
           </div>
 
           {/* Right Column - Booking Widget (Sticky) */}
@@ -365,9 +394,15 @@ export default function VehicleDetailPage({ params }: { params: { id: string } }
               <BookingWidget
                 vehicleId={vehicle.id}
                 dailyRate={vehicle.dailyRate}
+                weeklyRate={vehicle.weeklyRate}
+                monthlyRate={vehicle.monthlyRate}
+                weeklyDiscount={vehicle.weeklyDiscount}
+                monthlyDiscount={vehicle.monthlyDiscount}
                 securityDeposit={vehicle.securityDeposit}
                 instantBooking={vehicle.instantBooking || false}
                 availabilityStatus={vehicle.availabilityStatus}
+                minTripDuration={vehicle.minTripDuration}
+                maxTripDuration={vehicle.maxTripDuration}
               />
             </div>
           </div>
@@ -379,7 +414,7 @@ export default function VehicleDetailPage({ params }: { params: { id: string } }
         <div className="flex items-center justify-between">
           <div>
             <div className="text-sm text-gray-600">From</div>
-            <div className="text-xl font-bold">₦{vehicle.dailyRate.toLocaleString()}/day</div>
+            <div className="text-xl font-bold">ZMW {vehicle.dailyRate.toLocaleString()}/day</div>
           </div>
           <button
             onClick={handleBookNow}

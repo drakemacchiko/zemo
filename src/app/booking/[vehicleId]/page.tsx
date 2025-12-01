@@ -3,7 +3,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
-import { ChevronLeft, Check, Calendar, User, CreditCard } from 'lucide-react';
+import { 
+  ChevronLeft, 
+  Check, 
+  Calendar, 
+  User, 
+  CreditCard
+} from 'lucide-react';
 
 interface Vehicle {
   id: string;
@@ -11,9 +17,32 @@ interface Vehicle {
   model: string;
   year: number;
   dailyRate: number;
+  weeklyRate?: number;
+  monthlyRate?: number;
   securityDeposit: number;
   locationAddress: string;
+  minTripDuration?: number;
+  maxTripDuration?: number;
   photos: Array<{ photoUrl: string }>;
+  deliveryOptions?: {
+    pickup: boolean;
+    deliveryAvailable: boolean;
+    deliveryFee: number;
+    deliveryRadius: number;
+    airportPickup: boolean;
+    airportFee: number;
+  };
+  cancellationPolicy?: {
+    type: 'flexible' | 'moderate' | 'strict';
+  };
+  extras?: Array<{
+    id: string;
+    name: string;
+    description?: string;
+    pricePerDay?: number;
+    pricePerTrip?: number;
+    quantityAvailable?: number;
+  }>;
 }
 
 interface BookingData {

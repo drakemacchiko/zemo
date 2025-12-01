@@ -46,21 +46,32 @@ export default function Header() {
     if (token) {
       setIsAuthenticated(true);
       fetchUserData(token);
+    } else {
+      // Even without localStorage token, try fetching (cookie might exist)
+      fetchUserData('');
     }
   };
 
   const fetchUserData = async (token: string) => {
     try {
+      const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
       const response = await fetch('/api/auth/me', {
-        headers: { Authorization: `Bearer ${token}` },
+        headers,
+        credentials: 'include', // Include cookies
       });
       if (response.ok) {
         const data = await response.json();
         setUserData(data.user);
-        fetchNotificationCounts(token);
+        setIsAuthenticated(true);
+        if (token) {
+          fetchNotificationCounts(token);
+        }
+      } else {
+        setIsAuthenticated(false);
       }
     } catch (err) {
       console.error('Failed to fetch user data:', err);
+      setIsAuthenticated(false);
     }
   };
 

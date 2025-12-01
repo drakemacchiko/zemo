@@ -46,7 +46,7 @@ export default function NotificationsPage() {
     try {
       const response = await fetch(`/api/notifications?filter=${filter}&page=${page}&limit=20`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
       });
 
@@ -76,7 +76,7 @@ export default function NotificationsPage() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
         body: JSON.stringify({ notificationIds }),
       });
@@ -98,7 +98,7 @@ export default function NotificationsPage() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },
         body: JSON.stringify({ markAllRead: true }),
       });
@@ -117,7 +117,7 @@ export default function NotificationsPage() {
           fetch(`/api/notifications/${id}`, {
             method: 'DELETE',
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
             },
           })
         )
