@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { NextRequest } from 'next/server';
 import { POST, GET } from '@/app/api/claims/route';

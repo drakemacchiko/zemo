@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { prisma } from '@/lib/db';
 import { InsurancePricingService, ClaimService } from '@/lib/insurance';
