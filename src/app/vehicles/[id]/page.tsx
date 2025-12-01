@@ -14,7 +14,6 @@ import { RulesAccordion } from '@/components/vehicles/RulesAccordion';
 import { HostAccordion } from '@/components/vehicles/HostAccordion';
 import { ExtrasAccordion } from '@/components/vehicles/ExtrasAccordion';
 import { CancellationPolicyAccordion } from '@/components/vehicles/CancellationPolicyAccordion';
-import { EnhancedPhotoGallery } from '@/components/vehicles/EnhancedPhotoGallery';
 import { Star, Share2, Heart, ChevronLeft } from 'lucide-react';
 
 interface Vehicle {
